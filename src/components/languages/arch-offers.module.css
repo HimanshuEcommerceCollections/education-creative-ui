@@ -1,0 +1,23 @@
+/* Greeting words drifting behind the arch offer cards. Each word floats on its
+   own timing (custom props) around a baseline rotation, so the keyframe — which
+   reads --r/--d/--dl — is co-located here. */
+
+.floatWord {
+  animation: fxFloat var(--d) ease-in-out infinite alternate;
+  animation-delay: var(--dl);
+}
+
+@keyframes fxFloat {
+  from {
+    transform: translateY(-14px) rotate(var(--r));
+  }
+  to {
+    transform: translateY(14px) rotate(var(--r));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .floatWord {
+    animation: none;
+  }
+}

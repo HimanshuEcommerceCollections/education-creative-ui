@@ -1,0 +1,157 @@
+/* Scroll-driven 3D card rail (College Admissions "how we help"). Vertical
+   scroll through the tall wrapper drives a horizontal, perspective-warped
+   track. Transforms are applied imperatively in how-we-help-rail.tsx. */
+
+.wrap {
+  position: relative;
+  height: 300vh;
+  background: var(--color-ivory);
+}
+.sticky {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+}
+.head {
+  padding: 0 0 24px;
+}
+.stage {
+  perspective: 1500px;
+  perspective-origin: 50% 45%;
+}
+.track {
+  display: flex;
+  gap: 40px;
+  padding: 0 10vw;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+.card {
+  position: relative;
+  flex: none;
+  width: min(460px, 72vw);
+  aspect-ratio: 4 / 4.6;
+  border-radius: 20px;
+  overflow: hidden;
+  transform-style: preserve-3d;
+  background: linear-gradient(160deg, var(--sand), var(--sand2));
+  box-shadow: 0 30px 60px rgba(18, 19, 28, 0.18);
+  transition: box-shadow 0.4s ease;
+}
+.card:hover {
+  box-shadow: 0 50px 90px rgba(18, 19, 28, 0.34);
+}
+.cardFocus {
+  box-shadow: 0 48px 90px rgba(18, 19, 28, 0.3);
+}
+.bg {
+  position: absolute;
+  inset: 0;
+}
+.bg img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s ease;
+}
+.card:hover .bg img {
+  transform: scale(1.06);
+}
+.shade {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    0deg,
+    rgba(18, 19, 28, 0.86) 0%,
+    rgba(18, 19, 28, 0.35) 42%,
+    rgba(18, 19, 28, 0.08) 70%,
+    transparent 100%
+  );
+}
+.txt {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 26px 30px 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.num {
+  font-family: var(--font-serif);
+  font-weight: 800;
+  font-size: 38px;
+  line-height: 1;
+  color: var(--gold);
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+}
+.txt h3 {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: clamp(20px, 2.4vw, 26px);
+  color: #f6f5f1;
+}
+.txt p {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.65;
+  color: rgba(246, 245, 241, 0.82);
+}
+.hint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 26px;
+  color: var(--muted);
+  font-family: var(--font-sans);
+  font-size: 11.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.hint i {
+  width: 22px;
+  height: 2px;
+  background: var(--gold);
+}
+@media (max-width: 860px) {
+  .wrap {
+    height: auto;
+  }
+  .sticky {
+    position: static;
+    height: auto;
+    padding: 80px 0;
+  }
+  .stage {
+    perspective: none;
+  }
+  .track {
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding: 10px 24px 26px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .card {
+    width: 82vw;
+    scroll-snap-align: center;
+  }
+  .hint {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .track {
+    transition: none;
+  }
+}

@@ -1,0 +1,24 @@
+/* The step card's body cross-fades in each time the journey advances. Only
+   this keyframe needs to live outside Tailwind; the racked photos animate via
+   inline transforms + a Tailwind transition. */
+
+.stepBody {
+  animation: jFade 0.5s ease;
+}
+
+@keyframes jFade {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stepBody {
+    animation: none;
+  }
+}

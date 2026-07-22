@@ -1,0 +1,19 @@
+/* Decorative equalizer bars (music feature split). */
+.bar {
+  animation: eqb 1.15s ease-in-out infinite;
+}
+@keyframes eqb {
+  0%,
+  100% {
+    height: 22%;
+  }
+  50% {
+    height: 100%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bar {
+    height: 55%;
+    animation: none;
+  }
+}

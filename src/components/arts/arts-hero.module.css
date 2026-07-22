@@ -1,0 +1,44 @@
+/* Confetti shapes drifting behind the Arts & Crafts hero collage. Per-shape
+   duration/delay come from inline --d / --dl custom properties. */
+.cfx {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.cfx i {
+  position: absolute;
+  display: block;
+  opacity: 0.5;
+  animation: cfxFloat var(--d) ease-in-out infinite alternate;
+  animation-delay: var(--dl);
+}
+.cfx .dot {
+  border-radius: 50%;
+}
+.cfx .tri {
+  width: 0 !important;
+  height: 0 !important;
+  background: none !important;
+  border-left: 9px solid transparent;
+  border-right: 9px solid transparent;
+  border-bottom: 15px solid var(--gold);
+  opacity: 0.3;
+}
+.cfx .sq {
+  border-radius: 3px;
+  transform: rotate(18deg);
+}
+@keyframes cfxFloat {
+  from {
+    transform: translateY(-12px) rotate(0deg);
+  }
+  to {
+    transform: translateY(12px) rotate(14deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cfx i {
+    animation: none;
+  }
+}

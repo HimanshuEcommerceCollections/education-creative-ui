@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Standalone Node (CommonJS) asset-extraction scripts, not app source.
+    "extract-assets.js",
+    "extract-video.js",
   ]),
 ]);
 

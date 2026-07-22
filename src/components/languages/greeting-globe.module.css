@@ -1,0 +1,162 @@
+/* The greeting globe: a 2D canvas earth ringed by orbiting flag cards, set in
+   a glowing scene. Only the parts Tailwind can't express live here — the
+   ambient glow keyframe, the dashed orbit rings' clip-path halves, the ground
+   shadow and label triangle pseudo-elements, and the flag gradients. */
+
+.scene {
+  position: relative;
+  width: min(360px, 60vw);
+  aspect-ratio: 1;
+}
+
+/* Vector-globe ground shadow (dark-hero variant). */
+.scene::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -9%;
+  transform: translateX(-50%);
+  width: 58%;
+  height: 22px;
+  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.55), transparent 68%);
+  filter: blur(4px);
+  pointer-events: none;
+}
+
+.canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Ambient glow behind the sphere. */
+.glow {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 150%;
+  height: 150%;
+  transform: translate(-50%, -50%);
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(91, 192, 248, 0.2) 0%, rgba(46, 58, 115, 0.12) 34%, transparent 60%),
+    radial-gradient(circle at 50% 50%, rgba(210, 162, 65, 0.1) 0%, transparent 45%);
+  animation: glowPulse 6s ease-in-out infinite;
+}
+
+@keyframes glowPulse {
+  0%,
+  100% {
+    opacity: 0.75;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.06);
+  }
+}
+
+/* Dashed orbit rings, split front/back so flags can pass through them. */
+.oring {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  border: 1.5px dashed rgba(210, 162, 65, 0.28);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.oringBack {
+  clip-path: inset(0 0 50% 0);
+  z-index: 1;
+}
+
+.oringFront {
+  clip-path: inset(50% 0 0 0);
+  z-index: 5;
+}
+
+/* Orbiting flag cards — positioned/scaled in JS; gradients are the flags. */
+.fcard {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 74px;
+  height: 50px;
+  border-radius: 6px;
+  border: 3px solid #fff;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
+  will-change: transform, opacity;
+  pointer-events: none;
+  background-size: cover;
+}
+
+@media (max-width: 960px) {
+  .fcard {
+    width: 56px;
+    height: 38px;
+    border-width: 2px;
+  }
+}
+
+.fsEs {
+  background: linear-gradient(180deg, #aa151b 0 25%, #f1bf00 25% 75%, #aa151b 75%);
+}
+.fsFr {
+  background: linear-gradient(90deg, #0055a4 0 33.4%, #ffffff 33.4% 66.7%, #ef4135 66.7%);
+}
+.fsIn {
+  background:
+    radial-gradient(circle at 50% 50%, #000080 0 9%, rgba(0, 0, 0, 0) 9.5%),
+    linear-gradient(180deg, #ff9933 0 33.4%, #ffffff 33.4% 66.7%, #138808 66.7%);
+}
+.fsIt {
+  background: linear-gradient(90deg, #009246 0 33.4%, #ffffff 33.4% 66.7%, #ce2b37 66.7%);
+}
+.fsDe {
+  background: linear-gradient(180deg, #000000 0 33.4%, #dd0000 33.4% 66.7%, #ffce00 66.7%);
+}
+.fsJp {
+  background: radial-gradient(circle at 50% 50%, #bc002d 0 26%, #ffffff 27%);
+}
+
+/* Active-greeting chip (positioned in JS), with a downward pointer. */
+.lab {
+  position: absolute;
+  transform: translate(-50%, -100%);
+  z-index: 8;
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: 17px;
+  color: #10121f;
+  background: var(--gold);
+  border-radius: 999px;
+  padding: 8px 15px;
+  box-shadow:
+    0 12px 26px rgba(210, 162, 65, 0.45),
+    0 0 0 1.5px #fbfaf7 inset;
+  pointer-events: none;
+  white-space: nowrap;
+  transition: opacity 0.3s ease;
+}
+
+.lab::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: var(--gold);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glow {
+    animation: none;
+  }
+}

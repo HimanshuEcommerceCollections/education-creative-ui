@@ -1,0 +1,25 @@
+/* Notes drifting up over the music feature photo. */
+.note {
+  animation: noteup 5.5s linear infinite;
+}
+@keyframes noteup {
+  0% {
+    transform: translateY(0) rotate(-6deg);
+    opacity: 0;
+  }
+  12% {
+    opacity: 0.95;
+  }
+  55% {
+    opacity: 0.75;
+  }
+  100% {
+    transform: translateY(-340px) rotate(10deg);
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .note {
+    animation: none;
+  }
+}

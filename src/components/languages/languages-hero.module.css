@@ -1,0 +1,34 @@
+/* Twinkling starfield behind the dark languages hero. Each star's duration
+   and delay come from CSS custom properties set per element, so the keyframe
+   lives here with the component. */
+
+.star {
+  position: absolute;
+  border-radius: 50%;
+  background: var(--ivory);
+  opacity: 0.5;
+  animation: twinkle var(--d) ease-in-out infinite;
+  animation-delay: var(--dl);
+}
+
+.gold {
+  background: var(--gold);
+}
+
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: 0.15;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.15);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .star {
+    animation: none;
+  }
+}

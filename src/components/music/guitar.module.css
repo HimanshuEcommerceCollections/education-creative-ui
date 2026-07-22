@@ -1,0 +1,95 @@
+/* 3D guitar neck (music playground). Perspective neck + string vibration. */
+.guitar {
+  perspective: 1100px;
+  perspective-origin: 50% 0%;
+}
+.gNeck {
+  position: relative;
+  height: 210px;
+  transform: rotateX(26deg);
+  transform-style: preserve-3d;
+  background: linear-gradient(180deg, #2a2033 0%, #1d1626 100%);
+  border: 1px solid rgba(210, 162, 65, 0.25);
+  border-radius: 12px;
+  box-shadow:
+    0 40px 70px rgba(0, 0, 0, 0.55),
+    inset 0 2px 0 rgba(255, 255, 255, 0.05);
+  padding: 26px 0;
+}
+.fret {
+  position: absolute;
+  top: 8px;
+  bottom: 8px;
+  width: 3px;
+  background: linear-gradient(180deg, #8e8a7c, #5e5b50);
+  border-radius: 2px;
+  box-shadow: 1px 0 2px rgba(0, 0, 0, 0.5);
+}
+.fdot {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #f1e7c8, #c8a968 65%, #93743b);
+  top: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+.gs {
+  position: relative;
+  height: calc(100% / 6);
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+.gw {
+  display: block;
+  width: 100%;
+  height: var(--gw, 2px);
+  background: linear-gradient(90deg, #b9b4a2, #e8e2cc 30%, #b9b4a2 70%, #8e8a7c);
+  border-radius: 2px;
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.55);
+  transform: translateZ(10px);
+}
+.gs.vib .gw {
+  animation: gvib 0.5s linear;
+  box-shadow:
+    0 0 12px rgba(210, 162, 65, 0.65),
+    0 2px 3px rgba(0, 0, 0, 0.55);
+}
+@keyframes gvib {
+  0% {
+    transform: translateZ(10px) translateY(0);
+  }
+  12% {
+    transform: translateZ(10px) translateY(3px);
+  }
+  25% {
+    transform: translateZ(10px) translateY(-3px);
+  }
+  38% {
+    transform: translateZ(10px) translateY(2px);
+  }
+  52% {
+    transform: translateZ(10px) translateY(-2px);
+  }
+  68% {
+    transform: translateZ(10px) translateY(1px);
+  }
+  84% {
+    transform: translateZ(10px) translateY(-1px);
+  }
+  100% {
+    transform: translateZ(10px) translateY(0);
+  }
+}
+@media (max-width: 720px) {
+  .gNeck {
+    height: 150px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .gs.vib .gw {
+    animation: none;
+  }
+}

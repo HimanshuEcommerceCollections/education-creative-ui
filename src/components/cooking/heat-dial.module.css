@@ -1,0 +1,313 @@
+/* The Heat Dial showpiece: a stove burner + pot whose heat, bubbles, steam,
+   sear marks, char and knob angle all key off the stage's [data-step]. These
+   are gradient discs, stateful compound selectors, and keyframes — none of
+   which Tailwind expresses — so the whole dial lives here. */
+
+.cookPin {
+  height: 360vh;
+  position: relative;
+}
+
+.cookSec {
+  position: sticky;
+  top: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background: radial-gradient(120% 90% at 50% 32%, #1c2038, #141625 58%, #0f1120);
+  border-top: 1px solid rgba(210, 162, 65, 0.18);
+  border-bottom: 1px solid rgba(210, 162, 65, 0.18);
+  overflow: hidden;
+  padding: 30px 0 40px;
+}
+
+.cookStage {
+  position: relative;
+  height: 460px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dialWrap {
+  position: relative;
+  width: min(400px, 84%);
+  aspect-ratio: 1 / 1;
+}
+
+/* burner base + concentric rings */
+.burner {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 88%;
+  height: 88%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(circle at 44% 40%, #20243c 0%, #161a30 60%, #0e1122 100%);
+  box-shadow: 0 40px 90px rgba(0, 0, 0, 0.6), inset 0 0 60px rgba(0, 0, 0, 0.6);
+}
+.burnerRing {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  border-radius: 50%;
+  border: 2px solid rgba(210, 162, 65, 0.18);
+  transform: translate(-50%, -50%);
+}
+.ringR1 {
+  width: 70%;
+  height: 70%;
+}
+.ringR2 {
+  width: 52%;
+  height: 52%;
+}
+
+/* heat glow behind the pot — intensity rises with the step */
+.heatGlow {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 64%;
+  height: 64%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(210, 162, 65, 0.7), rgba(210, 162, 65, 0) 68%);
+  opacity: 0;
+  filter: blur(14px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+/* pot + liquid */
+.pot {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 46%;
+  height: 46%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(circle at 44% 40%, #3a3f5c 0%, #242a44 58%, #151a30 100%);
+  box-shadow: 0 20px 44px rgba(0, 0, 0, 0.5), inset 0 8px 22px rgba(0, 0, 0, 0.55);
+  overflow: hidden;
+  z-index: 2;
+}
+.liquid {
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  top: 14%;
+  bottom: 8%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 46% 42%, #3e4a83, #2e3a73 66%, #232c59 100%);
+  overflow: hidden;
+  transition: background 0.6s ease;
+}
+
+.bub {
+  position: absolute;
+  bottom: 8%;
+  border-radius: 50%;
+  background: rgba(246, 245, 241, 0.55);
+  opacity: 0;
+}
+.sear {
+  position: absolute;
+  border-radius: 40%;
+  background: rgba(22, 24, 29, 0.55);
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+.charfleck {
+  position: absolute;
+  border-radius: 50%;
+  background: #12131c;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+/* steam */
+.dialSteam {
+  position: absolute;
+  left: 50%;
+  top: 22%;
+  width: 200px;
+  height: 200px;
+  transform: translateX(-50%);
+  pointer-events: none;
+  z-index: 3;
+}
+.dialSteam span {
+  position: absolute;
+  bottom: 0;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: rgba(246, 245, 241, 0.4);
+  filter: blur(6px);
+  opacity: 0;
+}
+
+/* the rotating knob */
+.knob {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 30%;
+  height: 30%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 42% 38%, #2e3a73, #232c59 62%, #161b36 100%);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.55), inset 0 4px 14px rgba(255, 255, 255, 0.1);
+  z-index: 4;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  transform: translate(-50%, -50%) rotate(-126deg);
+  transition: transform 0.7s cubic-bezier(0.35, 0.05, 0.25, 1);
+}
+.knob::after {
+  content: "";
+  width: 5px;
+  height: 34%;
+  margin-top: 8%;
+  border-radius: 4px;
+  background: var(--gold);
+  box-shadow: 0 0 10px rgba(210, 162, 65, 0.85);
+}
+
+/* per-step: knob angle */
+.cookStage[data-step="0"] .knob {
+  transform: translate(-50%, -50%) rotate(-126deg);
+}
+.cookStage[data-step="1"] .knob {
+  transform: translate(-50%, -50%) rotate(-69deg);
+}
+.cookStage[data-step="2"] .knob {
+  transform: translate(-50%, -50%) rotate(0deg);
+}
+.cookStage[data-step="3"] .knob {
+  transform: translate(-50%, -50%) rotate(69deg);
+}
+.cookStage[data-step="4"] .knob {
+  transform: translate(-50%, -50%) rotate(126deg);
+}
+
+/* per-step: heat glow intensity */
+.cookStage[data-step="0"] .heatGlow {
+  opacity: 0;
+}
+.cookStage[data-step="1"] .heatGlow {
+  opacity: 0.35;
+  transform: translate(-50%, -50%) scale(0.9);
+}
+.cookStage[data-step="2"] .heatGlow {
+  opacity: 0.6;
+  transform: translate(-50%, -50%) scale(1);
+}
+.cookStage[data-step="3"] .heatGlow {
+  opacity: 0.85;
+  transform: translate(-50%, -50%) scale(1.08);
+}
+.cookStage[data-step="4"] .heatGlow {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1.16);
+}
+
+/* per-step: bubbles rise from simmer up */
+.cookStage[data-step="1"] .bub,
+.cookStage[data-step="2"] .bub,
+.cookStage[data-step="3"] .bub,
+.cookStage[data-step="4"] .bub {
+  animation: bubRise var(--bd) ease-in infinite;
+  animation-delay: var(--bdl);
+}
+.cookStage[data-step="1"] .bub {
+  animation-duration: calc(var(--bd) * 1.6);
+}
+@keyframes bubRise {
+  0% {
+    opacity: 0;
+    transform: translateY(0) scale(0.5);
+  }
+  30% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-160%) scale(1.1);
+  }
+}
+
+/* per-step: steam from medium up */
+.cookStage[data-step="2"] .dialSteam span,
+.cookStage[data-step="3"] .dialSteam span,
+.cookStage[data-step="4"] .dialSteam span {
+  animation: dsteam var(--sd) ease-out infinite;
+  animation-delay: var(--sdl);
+}
+@keyframes dsteam {
+  0% {
+    opacity: 0;
+    transform: translateY(0) scale(0.6);
+  }
+  20% {
+    opacity: 0.55;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-150px) scale(1.9);
+  }
+}
+
+/* per-step: sear marks (high) and char flecks (highest) */
+.cookStage[data-step="3"] .sear,
+.cookStage[data-step="4"] .sear {
+  opacity: 0.8;
+}
+.cookStage[data-step="4"] .charfleck {
+  opacity: 0.85;
+}
+.cookStage[data-step="4"] .liquid {
+  background: radial-gradient(circle at 46% 42%, #454b6b, #2b3050 66%, #20253f 100%);
+}
+
+/* the side card deals in on each step change */
+.dealCard {
+  animation: kDeal 0.45s cubic-bezier(0.2, 0.7, 0.3, 1.1);
+}
+@keyframes kDeal {
+  0% {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (max-width: 960px) {
+  .cookStage {
+    height: 340px;
+  }
+  .cookPin {
+    height: 320vh;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bub,
+  .dialSteam span,
+  .dealCard {
+    animation: none;
+  }
+  .heatGlow,
+  .sear,
+  .charfleck,
+  .knob,
+  .liquid {
+    transition: none;
+  }
+}

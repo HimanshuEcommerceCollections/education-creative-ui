@@ -1,0 +1,140 @@
+/* 3D drum kit (music playground). Perspective floor + per-pad hit/cymbal anim. */
+.drums {
+  perspective: 1200px;
+  perspective-origin: 50% -10%;
+}
+.drumFloor {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 4%;
+  transform: rotateX(30deg);
+  transform-style: preserve-3d;
+  padding: 20px 0 4px;
+}
+.dp {
+  position: relative;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transform-style: preserve-3d;
+  transition: transform 0.12s ease;
+  background: none;
+  border: none;
+  padding: 0;
+}
+.dpTop {
+  display: block;
+  border-radius: 50%;
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.12s ease;
+}
+.dpKick .dpTop {
+  width: 132px;
+  height: 132px;
+  background: radial-gradient(circle at 38% 30%, #4a567f, var(--slate-deep) 62%, #151a33);
+  box-shadow:
+    0 26px 34px rgba(0, 0, 0, 0.55),
+    inset 0 0 0 7px rgba(210, 162, 65, 0.55),
+    inset 0 0 34px rgba(0, 0, 0, 0.55);
+}
+.dpSnare .dpTop,
+.dpTom .dpTop {
+  width: 104px;
+  height: 104px;
+  background: radial-gradient(circle at 38% 30%, #fbfaf5, #dcd8c8 60%, #b4b09e);
+  box-shadow:
+    0 22px 30px rgba(0, 0, 0, 0.5),
+    inset 0 0 0 6px rgba(210, 162, 65, 0.5),
+    inset 0 -8px 22px rgba(0, 0, 0, 0.22);
+}
+.dpTom .dpTop {
+  width: 92px;
+  height: 92px;
+}
+.dpHat .dpTop,
+.dpCrash .dpTop {
+  width: 96px;
+  height: 96px;
+  background: radial-gradient(circle at 40% 32%, #f2dfa8, var(--gold) 55%, #8f6b24);
+  box-shadow:
+    0 20px 26px rgba(0, 0, 0, 0.5),
+    inset 0 0 0 2px rgba(255, 255, 255, 0.25),
+    inset 0 0 26px rgba(0, 0, 0, 0.3);
+}
+.dpCrash .dpTop {
+  width: 112px;
+  height: 112px;
+}
+.dpLbl {
+  display: inline-block;
+  font-family: var(--font-sans);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(246, 245, 241, 0.5);
+  transform: rotateX(-30deg);
+}
+.dp.hit .dpTop {
+  transform: scale(0.93) translateZ(-8px);
+  box-shadow:
+    0 10px 16px rgba(0, 0, 0, 0.55),
+    inset 0 0 0 6px rgba(210, 162, 65, 0.8),
+    inset 0 0 30px rgba(210, 162, 65, 0.35);
+}
+.dpHat.hit .dpTop,
+.dpCrash.hit .dpTop {
+  animation: cymb 0.55s ease;
+}
+@keyframes cymb {
+  0% {
+    transform: rotate3d(1, 0.3, 0, 0deg);
+  }
+  25% {
+    transform: rotate3d(1, 0.3, 0, 14deg) scale(0.97);
+  }
+  55% {
+    transform: rotate3d(1, 0.4, 0, -9deg);
+  }
+  80% {
+    transform: rotate3d(1, 0.2, 0, 5deg);
+  }
+  100% {
+    transform: rotate3d(1, 0, 0, 0deg);
+  }
+}
+@media (max-width: 720px) {
+  .dpKick .dpTop {
+    width: 86px;
+    height: 86px;
+  }
+  .dpSnare .dpTop {
+    width: 70px;
+    height: 70px;
+  }
+  .dpTom .dpTop {
+    width: 62px;
+    height: 62px;
+  }
+  .dpHat .dpTop {
+    width: 62px;
+    height: 62px;
+  }
+  .dpCrash .dpTop {
+    width: 74px;
+    height: 74px;
+  }
+  .drumFloor {
+    gap: 3%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dpHat.hit .dpTop,
+  .dpCrash.hit .dpTop {
+    animation: none;
+  }
+}

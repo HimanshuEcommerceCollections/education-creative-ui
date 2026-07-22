@@ -1,0 +1,315 @@
+/*
+ * Pop-quiz widget styling (3D dice cube, flip flashcard, options, qDeal/qShake
+ * keyframes). Colocated with pop-quiz.tsx / quiz-dice-cube.tsx. The flat dice
+ * block + labels + hint live as Tailwind classes in the component.
+ */
+.quizSec {
+  background: linear-gradient(160deg, #141625, var(--slate-deep) 55%, #10121f);
+  border-top: 1px solid rgba(210, 162, 65, 0.18);
+  border-bottom: 1px solid rgba(210, 162, 65, 0.18);
+  padding: 88px 0 96px;
+  overflow: hidden;
+}
+.qdice {
+  width: 74px;
+  height: 74px;
+  perspective: 560px;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+  display: block;
+}
+.qhop {
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.3s ease;
+  transform: rotateX(-16deg) rotateY(24deg);
+}
+.qdice.hop .qhop {
+  transform: translateY(-16px) rotateX(-16deg) rotateY(24deg);
+}
+.qcube {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 1.15s cubic-bezier(0.2, 0.75, 0.25, 1);
+}
+.qf {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(150deg, #fbfaf5, #e7e4d6);
+  border: 1px solid rgba(210, 162, 65, 0.6);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--slate-deep);
+  box-shadow: inset 0 0 14px rgba(210, 162, 65, 0.14);
+}
+.qf svg {
+  width: 30px;
+  height: 30px;
+}
+.qfRight,
+.qfLeft {
+  background: linear-gradient(150deg, #efede1, #d9d5c4);
+}
+.qfTop,
+.qfDown {
+  background: linear-gradient(150deg, #fffef9, #efecdf);
+}
+.qfFront {
+  transform: translateZ(37px);
+}
+.qfBack {
+  transform: rotateY(180deg) translateZ(37px);
+}
+.qfRight {
+  transform: rotateY(90deg) translateZ(37px);
+}
+.qfLeft {
+  transform: rotateY(-90deg) translateZ(37px);
+}
+.qfTop {
+  transform: rotateX(90deg) translateZ(37px);
+}
+.qfDown {
+  transform: rotateX(-90deg) translateZ(37px);
+}
+.quizStage {
+  display: flex;
+  justify-content: center;
+  margin-top: 54px;
+  perspective: 1600px;
+}
+.qcard {
+  position: relative;
+  width: min(560px, 94%);
+  height: 360px;
+  transform-style: preserve-3d;
+  transition: transform 0.8s cubic-bezier(0.35, 0.1, 0.25, 1);
+}
+.qcard.flip {
+  transform: rotateY(180deg);
+}
+.qcard.deal {
+  animation: qDeal 0.55s cubic-bezier(0.2, 0.7, 0.3, 1.15);
+}
+@keyframes qDeal {
+  0% {
+    opacity: 0;
+    transform: translateY(38px) rotateX(-24deg) scale(0.94);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+.qface {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border-radius: 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  text-align: center;
+  padding: 7% 9%;
+}
+.qfront {
+  background:
+    linear-gradient(90deg, rgba(22, 24, 29, 0.05), rgba(22, 24, 29, 0) 14%),
+    repeating-linear-gradient(
+      180deg,
+      transparent 0 34px,
+      rgba(22, 24, 29, 0.035) 34px 35px
+    ),
+    #fbfaf7;
+  border: 1px solid rgba(22, 24, 29, 0.1);
+  box-shadow: 0 34px 60px rgba(0, 0, 0, 0.45);
+}
+.qback {
+  background: linear-gradient(150deg, var(--slate) 0%, var(--slate-deep) 70%);
+  border: 1px solid rgba(210, 162, 65, 0.4);
+  box-shadow: 0 34px 60px rgba(0, 0, 0, 0.45);
+  transform: rotateY(180deg);
+  cursor: pointer;
+}
+.qchip {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--slate);
+}
+.qchip .qi {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  background: linear-gradient(150deg, var(--gold), #b8882e);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 14px rgba(210, 162, 65, 0.35);
+}
+.qchip .qi svg {
+  width: 16px;
+  height: 16px;
+}
+.qQ {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: clamp(16px, 2.6vw, 22px);
+  line-height: 1.3;
+  color: var(--ink);
+  margin: 0;
+}
+.qA {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: clamp(16px, 2.6vw, 22px);
+  color: #f6f5f1;
+  margin: 0;
+}
+.qAnote {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  color: rgba(246, 245, 241, 0.72);
+  margin: 0;
+  max-width: 400px;
+  line-height: 1.6;
+}
+.qagain {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(246, 245, 241, 0.5);
+}
+.qOpts {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  width: 100%;
+  max-width: 400px;
+}
+.qopt {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--ink);
+  background: #fff;
+  border: 1px solid rgba(22, 24, 29, 0.16);
+  border-radius: 999px;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 0.25s ease,
+    transform 0.25s ease,
+    background 0.25s ease,
+    color 0.25s ease,
+    opacity 0.25s ease;
+}
+.qopt .ol {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--sand);
+  color: var(--slate);
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+}
+.qopt:hover:not(:disabled) {
+  border-color: var(--gold);
+  transform: translateY(-1px);
+}
+.qopt:disabled {
+  cursor: default;
+}
+.qopt.good {
+  background: linear-gradient(150deg, var(--gold), #b8882e);
+  border-color: transparent;
+  color: #fff;
+}
+.qopt.good .ol {
+  background: rgba(255, 255, 255, 0.28);
+  color: #fff;
+}
+.qopt.bad {
+  opacity: 0.42;
+  animation: qShake 0.4s ease;
+}
+@keyframes qShake {
+  0%,
+  100% {
+    transform: none;
+  }
+  25% {
+    transform: translateX(-6px);
+  }
+  50% {
+    transform: translateX(5px);
+  }
+  75% {
+    transform: translateX(-3px);
+  }
+}
+.qFb {
+  min-height: 20px;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-style: italic;
+  color: var(--slate);
+  margin: 0;
+}
+.qPraise {
+  font-family: var(--font-serif);
+  font-weight: 800;
+  font-size: clamp(22px, 3.6vw, 34px);
+  color: var(--gold);
+  margin: 0;
+}
+@media (max-width: 720px) {
+  .quizSec {
+    padding: 68px 0 74px;
+  }
+  .quizStage {
+    margin-top: 40px;
+  }
+  .qcard {
+    height: 440px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .qcube,
+  .qcard,
+  .qhop {
+    transition: none;
+  }
+  .qcard.deal {
+    animation: none;
+  }
+  .qopt.bad {
+    animation: none;
+  }
+}
