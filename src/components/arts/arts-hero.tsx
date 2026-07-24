@@ -94,7 +94,7 @@ export function ArtsHero() {
                 </Link>
                 <span aria-hidden="true">/</span>
                 <Link
-                  href="/browse"
+                  href="/#subjects2"
                   className="no-underline hover:text-[rgba(246,245,241,0.92)]"
                 >
                   Subjects

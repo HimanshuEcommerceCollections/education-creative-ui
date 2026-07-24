@@ -32,7 +32,7 @@ export function CookingHero() {
                   Home
                 </Link>
                 <span aria-hidden="true">/</span>
-                <Link href="/browse" className="no-underline hover:text-[rgba(246,245,241,0.92)]">
+                <Link href="/#subjects2" className="no-underline hover:text-[rgba(246,245,241,0.92)]">
                   Subjects
                 </Link>
                 <span aria-hidden="true">/</span>
