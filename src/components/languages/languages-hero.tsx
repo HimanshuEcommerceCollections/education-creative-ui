@@ -1,7 +1,6 @@
 import Link from "next/link";
 import type { CSSProperties } from "react";
 
-import { HeroVideo } from "@/components/common/hero-video";
 import { Highlight } from "@/components/common/highlight";
 import { Reveal } from "@/components/common/reveal";
 import { Button } from "@/components/ui/button";
@@ -70,17 +69,7 @@ const STARS: Star[] = [
  */
 export function LanguagesHero() {
   return (
-    <section className="relative grid min-h-[94vh] grid-cols-[1.02fr_0.98fr] items-center gap-[30px] overflow-hidden bg-[#0F1120] pt-[70px] max-[960px]:min-h-0 max-[960px]:grid-cols-1 max-[960px]:pt-[110px]">
-      <div aria-hidden="true" className="absolute inset-0 z-0">
-        <HeroVideo src="/assets/languages/videos/hero.mp4" />
-      </div>
-
-      {/* Night-sky wash: keeps the deep gradient tint while the video shows through. */}
-      <div
-        aria-hidden="true"
-        className="absolute inset-0 z-0 bg-[radial-gradient(120%_90%_at_70%_20%,rgba(28,32,56,0.82)_0%,rgba(20,22,37,0.9)_45%,rgba(15,17,32,0.95)_100%)]"
-      />
-
+    <section className="relative grid min-h-[94vh] grid-cols-[1.02fr_0.98fr] items-center gap-[30px] overflow-hidden bg-[radial-gradient(120%_90%_at_70%_20%,#1C2038_0%,#141625_45%,#0F1120_100%)] pt-[70px] max-[960px]:min-h-0 max-[960px]:grid-cols-1 max-[960px]:pt-[110px]">
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 z-[1] overflow-hidden"
