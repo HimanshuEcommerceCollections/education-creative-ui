@@ -46,9 +46,9 @@ export function TrustSafety() {
             return (
               <Reveal key={card.title} delay={(index + 1) as RevealDelay}>
                 <div
-                  className={`${styles.glassCard} group h-full overflow-hidden rounded-[18px] border border-white/[0.18] bg-[linear-gradient(135deg,rgba(255,255,255,0.14)_0%,rgba(255,255,255,0.04)_100%)] p-8 shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_16px_40px_-24px_rgba(0,0,0,0.55)] backdrop-blur-[16px] backdrop-saturate-[1.4] transition-[transform,background,border-color,box-shadow] duration-500 ease-[cubic-bezier(0.16,0.7,0.2,1)] hover:-translate-y-2 hover:border-[rgba(210,162,65,0.45)] hover:bg-[linear-gradient(135deg,rgba(255,255,255,0.2)_0%,rgba(255,255,255,0.06)_100%)] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.3),0_34px_66px_-28px_rgba(0,0,0,0.7)]`}
+                  className={`${styles.glassCard} group h-full overflow-hidden rounded-[18px] border border-white/[0.18] bg-[linear-gradient(135deg,rgba(255,255,255,0.14)_0%,rgba(255,255,255,0.04)_100%)] p-8 shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_16px_40px_-24px_rgba(0,0,0,0.55)] backdrop-blur-[16px] backdrop-saturate-[1.4] transition-[transform,background,border-color,box-shadow] duration-500 ease-brand hover:-translate-y-2 hover:border-[rgba(210,162,65,0.45)] hover:bg-[linear-gradient(135deg,rgba(255,255,255,0.2)_0%,rgba(255,255,255,0.06)_100%)] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.3),0_34px_66px_-28px_rgba(0,0,0,0.7)]`}
                 >
-                  <div className="relative z-[1] mb-[22px] flex h-[52px] w-[52px] items-center justify-center rounded-[14px] border border-[rgba(210,162,65,0.28)] bg-[rgba(210,162,65,0.18)] text-gold transition-transform duration-500 ease-[cubic-bezier(0.16,0.7,0.2,1)] group-hover:rotate-[-4deg] group-hover:scale-[1.08]">
+                  <div className="relative z-[1] mb-[22px] flex h-[52px] w-[52px] items-center justify-center rounded-[14px] border border-[rgba(210,162,65,0.28)] bg-[rgba(210,162,65,0.18)] text-gold transition-transform duration-500 ease-brand group-hover:rotate-[-4deg] group-hover:scale-[1.08]">
                     <Icon className="h-6 w-6" />
                   </div>
                   <h3 className="relative z-[1] mb-[10px] font-serif text-[19px] font-semibold tracking-[-0.005em] text-white">

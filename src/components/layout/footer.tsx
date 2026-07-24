@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 
 import { Container } from "@/components/common/container";
 import { NewsletterForm } from "@/components/layout/newsletter-form";
@@ -36,15 +37,21 @@ export function Footer() {
               <h2 className="mb-[18px] text-[12px] font-semibold uppercase tracking-[0.14em] text-ivory">
                 {group.title}
               </h2>
-              {group.links.map((link) => (
-                <a
-                  key={link.label}
-                  href={link.href}
-                  className="mb-3 block text-[14.5px] text-[rgba(244,241,234,0.66)] no-underline transition-colors hover:text-ivory"
-                >
-                  {link.label}
-                </a>
-              ))}
+              {group.links.map((link) => {
+                const cls =
+                  "mb-3 block text-[14.5px] text-[rgba(244,241,234,0.66)] no-underline transition-colors hover:text-ivory";
+                // "#" placeholders have no destination yet — render as inert text
+                // so they don't jump the page to the top when clicked.
+                return link.href === "#" ? (
+                  <span key={link.label} className={cls} aria-disabled="true">
+                    {link.label}
+                  </span>
+                ) : (
+                  <Link key={link.label} href={link.href} className={cls}>
+                    {link.label}
+                  </Link>
+                );
+              })}
             </div>
           ))}
         </div>
@@ -53,12 +60,21 @@ export function Footer() {
           <div className="flex gap-4">
             {SOCIAL_LINKS.map((social) => {
               const Icon = SOCIAL_ICONS[social.icon];
-              return (
+              const cls =
+                "flex h-[38px] w-[38px] items-center justify-center rounded-full border border-[rgba(244,241,234,0.24)] text-[rgba(244,241,234,0.7)] no-underline transition-all hover:bg-[rgba(244,241,234,0.12)] hover:text-white";
+              // Placeholder "#" socials: inert until real profile URLs exist.
+              return social.href === "#" ? (
+                <span key={social.label} className={cls} aria-label={social.ariaLabel} role="img">
+                  <Icon className="h-[17px] w-[17px]" />
+                </span>
+              ) : (
                 <a
                   key={social.label}
                   href={social.href}
                   aria-label={social.ariaLabel}
-                  className="flex h-[38px] w-[38px] items-center justify-center rounded-full border border-[rgba(244,241,234,0.24)] text-[rgba(244,241,234,0.7)] no-underline transition-all hover:bg-[rgba(244,241,234,0.12)] hover:text-white"
+                  target="_blank"
+                  rel="noreferrer"
+                  className={cls}
                 >
                   <Icon className="h-[17px] w-[17px]" />
                 </a>
@@ -69,13 +85,13 @@ export function Footer() {
           <p className="text-[11px] text-[rgba(244,241,234,0.4)]">
             Demo — sample content, synthetic data, no student records collected.
             © 2026 {SITE.name}. &nbsp;·&nbsp;{" "}
-            <a href="/privacy" className="text-inherit">
+            <Link href="/privacy" className="text-inherit">
               Privacy Policy
-            </a>
+            </Link>
             &nbsp;·&nbsp;{" "}
-            <a href="/terms" className="text-inherit">
+            <Link href="/terms" className="text-inherit">
               Terms
-            </a>
+            </Link>
           </p>
         </div>
       </Container>

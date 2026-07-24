@@ -8,8 +8,8 @@ export const SITE = {
     "Book vetted tutors for academics, music, arts, languages, cooking, and more — online or in your home.",
 } as const;
 
-/** Root-relative anchor used by the header/footer "Book" call-to-action. */
-export const BOOK_HREF = "/#book";
+/** Destination for the header "Book" call-to-action (the contact page). */
+export const BOOK_HREF = "/contact";
 
 /** Route for the header "Sign in" action. */
 export const SIGNIN_HREF = "/login";

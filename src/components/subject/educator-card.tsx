@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 
 import type { SubjectEducator } from "@/types/subject-page";
 
@@ -12,7 +13,7 @@ const OVERLAY_HOVER =
  */
 export function EducatorCard({ educator }: { educator: SubjectEducator }) {
   return (
-    <a
+    <Link
       href={educator.href}
       className={`group relative block h-[440px] overflow-hidden rounded-[20px] shadow-[0_34px_66px_-34px_rgba(24,24,24,0.35)] after:absolute after:inset-0 after:z-[1] after:bg-[linear-gradient(180deg,rgba(16,20,30,0)_45%,rgba(16,20,30,0.78)_100%)] after:transition-[background] after:duration-500 after:content-[''] ${OVERLAY_HOVER}`}
     >
@@ -21,7 +22,7 @@ export function EducatorCard({ educator }: { educator: SubjectEducator }) {
         alt={educator.image.alt}
         fill
         sizes="(max-width: 640px) 100vw, (max-width: 960px) 50vw, 30vw"
-        className="object-cover transition-transform duration-[1100ms] ease-[cubic-bezier(0.16,0.7,0.2,1)] group-hover:scale-[1.05] group-focus-visible:scale-[1.05]"
+        className="object-cover transition-transform duration-[1100ms] ease-brand group-hover:scale-[1.05] group-focus-visible:scale-[1.05]"
       />
 
       <div
@@ -58,6 +59,6 @@ export function EducatorCard({ educator }: { educator: SubjectEducator }) {
           </span>
         </div>
       </div>
-    </a>
+    </Link>
   );
 }

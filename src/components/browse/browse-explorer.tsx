@@ -59,7 +59,7 @@ function EducatorCard({ educator, delay }: { educator: Educator; delay: RevealDe
               alt={educator.image.alt}
               fill
               sizes="(max-width: 600px) 100vw, (max-width: 980px) 50vw, 33vw"
-              className="object-cover object-[50%_12%] transition-transform duration-[600ms] ease-[cubic-bezier(0.16,0.7,0.2,1)] group-hover:scale-[1.06]"
+              className="object-cover object-[50%_12%] transition-transform duration-[600ms] ease-brand group-hover:scale-[1.06]"
             />
           </div>
 
@@ -129,7 +129,7 @@ export function BrowseExplorer() {
 
   return (
     <>
-      <section className="relative overflow-hidden bg-[#141416] pb-24 pt-[150px]">
+      <section className="relative overflow-hidden bg-ink-deep pb-24 pt-[150px]">
         <div
           aria-hidden="true"
           className="absolute inset-0 z-0 before:absolute before:inset-0 before:z-[1] before:bg-[linear-gradient(100deg,rgba(10,10,12,0.9)_0%,rgba(11,11,13,0.74)_40%,rgba(14,14,16,0.34)_72%,rgba(14,14,16,0.08)_100%)] before:content-[''] after:absolute after:inset-0 after:z-[2] after:bg-[radial-gradient(70%_80%_at_74%_20%,rgba(210,162,65,0.1),rgba(14,14,16,0)_58%),linear-gradient(0deg,rgba(14,14,16,0.5)_0%,rgba(14,14,16,0)_34%)] after:content-['']"

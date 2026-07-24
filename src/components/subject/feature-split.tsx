@@ -45,7 +45,7 @@ export function FeatureSplit({
             alt={image.alt}
             fill
             sizes="(max-width: 960px) 100vw, 50vw"
-            className="object-cover transition-transform duration-[1200ms] ease-[cubic-bezier(0.16,0.7,0.2,1)] group-hover:scale-[1.04]"
+            className="object-cover transition-transform duration-[1200ms] ease-brand group-hover:scale-[1.04]"
           />
           {photoOverlay}
         </Reveal>

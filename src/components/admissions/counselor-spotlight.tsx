@@ -60,7 +60,7 @@ export function CounselorSpotlight() {
                 process — calmly, honestly, and without ever writing a word for
                 the student.
               </p>
-              <Button href="/educators/priya" variant="primary">
+              <Button href="/browse" variant="primary">
                 View profile
               </Button>
               <p className="mt-[14px] text-[12.5px] text-[rgba(246,245,241,0.5)]">

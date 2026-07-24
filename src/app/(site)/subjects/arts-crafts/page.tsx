@@ -12,7 +12,7 @@ import { SubjectStats } from "@/components/subject/subject-stats";
 import { ARTS_MARQUEE, ARTS_OFFERS, ARTS_STATS } from "@/data/arts";
 
 export const metadata: Metadata = {
-  title: "Arts & Crafts — Your Learning Journey",
+  title: "Arts & Crafts",
   description:
     "Painting, clay, paper, and thread — unhurried, hands-on making for all ages, taught at home or online by patient, vetted craft educators.",
 };

@@ -22,7 +22,10 @@ const onest = Onest({
 });
 
 export const metadata: Metadata = {
-  title: `${SITE.name} — trusted educators in ${SITE.location}`,
+  title: {
+    default: `${SITE.name} — trusted educators in ${SITE.location}`,
+    template: `%s — ${SITE.name}`,
+  },
   description: SITE.description,
 };
 
@@ -32,7 +35,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={cn(manrope.variable, onest.variable, "antialiased")}>
+    <html
+      lang="en"
+      data-scroll-behavior="smooth"
+      className={cn(manrope.variable, onest.variable, "antialiased")}
+    >
       <body>
         <GrainOverlay />
         {children}

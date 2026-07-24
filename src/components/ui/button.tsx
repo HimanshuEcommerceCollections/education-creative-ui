@@ -4,6 +4,8 @@ import type {
   ReactNode,
 } from "react";
 
+import Link from "next/link";
+
 import { cn } from "@/lib/utils";
 
 export type ButtonVariant =
@@ -19,7 +21,7 @@ const BASE =
   "inline-flex min-h-[54px] cursor-pointer items-center justify-center gap-[9px] " +
   "rounded-[40px] border border-transparent px-8 py-4 font-sans text-[15px] font-semibold " +
   "tracking-[0.01em] no-underline transition-[transform,background-color,box-shadow,letter-spacing] " +
-  "duration-[450ms] ease-[cubic-bezier(0.16,0.7,0.2,1)] motion-reduce:transition-none";
+  "duration-[450ms] ease-brand motion-reduce:transition-none";
 
 /**
  * `.btn.pri` / `.sec` / `.light` / `.ghost` variants.
@@ -83,6 +85,15 @@ export function Button({
   const classes = cn(BASE, VARIANTS[variant], className);
 
   if (isAnchor(props)) {
+    // Internal routes ("/..." including "/#hash") navigate client-side via
+    // next/link; hash-only ("#..."), mailto:, tel:, and external URLs stay <a>.
+    if (props.href.startsWith("/")) {
+      return (
+        <Link className={classes} {...props}>
+          {children}
+        </Link>
+      );
+    }
     return (
       <a className={classes} {...props}>
         {children}

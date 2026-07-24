@@ -62,7 +62,7 @@ export function AboutSnapshot() {
         <div className="grid grid-cols-4 gap-7 max-[900px]:grid-cols-2 max-[520px]:grid-cols-1">
           {ABOUT_SNAPSHOT.map((stat, i) => (
             <Reveal key={stat.label} delay={(i + 1) as RevealDelay}>
-              <div className="rounded-[20px] border border-line bg-sand p-[38px_30px] transition-[transform,box-shadow] duration-500 ease-[cubic-bezier(0.16,0.7,0.2,1)] hover:-translate-y-[6px] hover:shadow-[0_24px_54px_-30px_rgba(22,24,29,0.34)]">
+              <div className="rounded-[20px] border border-line bg-sand p-[38px_30px] transition-[transform,box-shadow] duration-500 ease-brand hover:-translate-y-[6px] hover:shadow-[0_24px_54px_-30px_rgba(22,24,29,0.34)]">
                 <div
                   className={`flex items-baseline gap-1 font-serif font-bold leading-none tracking-[-0.03em] text-slate ${
                     stat.small ? "text-[clamp(30px,3.6vw,42px)]" : "text-[clamp(40px,5vw,60px)]"

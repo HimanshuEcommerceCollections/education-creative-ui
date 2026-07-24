@@ -1,7 +1,9 @@
 import { Container } from "@/components/common/container";
+import { CoppaBand } from "@/components/common/coppa-band";
 import { Reveal } from "@/components/common/reveal";
-import { CoppaBand } from "@/components/how-it-works/coppa-band";
+import { ShieldIcon } from "@/components/how-it-works/how-it-works-icons";
 import type { EducatorProfile } from "@/data/educators";
+import { COPPA_POINTS } from "@/data/coppa";
 
 import { AvailabilityWeek } from "./availability-week";
 import { BookingSidebar } from "./booking-sidebar";
@@ -40,7 +42,13 @@ export function EducatorPage({ profile }: { profile: EducatorProfile }) {
         </Container>
       </section>
 
-      <CoppaBand />
+      <CoppaBand
+        points={COPPA_POINTS}
+        imageSrc="/assets/how-it-works/images/coppa-bg.jpg"
+        icon={<ShieldIcon className="h-7 w-7" />}
+        stripClassName="bg-ivory"
+        bandClassName="bg-sand"
+      />
 
       <EducatorCta profile={profile} />
     </>

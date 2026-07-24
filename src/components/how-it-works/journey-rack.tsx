@@ -113,7 +113,7 @@ export function JourneyRack() {
                 <div
                   key={journeyStep.title}
                   style={rackStyle(index, step)}
-                  className="absolute left-1/2 top-1/2 h-[435px] w-[340px] max-w-[80%] overflow-hidden rounded-[18px] transition-[transform,filter,opacity,box-shadow] duration-[850ms] ease-[cubic-bezier(0.16,0.7,0.2,1)]"
+                  className="absolute left-1/2 top-1/2 h-[435px] w-[340px] max-w-[80%] overflow-hidden rounded-[18px] transition-[transform,filter,opacity,box-shadow] duration-[850ms] ease-brand"
                 >
                   <Image
                     src={journeyStep.image.src}

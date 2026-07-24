@@ -14,7 +14,7 @@ import { SubjectStats } from "@/components/subject/subject-stats";
 import { EDUCATORS, MUSIC_MARQUEE, MUSIC_STATS, OFFERS } from "@/data/music";
 
 export const metadata: Metadata = {
-  title: "Music — Your Learning Journey",
+  title: "Music",
   description:
     "Piano, guitar, voice, strings and more — taught at home or online by vetted independent musicians who meet learners where they are.",
 };

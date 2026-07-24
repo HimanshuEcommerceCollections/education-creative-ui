@@ -12,7 +12,7 @@ import { SubjectStats } from "@/components/subject/subject-stats";
 import { ADMISSIONS_STATS } from "@/data/admissions";
 
 export const metadata: Metadata = {
-  title: "College Admissions — Your Learning Journey",
+  title: "College Admissions",
   description:
     "One-on-one college admissions guidance — essays, applications, interviews, and aid — from junior spring to decision day, with parents in the loop.",
 };

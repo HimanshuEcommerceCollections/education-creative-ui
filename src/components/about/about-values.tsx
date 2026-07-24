@@ -86,7 +86,7 @@ export function AboutValues() {
   }, [step]);
 
   return (
-    <section ref={pinRef} className="relative h-[300vh] bg-[#141416] max-[640px]:h-auto motion-reduce:h-auto">
+    <section ref={pinRef} className="relative h-[300vh] bg-ink-deep max-[640px]:h-auto motion-reduce:h-auto">
       <div
         ref={stickyRef}
         className="sticky top-0 flex h-screen items-center overflow-hidden max-[640px]:static max-[640px]:h-auto max-[640px]:py-[12vh] motion-reduce:static motion-reduce:h-auto motion-reduce:py-[14vh]"
@@ -175,7 +175,7 @@ export function AboutValues() {
               type="button"
               onClick={() => step(-1)}
               aria-label="Previous value"
-              className="flex h-[54px] w-[54px] items-center justify-center rounded-full border-[1.5px] border-line bg-ivory text-ink transition-[transform,background-color,color,border-color] duration-[350ms] ease-[cubic-bezier(0.16,0.7,0.2,1)] hover:-translate-y-[3px] hover:border-slate hover:bg-slate hover:text-white"
+              className="flex h-[54px] w-[54px] items-center justify-center rounded-full border-[1.5px] border-line bg-ivory text-ink transition-[transform,background-color,color,border-color] duration-[350ms] ease-brand hover:-translate-y-[3px] hover:border-slate hover:bg-slate hover:text-white"
             >
               <ChevronLeftIcon className="h-5 w-5" />
             </button>
@@ -183,7 +183,7 @@ export function AboutValues() {
               type="button"
               onClick={() => step(1)}
               aria-label="Next value"
-              className="flex h-[54px] w-[54px] items-center justify-center rounded-full border-[1.5px] border-line bg-ivory text-ink transition-[transform,background-color,color,border-color] duration-[350ms] ease-[cubic-bezier(0.16,0.7,0.2,1)] hover:-translate-y-[3px] hover:border-slate hover:bg-slate hover:text-white"
+              className="flex h-[54px] w-[54px] items-center justify-center rounded-full border-[1.5px] border-line bg-ivory text-ink transition-[transform,background-color,color,border-color] duration-[350ms] ease-brand hover:-translate-y-[3px] hover:border-slate hover:bg-slate hover:text-white"
             >
               <ChevronRightIcon className="h-5 w-5" />
             </button>

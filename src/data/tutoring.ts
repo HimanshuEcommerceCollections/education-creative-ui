@@ -63,7 +63,7 @@ export const TUTORING_EDUCATORS: SubjectEducator[] = [
     rating: "4.7",
     bio: "Maths and sciences made calm and clear, one concept at a time.",
     price: "$50/hr",
-    href: "/educators/daniel",
+    href: "/browse",
     image: { src: "/assets/tutoring/images/educator-daniel.jpg", alt: "Daniel A., academic tutor" },
   },
 ];

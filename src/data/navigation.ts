@@ -32,7 +32,7 @@ export const FOOTER_NAV: NavGroup[] = [
     links: [
       { label: "Find Tutors", href: "/#subjects2" },
       { label: "Pricing", href: "#" },
-      { label: "FAQ", href: "/#faq" },
+      { label: "FAQ", href: "/how-it-works" },
     ],
   },
   {

@@ -13,14 +13,14 @@ interface OfferCardProps {
 /** Offer card with a photo top and an icon badge straddling the seam. */
 export function OfferCard({ image, icon, title, description }: OfferCardProps) {
   return (
-    <div className="group h-full overflow-hidden rounded-[18px] border border-line bg-sand transition-[transform,box-shadow,border-color] duration-500 ease-[cubic-bezier(0.16,0.7,0.2,1)] hover:-translate-y-[6px] hover:border-[rgba(46,58,115,0.35)] hover:shadow-[0_30px_60px_-30px_rgba(24,24,24,0.25)]">
+    <div className="group h-full overflow-hidden rounded-[18px] border border-line bg-sand transition-[transform,box-shadow,border-color] duration-500 ease-brand hover:-translate-y-[6px] hover:border-[rgba(46,58,115,0.35)] hover:shadow-[0_30px_60px_-30px_rgba(24,24,24,0.25)]">
       <div className="relative h-[210px] overflow-hidden">
         <Image
           src={image.src}
           alt={image.alt}
           fill
           sizes="(max-width: 900px) 100vw, 33vw"
-          className="object-cover transition-transform duration-[1100ms] ease-[cubic-bezier(0.16,0.7,0.2,1)] group-hover:scale-[1.06]"
+          className="object-cover transition-transform duration-[1100ms] ease-brand group-hover:scale-[1.06]"
         />
       </div>
       <div className="px-[26px] pb-[28px] pt-[26px]">

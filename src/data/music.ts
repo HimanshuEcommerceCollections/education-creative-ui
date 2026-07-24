@@ -52,7 +52,7 @@ export const EDUCATORS: SubjectEducator[] = [
     rating: "5.0",
     bio: "Classically trained, but happiest teaching the songs you actually want to play.",
     price: "$60/hr",
-    href: "/educators/marcus",
+    href: "/browse",
     image: { src: "/assets/music/images/educator-marcus.jpg", alt: "Marcus T., music educator" },
   },
   {
@@ -63,7 +63,7 @@ export const EDUCATORS: SubjectEducator[] = [
     rating: "4.8",
     bio: "Violin and viola, from first bow-hold to youth orchestra auditions.",
     price: "$54/hr",
-    href: "/educators/rosa",
+    href: "/browse",
     image: { src: "/assets/music/images/educator-rosa.jpg", alt: "Rosa N., music educator" },
   },
 ];

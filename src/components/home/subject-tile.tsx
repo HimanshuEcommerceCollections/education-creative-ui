@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 
 import { cn } from "@/lib/utils";
 import type { ImageAsset } from "@/types/media";
@@ -49,22 +50,21 @@ export function SubjectTile({
   image,
   className,
 }: SubjectTileProps) {
-  return (
-    <a
-      href={href}
-      className={cn(
-        "group relative flex h-full w-full flex-col overflow-hidden rounded-[14px] text-white",
-        WRAPPER[variant],
-        className,
-      )}
-    >
+  const wrapperClass = cn(
+    "group relative flex h-full w-full flex-col overflow-hidden rounded-[14px] text-white",
+    WRAPPER[variant],
+    className,
+  );
+
+  const content = (
+    <>
       {variant === "photo" && image ? (
         <Image
           src={image.src}
           alt={image.alt}
           fill
           sizes="(max-width: 520px) 100vw, (max-width: 900px) 50vw, 33vw"
-          className="z-0 object-cover [filter:saturate(0.95)] transition-transform duration-[1100ms] ease-[cubic-bezier(0.16,0.7,0.2,1)] group-hover:scale-[1.06]"
+          className="z-0 object-cover [filter:saturate(0.95)] transition-transform duration-[1100ms] ease-brand group-hover:scale-[1.06]"
         />
       ) : null}
 
@@ -94,6 +94,18 @@ export function SubjectTile({
         ) : null}
         <TileCta>{cta}</TileCta>
       </div>
+    </>
+  );
+
+  // Subject routes ("/subjects/…") navigate client-side; the intro tile's
+  // same-page "#tutors" anchor stays a plain <a>.
+  return href.startsWith("/") ? (
+    <Link href={href} className={wrapperClass}>
+      {content}
+    </Link>
+  ) : (
+    <a href={href} className={wrapperClass}>
+      {content}
     </a>
   );
 }

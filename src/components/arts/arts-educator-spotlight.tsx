@@ -73,7 +73,7 @@ export function ArtsEducatorSpotlight() {
                 wobbliest bowl on the shelf is usually the best story.
               </p>
               <div className="mt-1 flex flex-wrap items-center gap-[18px]">
-                <Button href="/educators/theo" variant="primary">
+                <Button href="/browse" variant="primary">
                   View profile
                 </Button>
                 <p className="text-[12px] italic text-muted">

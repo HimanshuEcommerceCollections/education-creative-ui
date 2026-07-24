@@ -15,7 +15,7 @@ export function WhyCard({ item }: WhyCardProps) {
         alt={item.image.alt}
         fill
         sizes="(max-width: 520px) 100vw, (max-width: 900px) 50vw, 25vw"
-        className="z-0 object-cover [filter:saturate(0.92)] transition-transform duration-[1100ms] ease-[cubic-bezier(0.16,0.7,0.2,1)] group-hover:scale-[1.06]"
+        className="z-0 object-cover [filter:saturate(0.92)] transition-transform duration-[1100ms] ease-brand group-hover:scale-[1.06]"
       />
 
       <span className="absolute left-[26px] top-[22px] z-[2] text-[12px] font-semibold tracking-[0.16em] text-white/[0.72]">

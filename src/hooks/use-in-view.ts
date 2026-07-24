@@ -24,11 +24,21 @@ export function useInView<T extends Element = HTMLElement>(
     const element = ref.current;
     if (!element) return;
 
+    const reveal = () => setInView(true);
+
+    // Deep-links and scroll restoration can land the viewport below elements
+    // that then never intersect; reveal anything already in or above the
+    // viewport on mount so it can't stay stuck hidden.
+    if (element.getBoundingClientRect().top < window.innerHeight) {
+      reveal();
+      if (once) return;
+    }
+
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
           if (entry.isIntersecting) {
-            setInView(true);
+            reveal();
             if (once) {
               observer.disconnect();
               break;

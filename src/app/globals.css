@@ -16,10 +16,15 @@
   --color-slate-deep: #232c59;
   --color-gold: #d2a241;
   --color-line: rgba(22, 24, 29, 0.1);
+  /* Primary dark-band background (hero washes, trust/values/CTA sections). */
+  --color-ink-deep: #141416;
 
   /* typography (font-face variables come from next/font in layout.tsx) */
   --font-sans: var(--font-manrope), system-ui, sans-serif;
   --font-serif: var(--font-onest), sans-serif;
+
+  /* motion — the shared "settle" easing used across transitions */
+  --ease-brand: cubic-bezier(0.16, 0.7, 0.2, 1);
 }
 
 /*

@@ -17,7 +17,7 @@ import {
 } from "@/data/cooking";
 
 export const metadata: Metadata = {
-  title: "Cooking — Your Learning Journey",
+  title: "Cooking",
   description:
     "Learn to read the heat — from a gentle poach to a fearless sear — with a patient cook beside you. Everyday cooking, baking, and world flavours in your own kitchen.",
 };

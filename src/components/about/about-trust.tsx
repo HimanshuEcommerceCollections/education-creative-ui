@@ -11,7 +11,7 @@ import { ABOUT_ICONS } from "./about-icons";
 /** "How we earn trust" — four safeguard cards over a dark, photo-backed band. */
 export function AboutTrust() {
   return (
-    <section className="relative overflow-hidden bg-[#141416] py-[15vh]">
+    <section className="relative overflow-hidden bg-ink-deep py-[15vh]">
       <div
         aria-hidden="true"
         className="absolute inset-0 z-0 after:absolute after:inset-0 after:bg-[linear-gradient(180deg,rgba(16,16,18,0.88),rgba(16,16,18,0.9))] after:content-['']"
@@ -50,7 +50,7 @@ export function AboutTrust() {
             const Icon = ABOUT_ICONS[card.icon];
             return (
               <Reveal key={card.title} delay={(i + 1) as RevealDelay}>
-                <div className="group h-full rounded-[18px] border border-white/[0.12] bg-white/[0.05] p-[32px_28px] transition-[transform,background-color,border-color] duration-500 ease-[cubic-bezier(0.16,0.7,0.2,1)] hover:-translate-y-[6px] hover:border-[rgba(210,162,65,0.4)] hover:bg-white/[0.08]">
+                <div className="group h-full rounded-[18px] border border-white/[0.12] bg-white/[0.05] p-[32px_28px] transition-[transform,background-color,border-color] duration-500 ease-brand hover:-translate-y-[6px] hover:border-[rgba(210,162,65,0.4)] hover:bg-white/[0.08]">
                   <div className="mb-[22px] flex h-[52px] w-[52px] items-center justify-center rounded-[14px] bg-[rgba(210,162,65,0.16)] text-gold transition-transform duration-500 group-hover:scale-[1.08]">
                     <Icon className="h-[26px] w-[26px]" />
                   </div>

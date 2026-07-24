@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { Container } from "@/components/common/container";
@@ -144,9 +145,9 @@ export function SubjectBook() {
                     one calm method.
                   </h3>
                   <p>Vetted educators across all five.</p>
-                  <a className={styles.bcta} href="/browse">
+                  <Link className={styles.bcta} href="/browse">
                     Browse educators →
-                  </a>
+                  </Link>
                 </div>
               </div>
 

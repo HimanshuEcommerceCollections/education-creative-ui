@@ -23,7 +23,7 @@ export function AuthSuccess({ show, title, message, againLabel, onAgain }: AuthS
       aria-hidden={!show}
       className={cn(
         "absolute inset-0 z-[7] flex flex-col items-center justify-center bg-ivory px-10 text-center",
-        "transition-[opacity,transform,visibility] duration-[450ms] ease-[cubic-bezier(0.16,0.7,0.2,1)]",
+        "transition-[opacity,transform,visibility] duration-[450ms] ease-brand",
         show ? "visible scale-100 opacity-100" : "invisible scale-[0.96] opacity-0",
       )}
     >

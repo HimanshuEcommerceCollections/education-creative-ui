@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { Container } from "@/components/common/container";
@@ -33,9 +34,9 @@ export function SubjectHero({
       <Container className="relative z-[2] pb-[72px] text-white">
         <Reveal>
           <p className="mb-[22px] text-[12.5px] tracking-[0.06em] text-white/75">
-            <a href="/browse" className="no-underline">
+            <Link href="/browse" className="no-underline">
               ← All subjects
-            </a>
+            </Link>
           </p>
         </Reveal>
 

@@ -29,7 +29,7 @@ export function WhatToExpect() {
           const Icon = EXPECT_ICONS[card.icon];
           return (
             <Reveal key={card.title} delay={(index + 1) as RevealDelay}>
-              <div className="h-full rounded-[20px] border border-line bg-white p-8 transition-[transform,box-shadow] duration-[400ms] ease-[cubic-bezier(0.16,0.7,0.2,1)] hover:-translate-y-[6px] hover:shadow-[0_28px_56px_-34px_rgba(22,24,29,0.42)]">
+              <div className="h-full rounded-[20px] border border-line bg-white p-8 transition-[transform,box-shadow] duration-[400ms] ease-brand hover:-translate-y-[6px] hover:shadow-[0_28px_56px_-34px_rgba(22,24,29,0.42)]">
                 <div className="mb-[18px] flex h-12 w-12 items-center justify-center rounded-[14px] bg-[var(--chip-a)] text-slate">
                   <Icon className="h-6 w-6" />
                 </div>

@@ -14,7 +14,7 @@ import { ABOUT_MEDIA } from "@/data/about";
  */
 export function AboutHero() {
   return (
-    <section className="relative flex min-h-[90vh] items-center overflow-hidden bg-[#141416] pb-24 pt-[150px] text-center">
+    <section className="relative flex min-h-[90vh] items-center overflow-hidden bg-ink-deep pb-24 pt-[150px] text-center">
       <div
         aria-hidden="true"
         className="absolute inset-0 z-0 after:absolute after:inset-0 after:bg-[linear-gradient(180deg,rgba(16,16,18,0.66)_0%,rgba(12,12,14,0.8)_100%)] after:content-['']"
@@ -58,7 +58,7 @@ export function AboutHero() {
 
         <Reveal delay={3}>
           <div className="mt-[34px] flex flex-wrap justify-center gap-[14px]">
-            <Button href="/#subjects2" variant="primary">
+            <Button href="/browse" variant="primary">
               Browse Educators
             </Button>
             <Button href="/how-it-works" variant="ghost">

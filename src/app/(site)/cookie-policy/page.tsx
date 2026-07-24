@@ -4,7 +4,7 @@ import { LegalPage } from "@/components/legal/legal-page";
 import { COOKIE_POLICY } from "@/data/legal";
 
 export const metadata: Metadata = {
-  title: "Cookie Policy — Your Learning Journey",
+  title: "Cookie Policy",
   description:
     "How the Your Learning Journey demo site uses cookies — essential, preference, and aggregate analytics only, with no advertising profiles and no identifying a child.",
 };

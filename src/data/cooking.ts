@@ -92,7 +92,7 @@ export const COOKING_EDUCATORS: SubjectEducator[] = [
     rating: "4.9",
     bio: "A former line cook who swears the best food is unfussy — sharp knife work, big flavour, no stress.",
     price: "$58/hr",
-    href: "/educators/james",
+    href: "/browse",
     image: { src: "/assets/cooking/images/educator-james.jpg", alt: "James O., cooking educator" },
   },
   {
@@ -103,7 +103,7 @@ export const COOKING_EDUCATORS: SubjectEducator[] = [
     rating: "4.8",
     bio: "Baker and bread-head — dough, pastry, and the quiet satisfaction of something rising in the oven.",
     price: "$54/hr",
-    href: "/educators/rosa",
+    href: "/browse",
     image: { src: "/assets/cooking/images/educator-rosa.jpg", alt: "Rosa N., cooking educator" },
   },
 ];

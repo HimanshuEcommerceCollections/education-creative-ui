@@ -37,12 +37,6 @@ export interface AboutTrustCard {
   body: string;
 }
 
-/** A parent-control point in the COPPA band. */
-export interface AboutCoppaPoint {
-  title: string;
-  body: string;
-}
-
 /** Background media for the About page's photo-backed sections. */
 export const ABOUT_MEDIA = {
   heroVideo: "/assets/about/videos/hero.mp4",
@@ -131,21 +125,5 @@ export const ABOUT_TRUST_CARDS: AboutTrustCard[] = [
     icon: "record",
     title: "A Record You Can Revisit",
     body: "Messaging and scheduling stay on-platform, giving you a history you can return to anytime.",
-  },
-];
-
-/** The COPPA band's three parent-control points. */
-export const ABOUT_COPPA_POINTS: AboutCoppaPoint[] = [
-  {
-    title: "Parent creates the account",
-    body: "Registration and profiles are set up and owned by a parent or guardian.",
-  },
-  {
-    title: "Parent handles booking",
-    body: "Scheduling, payment, and messaging with educators run through the parent.",
-  },
-  {
-    title: "Parent stays involved",
-    body: "A parent or guardian supervises every session, in-home or online.",
   },
 ];

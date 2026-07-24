@@ -17,12 +17,6 @@ export interface TrustCard {
   body: string;
 }
 
-/** A single parent-control point in the COPPA band. */
-export interface CoppaPoint {
-  title: string;
-  body: string;
-}
-
 /** An in-home / online session format card. */
 export interface SessionFormat {
   tag: string;
@@ -82,13 +76,6 @@ export const TRUST_CARDS: TrustCard[] = [
     title: "A Record You Can Revisit",
     body: "Messaging and scheduling stay on the platform, so there’s always a record to look back on.",
   },
-];
-
-/** The COPPA band's three parent-control points. */
-export const COPPA_POINTS: CoppaPoint[] = [
-  { title: "Parent creates the account", body: "There’s no separate login for a child." },
-  { title: "Parent handles booking", body: "All messaging and scheduling runs through the parent." },
-  { title: "Parent stays involved", body: "Present or reachable for every session, in-home or online." },
 ];
 
 /** In-home and online session formats. */

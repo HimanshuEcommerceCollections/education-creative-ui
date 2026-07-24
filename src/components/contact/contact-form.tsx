@@ -13,7 +13,7 @@ const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 
 const FIELD_BASE =
   "w-full rounded-[12px] border-[1.5px] bg-ivory px-4 py-[14px] font-sans text-[15.5px] text-ink " +
-  "transition-[border-color,box-shadow,transform,background-color] duration-[350ms] ease-[cubic-bezier(0.16,0.7,0.2,1)] " +
+  "transition-[border-color,box-shadow,transform,background-color] duration-[350ms] ease-brand " +
   "placeholder:text-[rgba(99,99,110,0.5)] focus:-translate-y-[2px] focus:border-gold focus:bg-white " +
   "focus:shadow-[0_10px_28px_-16px_rgba(210,162,65,0.7)] focus:outline-none";
 
@@ -180,7 +180,7 @@ export function ContactForm() {
                 onClick={() => setReason(option)}
                 className={cn(
                   "cursor-pointer rounded-[30px] border-[1.5px] border-transparent px-[18px] py-[10px] font-sans text-[13.5px] font-semibold text-slate",
-                  "transition-[transform,background-color,color,box-shadow] duration-[300ms] ease-[cubic-bezier(0.16,0.7,0.2,1)]",
+                  "transition-[transform,background-color,color,box-shadow] duration-[300ms] ease-brand",
                   active
                     ? "bg-slate text-white shadow-[0_0_0_2px_rgba(210,162,65,0.55),0_14px_28px_-14px_rgba(46,58,115,0.6)]"
                     : "bg-[var(--chip-a)] hover:-translate-y-[2px] hover:bg-[var(--chip-b)]",

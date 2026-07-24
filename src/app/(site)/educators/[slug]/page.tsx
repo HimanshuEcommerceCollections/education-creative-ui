@@ -19,11 +19,11 @@ export async function generateMetadata({
   const profile = getEducator(slug);
 
   if (!profile) {
-    return { title: "Educator not found — Your Learning Journey" };
+    return { title: "Educator not found" };
   }
 
   return {
-    title: `${profile.name} — ${profile.subject} — Your Learning Journey`,
+    title: `${profile.name} — ${profile.subject}`,
     description: profile.about[0],
   };
 }

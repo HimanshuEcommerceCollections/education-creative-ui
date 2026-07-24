@@ -18,7 +18,7 @@ import {
 } from "@/data/tutoring";
 
 export const metadata: Metadata = {
-  title: "Academic Tutoring — Your Learning Journey",
+  title: "Academic Tutoring",
   description:
     "Maths, sciences, reading and writing — steady one-to-one support from vetted educators, at home or online, for school-age and adult learners.",
 };

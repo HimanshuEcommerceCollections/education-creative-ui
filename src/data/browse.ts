@@ -112,19 +112,3 @@ export const EDUCATORS: Educator[] = [
     image: { src: "/assets/browse/images/educator-theo.jpg", alt: "Theo W." },
   },
 ];
-
-/** COPPA band parent-control points. */
-export const BROWSE_COPPA_POINTS = [
-  {
-    title: "Parent creates the account",
-    body: "A parent or guardian sets up and owns the account from the start.",
-  },
-  {
-    title: "Parent handles booking",
-    body: "Every session is scheduled and confirmed by the adult in charge.",
-  },
-  {
-    title: "Parent stays involved",
-    body: "Guardians supervise sessions and stay part of the learning throughout.",
-  },
-];

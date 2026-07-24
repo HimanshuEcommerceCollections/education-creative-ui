@@ -43,7 +43,7 @@ export function ContactInfoCard() {
           styles.infoCard,
           "relative overflow-hidden rounded-[24px] bg-[linear-gradient(158deg,var(--slate)_0%,var(--slate-deep)_100%)] p-10 text-white",
           "shadow-[0_40px_80px_-44px_rgba(46,58,115,0.75)] will-change-transform max-[560px]:p-[30px]",
-          "transition-[transform,box-shadow] duration-500 ease-[cubic-bezier(0.16,0.7,0.2,1)]",
+          "transition-[transform,box-shadow] duration-500 ease-brand",
         )}
       >
         <div className="mb-[14px] text-[11px] font-bold uppercase tracking-[0.26em] text-gold">

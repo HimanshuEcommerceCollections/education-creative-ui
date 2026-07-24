@@ -5,7 +5,7 @@ import { LoginForm } from "@/components/auth/login-form";
 import { LOGIN_PANEL } from "@/data/auth";
 
 export const metadata: Metadata = {
-  title: "Sign In — Your Learning Journey",
+  title: "Sign In",
   description:
     "Sign in to your parent account to message educators, manage bookings, and pick up right where your family left off.",
 };

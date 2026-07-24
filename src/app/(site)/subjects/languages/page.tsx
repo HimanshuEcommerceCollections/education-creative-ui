@@ -10,7 +10,7 @@ import { SubjectStats } from "@/components/subject/subject-stats";
 import { LANGUAGES_STATS } from "@/data/languages";
 
 export const metadata: Metadata = {
-  title: "Languages — Your Learning Journey",
+  title: "Languages",
   description:
     "Spanish, French, and Hindi with educators who teach conversation first — real talk from lesson one, grammar sneaking in while you're busy speaking.",
 };

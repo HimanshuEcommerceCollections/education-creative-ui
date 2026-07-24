@@ -97,7 +97,7 @@ export const LANGUAGE_EDUCATORS: LanguageEducator[] = [
     experience: "7 yrs experience",
     price: "$52/hr",
     bio: "Warm, patient, and relentlessly conversational — Lena's students often forget they're in a lesson at all.",
-    href: "/educators/lena",
+    href: "/browse",
     image: { src: "/assets/languages/images/educator-lena.jpg", alt: "Lena K., Spanish and French educator" },
   },
   {
@@ -108,7 +108,7 @@ export const LANGUAGE_EDUCATORS: LanguageEducator[] = [
     experience: "6 yrs experience",
     price: "$48/hr",
     bio: "Script, songs, and stories — Sofia teaches Hindi the way families speak it, with culture in every lesson.",
-    href: "/educators/sofia",
+    href: "/browse",
     image: { src: "/assets/languages/images/educator-sofia.jpg", alt: "Sofia R., Hindi and English educator" },
   },
 ];

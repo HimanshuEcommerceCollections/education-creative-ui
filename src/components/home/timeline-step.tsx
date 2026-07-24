@@ -31,7 +31,7 @@ export function TimelineStep({ step, reversed }: TimelineStepProps) {
           alt={step.image.alt}
           fill
           sizes="(max-width: 820px) 100vw, (max-width: 1040px) 50vw, 485px"
-          className="object-cover transition-transform duration-[1200ms] ease-[cubic-bezier(0.16,0.7,0.2,1)] group-hover:scale-[1.05]"
+          className="object-cover transition-transform duration-[1200ms] ease-brand group-hover:scale-[1.05]"
         />
       </div>
 
