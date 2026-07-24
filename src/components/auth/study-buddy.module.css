@@ -1,0 +1,64 @@
+/*
+ * The peeking study-buddy. Stateful compound selectors + transforms (hands
+ * cover/lower, eyes dim, head lift) that Tailwind can't express, so they live
+ * here. `cover` / `peek` are toggled on the root by the password field.
+ */
+.head {
+  transition: transform 0.4s cubic-bezier(0.16, 0.7, 0.2, 1);
+}
+
+.eye {
+  transform-origin: center;
+  transition: opacity 0.3s ease;
+}
+
+.pupil {
+  transition: transform 0.35s cubic-bezier(0.16, 0.7, 0.2, 1);
+}
+
+.mouth {
+  transform-origin: 60px 78px;
+  transition: transform 0.3s ease;
+}
+
+.hands {
+  opacity: 0;
+  transform: translateY(52px);
+  transition:
+    transform 0.42s cubic-bezier(0.34, 1.56, 0.64, 1),
+    opacity 0.3s ease;
+}
+
+/* Covering — hands up over the eyes while typing a hidden password. */
+.cover .hands {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.cover .eye {
+  opacity: 0.15;
+}
+
+/* Peeking — hands lowered, eyes up, when the password is revealed. */
+.peek .hands {
+  opacity: 1;
+  transform: translateY(34px);
+}
+
+.peek .pupil {
+  transform: translateY(-2px);
+}
+
+.peek .head {
+  transform: translateY(-3px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .head,
+  .eye,
+  .pupil,
+  .mouth,
+  .hands {
+    transition-duration: 0.01ms;
+  }
+}

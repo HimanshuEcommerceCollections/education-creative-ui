@@ -6,7 +6,13 @@ import type {
 
 import { cn } from "@/lib/utils";
 
-export type ButtonVariant = "primary" | "secondary" | "light" | "ghost" | "gold";
+export type ButtonVariant =
+  | "primary"
+  | "secondary"
+  | "outline"
+  | "light"
+  | "ghost"
+  | "gold";
 
 /** Shared `.btn` styles from the source. */
 const BASE =
@@ -27,6 +33,9 @@ const VARIANTS: Record<ButtonVariant, string> = {
     "hover:tracking-[0.04em] hover:shadow-[0_18px_40px_-12px_rgba(46,58,115,0.42)]",
   secondary:
     "border-[rgba(255,255,255,0.55)] bg-transparent text-white " +
+    "hover:-translate-y-[2px] hover:bg-[rgba(30,28,25,0.05)]",
+  outline:
+    "border-[rgba(30,28,25,0.28)] bg-transparent text-ink " +
     "hover:-translate-y-[2px] hover:bg-[rgba(30,28,25,0.05)]",
   light: "bg-ivory text-ink hover:-translate-y-[2px]",
   ghost:

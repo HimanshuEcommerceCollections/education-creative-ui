@@ -1,0 +1,22 @@
+/* Entrance pop for the confirmation medallion — a keyframe, so it lives in the
+   component's module rather than globals. */
+.checkPop {
+  animation: contactCheckPop 0.55s cubic-bezier(0.16, 0.7, 0.2, 1);
+}
+
+@keyframes contactCheckPop {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .checkPop {
+    animation: none;
+  }
+}

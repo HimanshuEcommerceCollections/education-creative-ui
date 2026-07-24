@@ -1,0 +1,51 @@
+/*
+ * 3D flip credential card. Perspective, preserve-3d, backface-visibility and the
+ * rotateY flip can't be expressed in Tailwind, so they live here. Flips on hover,
+ * focus, or the `.flipped` class (toggled by click / keyboard).
+ */
+.scene {
+  perspective: 1400px;
+}
+
+.card {
+  position: relative;
+  width: 100%;
+  min-height: 260px;
+  transform-style: preserve-3d;
+  transition: transform 0.7s cubic-bezier(0.19, 1, 0.22, 1);
+  cursor: pointer;
+}
+
+.scene:hover .card,
+.scene:focus-within .card,
+.flipped {
+  transform: rotateY(180deg);
+}
+
+.face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  border-radius: 22px;
+  border: 1px solid var(--color-line);
+  padding: 32px;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.front {
+  background: linear-gradient(160deg, #ffffff, var(--sand));
+}
+
+.back {
+  background: linear-gradient(160deg, #14161d, #1f2350);
+  color: rgba(244, 241, 234, 0.92);
+  transform: rotateY(180deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    transition: none;
+  }
+}

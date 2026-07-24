@@ -1,0 +1,17 @@
+/* Falling confetti pieces — a keyframe, so scoped to this component. */
+.piece {
+  position: absolute;
+  top: -24px;
+  border-radius: 2px;
+  opacity: 0.95;
+  will-change: transform;
+  animation-name: authConfettiFall;
+  animation-timing-function: cubic-bezier(0.2, 0.6, 0.4, 1);
+  animation-fill-mode: forwards;
+}
+
+@keyframes authConfettiFall {
+  to {
+    transform: translateY(115vh) rotate(760deg);
+  }
+}

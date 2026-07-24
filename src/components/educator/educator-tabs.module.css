@@ -1,0 +1,21 @@
+/* Panel fade used when switching tabs — a keyframe, so it lives in a module. */
+.panel {
+  animation: tabFade 0.4s cubic-bezier(0.16, 0.7, 0.2, 1) both;
+}
+
+@keyframes tabFade {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel {
+    animation: none;
+  }
+}

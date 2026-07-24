@@ -1,0 +1,63 @@
+/*
+ * The hero portrait: a monogram card tilted in 3D that levels out on hover,
+ * with a capability badge that lifts with it. Perspective + 3D transforms and
+ * the hover-linked badge belong in a module, not Tailwind.
+ */
+.wrap {
+  position: relative;
+  perspective: 1200px;
+}
+
+.card {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  border-radius: 26px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow: 0 44px 90px -34px rgba(0, 0, 0, 0.65);
+  transform: rotateY(-8deg) rotateX(4deg);
+  transition: transform 0.9s cubic-bezier(0.19, 1, 0.22, 1);
+  will-change: transform;
+}
+
+.wrap:hover .card,
+.wrap:focus-within .card {
+  transform: rotateY(0deg) rotateX(0deg) translateY(-4px);
+}
+
+.badge {
+  position: absolute;
+  top: -18px;
+  right: -18px;
+  z-index: 4;
+  display: flex;
+  height: 66px;
+  width: 66px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 3px solid var(--ivory);
+  background: var(--gold);
+  color: #1a1508;
+  box-shadow: 0 16px 34px -12px rgba(210, 162, 65, 0.6), 0 4px 12px rgba(0, 0, 0, 0.28);
+  transition: transform 0.5s cubic-bezier(0.16, 0.7, 0.2, 1);
+}
+
+.wrap:hover .badge,
+.wrap:focus-within .badge {
+  transform: scale(1.08) rotate(-6deg);
+}
+
+.badge svg {
+  height: 32px;
+  width: 32px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .badge {
+    transition: none;
+    transform: none;
+  }
+}

@@ -1,0 +1,59 @@
+/* 3D perspective + the map panel's gilded grid and pulsing marker rings —
+   perspective/preserve-3d, layered gradients, and keyframes are the pieces
+   Tailwind can't express, so they live here. Everything else stays in Tailwind. */
+
+.infoWrap {
+  perspective: 1000px;
+}
+
+.infoCard {
+  transform-style: preserve-3d;
+}
+
+.mapGrid {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+  background-size: 34px 34px;
+}
+
+.mapGrid::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(118deg, rgba(210, 162, 65, 0.16), rgba(210, 162, 65, 0) 44%),
+    linear-gradient(300deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0) 40%);
+}
+
+.ring {
+  animation: contactPulseRing 2.6s ease-out infinite;
+}
+
+.ring2 {
+  animation-delay: 1.3s;
+}
+
+@keyframes contactPulseRing {
+  0% {
+    transform: translate(-50%, -50%) scale(0.4);
+    opacity: 0.85;
+  }
+  70% {
+    opacity: 0;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(3.4);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ring {
+    animation: none;
+    opacity: 0.45;
+  }
+  .infoCard {
+    transition: none;
+  }
+}

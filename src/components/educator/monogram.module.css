@@ -1,0 +1,45 @@
+/*
+ * The educator "photo" placeholder — a slate radial field with a soft gold
+ * glow (the source `.ph` monogram, used until real portraits are dropped in).
+ * Advanced gradients + a pseudo-element keep this out of Tailwind. It fills its
+ * parent, so the parent controls size, radius and clipping.
+ */
+.ph {
+  position: relative;
+  display: flex;
+  height: 100%;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: radial-gradient(120% 120% at 30% 20%, #2e3a73 0%, #232c59 55%, #1a2450 100%);
+}
+
+.ph::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(60% 60% at 70% 90%, rgba(210, 162, 65, 0.22), rgba(210, 162, 65, 0) 70%);
+}
+
+.mono {
+  position: relative;
+  z-index: 1;
+  font-family: var(--font-serif);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.slot {
+  position: absolute;
+  z-index: 1;
+  bottom: 12px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+}
