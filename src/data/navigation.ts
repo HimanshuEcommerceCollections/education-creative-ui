@@ -3,16 +3,17 @@ import type { NavGroup, NavLink, SocialLink } from "@/types/navigation";
 /**
  * The site's single primary navigation, shared by every page. Section links are
  * root-relative (`/#id`) so they jump to the matching home-page section from
- * anywhere; `/how-it-works` is a standalone route. This is the canonical set —
- * individual page designs never trim it.
+ * anywhere; `/how-it-works` and `/about` are standalone routes. This is the
+ * canonical set — individual page designs never trim it.
  */
 export const MAIN_NAV: NavLink[] = [
   { label: "Home", href: "/" },
+  { label: "Browse", href: "/browse" },
   { label: "Subjects", href: "/#subjects2" },
   { label: "How It Works", href: "/how-it-works" },
   { label: "For Parents", href: "/#trust" },
   { label: "Educators", href: "/#tutors" },
-  { label: "About", href: "/#faq" },
+  { label: "About", href: "/about" },
   { label: "Contact", href: "/contact" },
 ];
 
@@ -21,7 +22,7 @@ export const FOOTER_NAV: NavGroup[] = [
   {
     title: "Company",
     links: [
-      { label: "About", href: "#" },
+      { label: "About", href: "/about" },
       { label: "Careers", href: "#" },
       { label: "Contact", href: "/contact" },
     ],

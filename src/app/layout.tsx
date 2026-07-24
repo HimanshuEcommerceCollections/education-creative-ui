@@ -2,8 +2,6 @@ import type { Metadata } from "next";
 import { Manrope, Onest } from "next/font/google";
 
 import { GrainOverlay } from "@/components/common/grain-overlay";
-import { Footer } from "@/components/layout/footer";
-import { Header } from "@/components/layout/header";
 import { SITE } from "@/constants/site";
 import { cn } from "@/lib/utils";
 
@@ -37,9 +35,7 @@ export default function RootLayout({
     <html lang="en" className={cn(manrope.variable, onest.variable, "antialiased")}>
       <body>
         <GrainOverlay />
-        <Header />
         {children}
-        <Footer />
       </body>
     </html>
   );

@@ -19,14 +19,15 @@ interface AuthLayoutProps {
 }
 
 /**
- * Split auth card — brand panel beside the form — sitting in normal page flow
- * beneath the shared site header, above the shared footer (both from the root
- * layout). The form panel is the positioning context for its success overlay.
+ * Split auth card — brand panel beside the form — centered in its own full-height
+ * canvas. Auth routes live in the `(auth)` route group, which deliberately omits
+ * the shared site header and footer. The form panel is the positioning context
+ * for its success overlay.
  */
 export function AuthLayout({ crumb, panel, children, reverse }: AuthLayoutProps) {
   return (
     <main>
-      <Section className="relative overflow-hidden bg-[radial-gradient(120%_90%_at_80%_8%,rgba(46,58,115,0.11)_0%,rgba(46,58,115,0)_55%),radial-gradient(90%_80%_at_4%_96%,rgba(210,162,65,0.13),rgba(210,162,65,0)_58%),var(--color-ivory)] pb-[13vh] pt-[172px]">
+      <Section className="relative flex min-h-screen flex-col justify-center overflow-hidden bg-[radial-gradient(120%_90%_at_80%_8%,rgba(46,58,115,0.11)_0%,rgba(46,58,115,0)_55%),radial-gradient(90%_80%_at_4%_96%,rgba(210,162,65,0.13),rgba(210,162,65,0)_58%),var(--color-ivory)] py-[72px]">
         <Reveal>
           <nav
             aria-label="Breadcrumb"
