@@ -18,7 +18,7 @@ function DesktopNavLink({ link, solid }: { link: NavLink; solid: boolean }) {
     <a
       href={link.href}
       className={cn(
-        "relative py-[6px] text-[15px] font-semibold tracking-[0.005em] no-underline transition-opacity duration-[350ms]",
+        "relative whitespace-nowrap py-[6px] text-[15px] font-semibold tracking-[0.005em] no-underline transition-opacity duration-[350ms]",
         "after:absolute after:bottom-0 after:left-0 after:right-full after:h-px after:bg-gold after:transition-[right] after:duration-[400ms] after:ease-[cubic-bezier(0.16,0.7,0.2,1)] hover:after:right-0",
         solid
           ? "text-ink opacity-[0.82] hover:opacity-100"
@@ -78,14 +78,14 @@ export function Header() {
 
         <nav
           aria-label="Primary"
-          className="hidden flex-1 justify-center gap-[38px] min-[1081px]:flex"
+          className="hidden flex-1 justify-center gap-[22px] min-[1240px]:flex min-[1360px]:gap-[32px]"
         >
           {MAIN_NAV.map((link) => (
             <DesktopNavLink key={link.href} link={link} solid={solid} />
           ))}
         </nav>
 
-        <div className="hidden items-center gap-2 min-[1081px]:flex">
+        <div className="hidden items-center gap-2 min-[1240px]:flex">
           <Link
             href={SIGNIN_HREF}
             className={cn(
@@ -117,7 +117,7 @@ export function Header() {
           aria-controls="mobile-menu"
           onClick={() => setMenuOpen((open) => !open)}
           className={cn(
-            "cursor-pointer border-none bg-transparent text-[13px] uppercase tracking-[0.1em] min-[1081px]:hidden",
+            "cursor-pointer border-none bg-transparent text-[13px] uppercase tracking-[0.1em] min-[1240px]:hidden",
             solid ? "text-ink" : "text-[#F6F3EC]",
           )}
         >
@@ -126,7 +126,7 @@ export function Header() {
       </Container>
 
       {menuOpen ? (
-        <nav id="mobile-menu" aria-label="Mobile" className="min-[1081px]:hidden">
+        <nav id="mobile-menu" aria-label="Mobile" className="min-[1240px]:hidden">
           <Container className="flex flex-col gap-1 border-t border-line bg-ivory py-4">
             {MAIN_NAV.map((link) => (
               <a
