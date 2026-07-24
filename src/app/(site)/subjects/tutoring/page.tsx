@@ -27,6 +27,7 @@ export default function TutoringSubjectPage() {
   return (
     <main>
       <SubjectHero
+        name="Academic Tutoring"
         title={
           <>
             Academic Tutoring, for{" "}

@@ -96,7 +96,7 @@ export function LanguagesHero() {
         <Reveal>
           <nav
             aria-label="Breadcrumb"
-            className="mb-[22px] flex gap-2 text-[12.5px] tracking-[0.06em] text-[rgba(246,245,241,0.6)]"
+            className="mb-[22px] flex flex-wrap items-center gap-[10px] text-[12.5px] tracking-[0.06em] text-[rgba(246,245,241,0.6)]"
           >
             <Link href="/" className="no-underline hover:text-[rgba(246,245,241,0.92)]">
               Home
@@ -111,7 +111,7 @@ export function LanguagesHero() {
         </Reveal>
 
         <Reveal delay={1}>
-          <h1 className="mb-[22px] font-serif text-[clamp(38px,4.8vw,60px)] font-extrabold leading-[1.08] text-[#F6F5F1] [text-shadow:0_2px_24px_rgba(0,0,0,0.35)]">
+          <h1 className="mb-[22px] font-serif text-[clamp(38px,5.4vw,64px)] font-extrabold leading-[1.06] text-[#F6F5F1] [text-shadow:0_2px_26px_rgba(0,0,0,0.4)]">
             Languages,
             <br />
             <Highlight tone="gold">spoken from day one.</Highlight>
@@ -119,7 +119,7 @@ export function LanguagesHero() {
         </Reveal>
 
         <Reveal delay={2}>
-          <p className="mb-8 max-w-[460px] text-[17.5px] leading-[1.7] text-[rgba(246,245,241,0.75)]">
+          <p className="mb-8 max-w-[460px] text-[17.5px] leading-[1.7] text-[rgba(246,245,241,0.78)]">
             Spanish, French, and Hindi with educators who teach conversation first — grammar
             sneaks in while you&rsquo;re busy actually talking.
           </p>
@@ -137,7 +137,7 @@ export function LanguagesHero() {
         </Reveal>
 
         <Reveal delay={3}>
-          <p className="mt-6 text-[12.5px] italic text-[rgba(246,245,241,0.55)]">
+          <p className="mt-[18px] text-[12.5px] text-[rgba(246,245,241,0.6)]">
             All ages welcome — for learners under 18, parents handle contact and scheduling.
           </p>
         </Reveal>

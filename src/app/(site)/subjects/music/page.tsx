@@ -23,6 +23,7 @@ export default function MusicSubjectPage() {
   return (
     <main>
       <SubjectHero
+        name="Music"
         title={
           <>
             Music, for <Highlight tone="gold">every note.</Highlight>

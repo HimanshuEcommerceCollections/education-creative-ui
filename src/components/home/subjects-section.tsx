@@ -56,7 +56,7 @@ export function SubjectsSection() {
               category="Six ways to begin"
               title="Find the right educator for every kind of learning."
               cta="Browse all"
-              href={SUBJECTS_TARGET}
+              href="/browse"
             />
           </Reveal>
 
