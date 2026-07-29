@@ -16,10 +16,15 @@ export type ButtonVariant =
   | "ghost"
   | "gold";
 
-/** Shared `.btn` styles from the source. */
+/**
+ * Shared `.btn` styles from the source. Only the border *width* lives here —
+ * each variant sets its own border color, and `cn` doesn't merge conflicting
+ * utilities, so a `border-transparent` here would win over them and flatten the
+ * outlined variants.
+ */
 const BASE =
   "inline-flex min-h-[54px] cursor-pointer items-center justify-center gap-[9px] " +
-  "rounded-[40px] border border-transparent px-8 py-4 font-sans text-[15px] font-semibold " +
+  "rounded-[40px] border px-8 py-4 font-sans text-[15px] font-semibold " +
   "tracking-[0.01em] no-underline transition-[transform,background-color,box-shadow,letter-spacing] " +
   "duration-[450ms] ease-brand motion-reduce:transition-none";
 
@@ -31,7 +36,7 @@ const BASE =
  */
 const VARIANTS: Record<ButtonVariant, string> = {
   primary:
-    "bg-slate text-white hover:-translate-y-[3px] hover:bg-slate-deep " +
+    "border-transparent bg-slate text-white hover:-translate-y-[3px] hover:bg-slate-deep " +
     "hover:tracking-[0.04em] hover:shadow-[0_18px_40px_-12px_rgba(46,58,115,0.42)]",
   secondary:
     "border-[rgba(255,255,255,0.55)] bg-transparent text-white " +
@@ -39,12 +44,12 @@ const VARIANTS: Record<ButtonVariant, string> = {
   outline:
     "border-[rgba(30,28,25,0.28)] bg-transparent text-ink " +
     "hover:-translate-y-[2px] hover:bg-[rgba(30,28,25,0.05)]",
-  light: "bg-ivory text-ink hover:-translate-y-[2px]",
+  light: "border-transparent bg-ivory text-ink hover:-translate-y-[2px]",
   ghost:
     "border-[rgba(255,255,255,0.5)] bg-transparent text-white " +
     "hover:-translate-y-[2px] hover:bg-[rgba(255,255,255,0.12)]",
   gold:
-    "bg-gold text-slate-deep shadow-[0_12px_26px_rgba(210,162,65,0.35)] " +
+    "border-transparent bg-gold text-slate-deep shadow-[0_12px_26px_rgba(210,162,65,0.35)] " +
     "hover:-translate-y-[2px] hover:shadow-[0_16px_32px_rgba(210,162,65,0.45)]",
 };
 
