@@ -22,7 +22,7 @@ export const FOOTER_NAV: NavGroup[] = [
     title: "Company",
     links: [
       { label: "About", href: "/about" },
-      { label: "Careers", href: "#" },
+      { label: "Careers", href: "/careers" },
       { label: "Contact", href: "/contact" },
     ],
   },
@@ -31,14 +31,14 @@ export const FOOTER_NAV: NavGroup[] = [
     links: [
       { label: "Find Tutors", href: "/#subjects2" },
       { label: "Pricing", href: "#" },
-      { label: "FAQ", href: "/how-it-works" },
+      { label: "FAQ", href: "/faq" },
     ],
   },
   {
     title: "Educators",
     links: [
-      { label: "Become a Tutor", href: "/#tutors" },
-      { label: "Requirements", href: "#" },
+      { label: "Become an Educator", href: "/become-a-tutor" },
+      { label: "Requirements", href: "/requirements" },
       { label: "Support", href: "#" },
     ],
   },
