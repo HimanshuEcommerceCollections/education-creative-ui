@@ -1,0 +1,22 @@
+/* Entrance for the "thanks for applying" panel — a keyframe, so it lives in
+   the component's own module rather than globals. */
+.successFade {
+  animation: applySuccessFade 0.5s ease;
+}
+
+@keyframes applySuccessFade {
+  0% {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .successFade {
+    animation: none;
+  }
+}

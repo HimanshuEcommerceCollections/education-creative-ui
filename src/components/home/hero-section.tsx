@@ -50,7 +50,7 @@ export function HeroSection() {
           <Button href="#subjects2" variant="primary">
             Find Tutors
           </Button>
-          <Button href="#tutors" variant="secondary">
+          <Button href="/become-a-tutor" variant="secondary">
             Become an Educator
           </Button>
         </div>
