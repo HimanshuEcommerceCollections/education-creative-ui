@@ -39,7 +39,7 @@ export const FOOTER_NAV: NavGroup[] = [
     links: [
       { label: "Become an Educator", href: "/become-a-tutor" },
       { label: "Requirements", href: "/requirements" },
-      { label: "Support", href: "#" },
+      { label: "Support", href: "/support" },
     ],
   },
   {
