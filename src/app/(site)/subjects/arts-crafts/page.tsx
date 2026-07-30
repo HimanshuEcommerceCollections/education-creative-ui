@@ -2,14 +2,14 @@ import type { Metadata } from "next";
 
 import { ArtsEducatorSpotlight } from "@/components/arts/arts-educator-spotlight";
 import { ArtsHero } from "@/components/arts/arts-hero";
+import { ArtsOffers } from "@/components/arts/arts-offers";
 import { OrigamiFold } from "@/components/arts/origami-fold";
 import { Highlight } from "@/components/common/highlight";
 import { Marquee } from "@/components/common/marquee";
 import { FeatureSplit } from "@/components/subject/feature-split";
-import { OfferSection } from "@/components/subject/offer-section";
 import { SubjectCta } from "@/components/subject/subject-cta";
 import { SubjectStats } from "@/components/subject/subject-stats";
-import { ARTS_MARQUEE, ARTS_OFFERS, ARTS_STATS } from "@/data/arts";
+import { ARTS_MARQUEE, ARTS_STATS } from "@/data/arts";
 
 export const metadata: Metadata = {
   title: "Arts & Crafts",
@@ -26,7 +26,7 @@ export default function ArtsCraftsSubjectPage() {
 
       <OrigamiFold />
 
-      <OfferSection offers={ARTS_OFFERS} />
+      <ArtsOffers />
 
       <FeatureSplit
         image={{
