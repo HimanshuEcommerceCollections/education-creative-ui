@@ -10,8 +10,8 @@ import { cn } from "@/lib/utils";
 const LAST = REVIEW_STEPS.length - 1;
 
 /**
- * Our review process: four numbered cards connected by short rules, over a
- * dark photo-backed band. The final step is gold to mark going live.
+ * Our review process: four numbered cards over a dark photo-backed band. Each
+ * number trails a short rule except the last, which is gold to mark going live.
  */
 export function ReviewSteps() {
   return (
@@ -47,21 +47,23 @@ export function ReviewSteps() {
           {REVIEW_STEPS.map((step, index) => (
             <Reveal key={step.title} delay={(index + 1) as RevealDelay}>
               <div className="relative h-full rounded-[18px] border border-line bg-ivory px-[26px] pb-7 pt-[34px] transition-[transform,box-shadow] duration-[400ms] ease-brand hover:-translate-y-1 hover:shadow-[0_22px_46px_-26px_rgba(46,58,115,0.4)]">
-                <div
-                  className={cn(
-                    "mb-5 flex h-[46px] w-[46px] items-center justify-center rounded-full font-serif text-[19px] font-bold",
-                    index === LAST ? "bg-gold text-[#1a1508]" : "bg-slate text-white",
-                  )}
-                >
-                  {index + 1}
-                </div>
+                <div className="mb-5 flex items-center gap-[10px]">
+                  <div
+                    className={cn(
+                      "flex h-[46px] w-[46px] shrink-0 items-center justify-center rounded-full font-serif text-[19px] font-bold",
+                      index === LAST ? "bg-gold text-[#1a1508]" : "bg-slate text-white",
+                    )}
+                  >
+                    {index + 1}
+                  </div>
 
-                {index < LAST ? (
-                  <span
-                    aria-hidden="true"
-                    className="absolute right-[-13px] top-[56px] h-[2px] w-[26px] bg-[rgba(46,58,115,0.28)] max-[900px]:hidden"
-                  />
-                ) : null}
+                  {index < LAST ? (
+                    <span
+                      aria-hidden="true"
+                      className="h-[2px] w-[26px] bg-[rgba(46,58,115,0.28)]"
+                    />
+                  ) : null}
+                </div>
 
                 <h3 className="mb-2 font-serif text-[18px] font-semibold tracking-[-0.01em]">
                   {step.title}

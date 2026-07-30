@@ -11,7 +11,7 @@ import { Section } from "@/components/common/section";
  */
 export function ContactHero() {
   return (
-    <Section className="relative overflow-hidden bg-[radial-gradient(120%_90%_at_80%_8%,rgba(46,58,115,0.11)_0%,rgba(46,58,115,0)_55%),radial-gradient(90%_80%_at_4%_96%,rgba(210,162,65,0.13),rgba(210,162,65,0)_58%),var(--color-ivory)] pb-[84px] pt-[188px]">
+    <Section className="relative overflow-hidden bg-ivory bg-[radial-gradient(120%_90%_at_80%_8%,rgba(46,58,115,0.11)_0%,rgba(46,58,115,0)_55%),radial-gradient(90%_80%_at_4%_96%,rgba(210,162,65,0.13),rgba(210,162,65,0)_58%)] pb-[84px] pt-[188px]">
       <Reveal>
         <nav
           aria-label="Breadcrumb"

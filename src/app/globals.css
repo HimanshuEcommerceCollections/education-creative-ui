@@ -64,6 +64,12 @@
     color: inherit;
   }
 
+  /* Brand text selection — legible on the ivory pages and the dark bands alike. */
+  ::selection {
+    background: var(--color-slate);
+    color: var(--color-ivory);
+  }
+
   /* Preserve the source's visible focus ring for keyboard users. */
   a:focus-visible,
   button:focus-visible,

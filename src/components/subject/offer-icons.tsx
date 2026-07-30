@@ -71,9 +71,8 @@ function PencilIcon({ className }: IconProps) {
 function BrushIcon({ className }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
-      <path d="M14 4l6 6-7.5 7.5a3 3 0 0 1-2 .9" />
-      <path d="M14 4l-3-1" />
-      <path d="M8.5 13.5C6 15 6 18 4 19c2.5.6 5 .2 6.2-1a3 3 0 0 0-1.7-4.5z" />
+      <path d="M15 4l5 5-8 8-5-5z" />
+      <path d="M8 13l-3 3a2.5 2.5 0 0 0 3.5 3.5l3-3" />
     </svg>
   );
 }
@@ -81,8 +80,8 @@ function BrushIcon({ className }: IconProps) {
 function VaseIcon({ className }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
-      <path d="M9 3h6" />
-      <path d="M9 3c0 2.5 2 3 2 5s-3 2.5-3 6a5 5 0 0 0 8 0c0-3.5-3-4-3-6s2-2.5 2-5" />
+      <path d="M9.5 3h5" />
+      <path d="M9.5 3c0 3-3.5 4.5-3.5 9a6.5 6.5 0 0 0 12 0c0-4.5-3.5-6-3.5-9" />
     </svg>
   );
 }

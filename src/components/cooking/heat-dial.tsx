@@ -204,7 +204,7 @@ export function HeatDial() {
                 key={step}
                 className={cn(
                   styles.dealCard,
-                  "flex flex-col gap-[9px] rounded-[18px] border border-[rgba(22,24,29,0.1)] bg-[linear-gradient(90deg,rgba(210,162,65,0.06),transparent_16%),var(--color-ivory)] p-[26px_30px] shadow-[0_34px_60px_rgba(0,0,0,0.5)] transition-[transform,box-shadow] duration-[400ms] hover:-translate-y-[5px] hover:shadow-[0_44px_74px_rgba(0,0,0,0.6)]",
+                  "flex flex-col gap-[9px] rounded-[18px] border border-[rgba(22,24,29,0.1)] bg-ivory bg-[linear-gradient(90deg,rgba(210,162,65,0.06),transparent_16%)] p-[26px_30px] shadow-[0_34px_60px_rgba(0,0,0,0.5)] transition-[transform,box-shadow] duration-[400ms] hover:-translate-y-[5px] hover:shadow-[0_44px_74px_rgba(0,0,0,0.6)]",
                 )}
               >
                 <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.16em] text-slate">
