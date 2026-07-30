@@ -8,7 +8,7 @@ import type { NavGroup, NavLink, SocialLink } from "@/types/navigation";
  */
 export const MAIN_NAV: NavLink[] = [
   { label: "Home", href: "/" },
-  { label: "Subjects", href: "/#subjects2" },
+  { label: "Services", href: "/services" },
   { label: "How It Works", href: "/how-it-works" },
   { label: "For Parents", href: "/#trust" },
   { label: "Educators", href: "/browse" },
