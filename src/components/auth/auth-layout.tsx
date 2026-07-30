@@ -27,7 +27,7 @@ interface AuthLayoutProps {
 export function AuthLayout({ crumb, panel, children, reverse }: AuthLayoutProps) {
   return (
     <main>
-      <Section className="relative flex min-h-screen flex-col justify-center overflow-hidden bg-[radial-gradient(120%_90%_at_80%_8%,rgba(46,58,115,0.11)_0%,rgba(46,58,115,0)_55%),radial-gradient(90%_80%_at_4%_96%,rgba(210,162,65,0.13),rgba(210,162,65,0)_58%),var(--color-ivory)] py-[72px]">
+      <Section className="relative flex min-h-screen flex-col justify-center overflow-hidden bg-ivory bg-[radial-gradient(120%_90%_at_80%_8%,rgba(46,58,115,0.11)_0%,rgba(46,58,115,0)_55%),radial-gradient(90%_80%_at_4%_96%,rgba(210,162,65,0.13),rgba(210,162,65,0)_58%)] py-[72px]">
         <Reveal>
           <nav
             aria-label="Breadcrumb"
