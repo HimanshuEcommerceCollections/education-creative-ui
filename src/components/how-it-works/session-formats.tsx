@@ -12,6 +12,7 @@ export function SessionFormats() {
     <Section className="bg-sand py-[16vh]">
       <Reveal>
         <SectionHeading
+          className="mb-[76px]"
           eyebrow="How Sessions Run"
           title={
             <>
