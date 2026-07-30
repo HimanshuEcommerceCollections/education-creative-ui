@@ -25,7 +25,7 @@ export function HowItWorksSection() {
 
       <Reveal delay={1}>
         <div className="mt-16 flex justify-center">
-          <Button href="/how-it-works" variant="secondary">
+          <Button href="/how-it-works" variant="outline">
             See the full process
           </Button>
         </div>
