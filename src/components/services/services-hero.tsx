@@ -22,7 +22,7 @@ export function ServicesHero() {
         aria-hidden="true"
         className="pointer-events-none absolute left-1/2 top-[104px] z-0 -translate-x-1/2 select-none whitespace-nowrap font-serif text-[min(24vw,300px)] font-extrabold leading-none tracking-[-0.04em] text-[rgba(46,58,115,0.09)] max-[760px]:top-[130px] max-[760px]:text-[26vw]"
       >
-        SERVICES
+        SUBJECTS
       </div>
 
       <Container className="relative z-[1] max-w-[820px]">
