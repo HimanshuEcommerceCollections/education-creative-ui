@@ -1,0 +1,24 @@
+/* The active pane rises in each time the stepper advances. Only this keyframe
+   needs to live outside Tailwind; the rail, dots, and progress bar are all
+   plain utilities. */
+
+.stepPane {
+  animation: paneUp 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+@keyframes paneUp {
+  0% {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stepPane {
+    animation: none;
+  }
+}

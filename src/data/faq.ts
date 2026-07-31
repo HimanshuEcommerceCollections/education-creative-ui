@@ -112,6 +112,16 @@ export const FAQ_ITEMS: FaqItem[] = [
     ],
   },
   {
+    id: "parent-present-during-sessions",
+    category: "safety",
+    question: "Do I have to be there during sessions?",
+    answer: [
+      "Yes — a parent or guardian stays present or reachable for every session, whether it's in your home or online. Supervision is a core part of how we keep learning safe, and it applies to every subject and format. See our ",
+      { kind: "link", text: "Child Safety", href: "/child-safety" },
+      " page for the full picture.",
+    ],
+  },
+  {
     id: "educator-vetting",
     category: "safety",
     question: "Are educators vetted?",
