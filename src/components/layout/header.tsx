@@ -20,7 +20,6 @@ const SOLID_THRESHOLD = 40;
  * (which would be invisible). Mirrors the source design's `header.onLight`.
  */
 const LIGHT_HERO_ROUTES = new Set([
-  "/services",
   "/contact",
   "/privacy",
   "/terms",
