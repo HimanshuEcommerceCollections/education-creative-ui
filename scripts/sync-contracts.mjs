@@ -32,12 +32,27 @@ async function main() {
   let entries;
   try {
     entries = await readdir(SOURCE, { withFileTypes: true });
-  } catch (error) {
+  } catch {
+    // The API lives in a separate repository, so a fresh clone of this one alone
+    // cannot build. Say so plainly rather than surfacing an ENOENT.
     console.error(
-      `sync-contracts: could not read ${SOURCE}\n` +
-        "Is the sibling server/ directory present?",
+      [
+        "",
+        "sync-contracts: could not read the API contracts.",
+        `  looked in: ${SOURCE}`,
+        "",
+        "  The API is a separate repository and must be cloned as a sibling of",
+        "  this one, because the shared request/response contracts live there:",
+        "",
+        "    <parent>/",
+        "      client/   <- this repo (education-creative-ui)",
+        "      server/   <- git@github.com:HimanshuEcommerceCollections/education-creative.git",
+        "",
+        "  git clone git@github.com:HimanshuEcommerceCollections/education-creative.git server",
+        "",
+      ].join("\n"),
     );
-    throw error;
+    process.exit(1);
   }
 
   const files = entries

@@ -7,11 +7,23 @@ and never learns the API's origin (`docs/ARCHITECTURE.md` §4).
 
 ## Getting started
 
+**The API lives in a separate repository and must be cloned as a sibling of this
+one** — the shared contracts this app imports come from there, so a clone of this
+repo alone will not build.
+
 ```bash
+mkdir "education-creative" && cd "education-creative"
+git clone git@github.com:HimanshuEcommerceCollections/education-creative-ui.git client
+git clone git@github.com:HimanshuEcommerceCollections/education-creative.git   server
+
+cd client
 cp .env.example .env.local     # check API_BASE_URL matches the server's PORT
 npm install
 npm run dev                    # http://localhost:3000
 ```
+
+The directory names matter: `scripts/sync-contracts.mjs` looks for
+`../server/src/contracts` and exits with instructions if it isn't there.
 
 The API has to be running too — see `../server/README.md`.
 
@@ -23,6 +35,11 @@ The API has to be running too — see `../server/README.md`.
 by `scripts/sync-contracts.mjs`, gitignored, and imported as `@contracts/*`. The
 server owns the originals, so request shapes, password rules, role precedence,
 consent copy, and error codes have exactly one definition.
+
+Because that source is in the other repository, the two repos are coupled: a
+contract change in the API is a breaking change here until the sync runs. Land
+API contract edits first, then pull the server repo and re-run
+`npm run contracts:sync` before relying on them.
 
 If you edit a contract during a long-running `npm run dev`, re-run
 `npm run contracts:sync` — the hooks only fire at startup.
