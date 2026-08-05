@@ -15,6 +15,9 @@ const eslintConfig = defineConfig([
     // Standalone Node (CommonJS) asset-extraction scripts, not app source.
     "extract-assets.js",
     "extract-video.js",
+    // Contracts copied verbatim from ../server by scripts/sync-contracts.mjs —
+    // lint the originals, not the generated copies.
+    "src/generated/**",
   ]),
 ]);
 

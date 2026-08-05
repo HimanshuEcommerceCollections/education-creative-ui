@@ -7,11 +7,19 @@ import { cn } from "@/lib/utils";
 
 import styles from "./subject-chips.module.css";
 
+interface SubjectChipsProps {
+  /** Form field name. Emitted once per selected subject. */
+  name?: string;
+}
+
 /**
- * Optional multi-select subject chips on the sign-up form. Selection is
- * self-contained (demo only); the hint reflects how many are picked.
+ * Optional multi-select subject chips on the sign-up form.
+ *
+ * The chips are buttons, which `FormData` ignores, so each selection also renders
+ * a hidden input. Without those the selection stayed a purely visual flourish —
+ * it never left the browser.
  */
-export function SubjectChips() {
+export function SubjectChips({ name = "subjectsOfInterest" }: SubjectChipsProps) {
   const [selected, setSelected] = useState<string[]>([]);
   const [popping, setPopping] = useState<string | null>(null);
 
@@ -53,6 +61,11 @@ export function SubjectChips() {
           );
         })}
       </div>
+
+      {selected.map((subject) => (
+        <input key={subject} type="hidden" name={name} value={subject} />
+      ))}
+
       <p className="mb-4 text-[12px] text-muted">
         {selected.length > 0
           ? `${selected.length} selected — you can change this anytime.`

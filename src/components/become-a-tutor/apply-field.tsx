@@ -20,9 +20,12 @@ export const APPLY_FIELD_ERROR = "border-[#b23b3b] bg-[#fdf3f2]";
 interface FieldRowProps {
   id: string;
   label: string;
-  /** Inline error copy, revealed only while `invalid`. */
-  error: string;
-  invalid: boolean;
+  /**
+   * The message to show, or undefined when valid. Now the server's own copy
+   * rather than a fixed string toggled by a boolean, so a rule change on the API
+   * doesn't leave stale wording here.
+   */
+  error?: string;
   children: ReactNode;
   className?: string;
 }
@@ -32,7 +35,7 @@ interface FieldRowProps {
  * control, and its inline error message. The error keeps a stable id so the
  * control can point at it with `aria-describedby`.
  */
-export function FieldRow({ id, label, error, invalid, children, className }: FieldRowProps) {
+export function FieldRow({ id, label, error, children, className }: FieldRowProps) {
   return (
     <div className={className}>
       <label htmlFor={id} className="mb-2 block text-[13px] font-bold tracking-[0.02em] text-ink">
@@ -41,7 +44,7 @@ export function FieldRow({ id, label, error, invalid, children, className }: Fie
       {children}
       <p
         id={`${id}-error`}
-        hidden={!invalid}
+        hidden={!error}
         className="mt-[7px] text-[12.5px] font-semibold text-[#b23b3b]"
       >
         {error}

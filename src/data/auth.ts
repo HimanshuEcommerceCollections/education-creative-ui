@@ -1,5 +1,3 @@
-import type { SocialIconName } from "@/components/auth/auth-icons";
-
 /** Marketing content for an auth page's dark brand panel. */
 export interface AuthPanel {
   eyebrow: string;
@@ -26,7 +24,7 @@ export const LOGIN_PANEL: AuthPanel = {
     "Every educator reviewed before listing",
     "In-home & online, across six subjects",
   ],
-  footnote: "Demo — no real account is created and no data is stored.",
+  footnote: "Your session is private to this device. Sign out anytime.",
   image: "/assets/tutoring/images/feature-study-session.jpg",
   imageAlt: "Students learning together",
 };
@@ -42,7 +40,7 @@ export const SIGNUP_PANEL: AuthPanel = {
     "A parent stays in control of every booking",
     "Six subjects, all vetted educators",
   ],
-  footnote: "Demo — no real account is created and no data is stored.",
+  footnote: "We never create a login for a child, and we never sell your data.",
   image: "/assets/home/images/step-booking-lesson.jpg",
   imageAlt: "A parent and child learning together",
 };
@@ -57,17 +55,13 @@ export const SUBJECT_CHIPS = [
   "Cooking",
 ] as const;
 
-/** One "continue with" social provider on the sign-in form. */
-export interface SocialProvider {
-  label: string;
-  icon: SocialIconName;
-}
-
-export const SOCIAL_PROVIDERS: SocialProvider[] = [
-  { label: "Google", icon: "google" },
-  { label: "Facebook", icon: "facebook" },
-];
-
-/** Guardian consent copy on the sign-up form. */
-export const SIGNUP_CONSENT =
-  "I'm a parent or guardian creating this account for my family, and I'll book and supervise every session.";
+/*
+ * Removed from here deliberately:
+ *
+ * - `SOCIAL_PROVIDERS` — the sign-in form now lists only Google (disabled until
+ *   OAuth ships). Facebook is deferred past launch, so the provider list lives
+ *   next to the code that acts on that decision.
+ * - `SIGNUP_CONSENT` — the consent wording is now `CURRENT_SIGNUP_CONSENT_TEXT`
+ *   in the shared contracts. The API hashes its own copy into every consent
+ *   record, so the text shown and the text recorded cannot drift apart.
+ */

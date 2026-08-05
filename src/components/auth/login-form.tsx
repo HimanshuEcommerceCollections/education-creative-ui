@@ -1,59 +1,65 @@
 "use client";
 
 import Link from "next/link";
-import { useRef, useState, type FormEvent } from "react";
+import { useRouter } from "next/navigation";
+import { useActionState, useEffect, useRef, useState } from "react";
 
-import { Button } from "@/components/ui/button";
-import { SOCIAL_PROVIDERS } from "@/data/auth";
+import { loginAction } from "@/app/(auth)/actions";
+import { IDLE, fieldError, formMessage } from "@/lib/auth/form-state";
 
 import { SOCIAL_ICONS } from "./auth-icons";
 import { AuthSuccess } from "./auth-success";
-import { Confetti, createConfettiPieces, type ConfettiPiece } from "./confetti";
+import { Confetti } from "./confetti";
+import { FormAlert } from "./form-alert";
 import { PasswordField } from "./password-field";
 import { StudyBuddy, type BuddyState } from "./study-buddy";
+import { SubmitButton } from "./submit-button";
 import { TextField } from "./text-field";
 
-const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+/** How long the confirmation panel shows before navigating. */
+const SUCCESS_DWELL_MS = 1400;
 
-interface Errors {
-  email?: boolean;
-  password?: boolean;
-}
-
-/** Sign-in form panel: fields, social options, and the demo success state. */
+/** Sign-in form panel — one entry point for parents, educators, and staff. */
 export function LoginForm() {
+  const router = useRouter();
+  const [state, formAction] = useActionState(loginAction, IDLE);
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [remember, setRemember] = useState(false);
-  const [errors, setErrors] = useState<Errors>({});
-  const [submitted, setSubmitted] = useState(false);
-  const [confetti, setConfetti] = useState<ConfettiPiece[]>([]);
 
   const [pwFocused, setPwFocused] = useState(false);
   const [pwVisible, setPwVisible] = useState(false);
   const buddy: BuddyState = pwFocused ? (pwVisible ? "peek" : "cover") : "idle";
 
-  const formRef = useRef<HTMLFormElement>(null);
   const emailRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
 
-  function handleSubmit(event: FormEvent) {
-    event.preventDefault();
-    const next: Errors = {
-      email: !EMAIL_RE.test(email.trim()),
-      password: password.length < 1,
-    };
-    setErrors(next);
-    if (next.email) return emailRef.current?.focus();
-    if (next.password) return passwordRef.current?.focus();
-    setSubmitted(true);
-    setConfetti(createConfettiPieces());
-  }
+  const succeeded = state.status === "success";
 
-  function reset() {
-    setSubmitted(false);
-    setConfetti([]);
-  }
+  /**
+   * Celebrate, then go where the **server** said to. `redirectTo` is derived from
+   * the session's role — customers to the homepage, educators and staff to their
+   * dashboards, and a staff account short of its second factor to the TOTP step.
+   * Nothing here inspects a role to make that choice.
+   */
+  useEffect(() => {
+    if (state.status !== "success") return;
+
+    const timer = setTimeout(() => router.replace(state.redirectTo), SUCCESS_DWELL_MS);
+    return () => clearTimeout(timer);
+  }, [state, router]);
+
+  /** Put the cursor on whichever field the server complained about. */
+  useEffect(() => {
+    if (state.status !== "error") return;
+    if (state.fieldErrors?.email) emailRef.current?.focus();
+    else if (state.fieldErrors?.password) passwordRef.current?.focus();
+  }, [state]);
+
+  const emailError = fieldError(state, "email");
+  const passwordError = fieldError(state, "password");
+  // Field-level messages render under their input; only surface the rest here.
+  const alert = emailError || passwordError ? undefined : formMessage(state);
 
   return (
     <>
@@ -64,10 +70,12 @@ export function LoginForm() {
           Sign in
         </h1>
         <p className="mb-[30px] mt-2 text-center text-[13.5px] text-muted">
-          <b className="font-bold text-slate">Parent &amp; guardian accounts only.</b>
+          Parents, educators, and staff all sign in here.
         </p>
 
-        <form ref={formRef} onSubmit={handleSubmit} noValidate>
+        <FormAlert message={alert} />
+
+        <form action={formAction} noValidate>
           <TextField
             id="email"
             label="Email"
@@ -76,7 +84,7 @@ export function LoginForm() {
             autoComplete="email"
             value={email}
             onChange={setEmail}
-            error={errors.email}
+            error={emailError}
             inputRef={emailRef}
           />
           <PasswordField
@@ -86,7 +94,7 @@ export function LoginForm() {
             autoComplete="current-password"
             value={password}
             onChange={setPassword}
-            error={errors.password}
+            error={passwordError}
             inputRef={passwordRef}
             onFocusChange={setPwFocused}
             onVisibleChange={setPwVisible}
@@ -96,24 +104,20 @@ export function LoginForm() {
             <label className="flex cursor-pointer select-none items-center gap-2 text-muted">
               <input
                 type="checkbox"
-                checked={remember}
-                onChange={(event) => setRemember(event.target.checked)}
+                name="rememberMe"
                 className="h-4 w-4 accent-slate"
               />
               Remember me
             </label>
-            <a
-              href="#"
-              onClick={(event) => event.preventDefault()}
+            <Link
+              href="/forgot-password"
               className="font-semibold text-slate transition-colors hover:text-gold"
             >
               Forgot password?
-            </a>
+            </Link>
           </div>
 
-          <Button type="submit" variant="primary" className="w-full">
-            Sign in
-          </Button>
+          <SubmitButton pendingLabel="Signing in…">Sign in</SubmitButton>
         </form>
 
         <div className="my-6 flex items-center gap-[14px] text-[12px] text-muted">
@@ -122,18 +126,26 @@ export function LoginForm() {
           <span className="h-px flex-1 bg-line" />
         </div>
 
+        {/*
+          Google sign-in is a fast-follow, not wired yet — rendered disabled
+          rather than hidden so the option is visibly coming. Facebook is
+          deliberately absent: its app review is heavy for a child-adjacent
+          product, so it's deferred past launch.
+        */}
         <div className="flex gap-3">
-          {SOCIAL_PROVIDERS.map((provider) => {
+          {SOCIAL_PROVIDERS_AT_LAUNCH.map((provider) => {
             const Icon = SOCIAL_ICONS[provider.icon];
             return (
               <button
                 key={provider.label}
                 type="button"
-                onClick={() => formRef.current?.requestSubmit()}
-                className="flex flex-1 items-center justify-center gap-2 rounded-[12px] border-[1.5px] border-line bg-white py-3 text-[13.5px] font-semibold text-ink transition-[transform,background-color,border-color] duration-200 hover:-translate-y-[2px] hover:border-[rgba(var(--slate-rgb),0.4)] hover:bg-[rgba(var(--slate-rgb),0.04)]"
+                disabled
+                title="Coming soon"
+                className="flex flex-1 cursor-not-allowed items-center justify-center gap-2 rounded-[12px] border-[1.5px] border-line bg-white py-3 text-[13.5px] font-semibold text-muted opacity-60"
               >
                 <Icon className="h-[17px] w-[17px]" />
                 {provider.label}
+                <span className="text-[11px] font-medium">(soon)</span>
               </button>
             );
           })}
@@ -148,13 +160,17 @@ export function LoginForm() {
       </div>
 
       <AuthSuccess
-        show={submitted}
+        show={succeeded}
         title="You&rsquo;re signed in!"
-        message="This is a demo, so nothing was actually submitted — but that's exactly how it would feel."
-        againLabel="Back to sign in"
-        onAgain={reset}
+        message="Taking you where you need to be…"
       />
-      <Confetti pieces={confetti} />
+      <Confetti show={succeeded} />
     </>
   );
 }
+
+/**
+ * Only Google at launch (§4). Kept local rather than in `data/auth.ts` so the
+ * deferred-Facebook decision lives next to the code that acts on it.
+ */
+const SOCIAL_PROVIDERS_AT_LAUNCH = [{ label: "Google", icon: "google" }] as const;

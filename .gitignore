@@ -17,6 +17,10 @@
 /.next/
 /out/
 
+# contracts copied from ../server by scripts/sync-contracts.mjs — the originals
+# are the source of truth, these are rebuilt by predev/prebuild
+/src/generated/
+
 # production
 /build
 
@@ -30,8 +34,10 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
+# env files — real values never get committed, but the template must be, so a
+# fresh clone can see which variables the app needs.
 .env*
+!.env.example
 
 # vercel
 .vercel

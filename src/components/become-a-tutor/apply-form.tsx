@@ -1,26 +1,32 @@
 "use client";
 
-import { useRef, useState, type FormEvent } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
+import { useFormStatus } from "react-dom";
 
+import { submitApplicationAction } from "@/app/(auth)/actions";
 import { Button } from "@/components/ui/button";
 import { APPLY_EXPERIENCE, APPLY_SUBJECTS } from "@/data/become-a-tutor";
+import { IDLE, fieldError, formMessage } from "@/lib/auth/form-state";
 import { cn } from "@/lib/utils";
 
 import { APPLY_FIELD, APPLY_FIELD_ERROR, APPLY_FIELD_REST, FieldRow } from "./apply-field";
 import styles from "./apply-form.module.css";
 import { CheckIcon, ChevronDownIcon } from "./become-icons";
 
-const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
-
 const CARD =
   "rounded-[22px] border border-line bg-white px-10 pb-9 pt-10 " +
   "shadow-[0_34px_70px_-44px_rgba(35,40,70,0.4)] max-[560px]:px-6 max-[560px]:py-[30px]";
 
-type FieldName = "name" | "email" | "subject" | "years" | "about";
+/** Input names, which are also the contract's field names where they match. */
+type FieldName = "applicantName" | "email" | "subject" | "yearsExperience" | "about";
 
-type Errors = Partial<Record<FieldName, boolean>>;
-
-const EMPTY = { name: "", email: "", subject: "", years: "", about: "" };
+const EMPTY: Record<FieldName, string> = {
+  applicantName: "",
+  email: "",
+  subject: "",
+  yearsExperience: "",
+  about: "",
+};
 
 /** Chevron indicator for the native selects, which render `appearance-none`. */
 function SelectChevron() {
@@ -33,13 +39,16 @@ function SelectChevron() {
 
 /**
  * The educator application: name, email, subject, experience, and a short
- * introduction, with inline validation and a confirmation panel. This is a demo
- * — submitting stores and sends nothing, it just swaps in the confirmation.
+ * introduction.
+ *
+ * Submitting creates **no account** — that's the point of the flow. A coordinator
+ * reviews the application, and only an approval creates a user and emails an
+ * invite to set a password. Until then the applicant has nothing to sign in with
+ * and hears back by email.
  */
 export function ApplyForm() {
+  const [state, formAction] = useActionState(submitApplicationAction, IDLE);
   const [values, setValues] = useState(EMPTY);
-  const [errors, setErrors] = useState<Errors>({});
-  const [submitted, setSubmitted] = useState(false);
 
   const nameRef = useRef<HTMLInputElement>(null);
   const emailRef = useRef<HTMLInputElement>(null);
@@ -47,37 +56,28 @@ export function ApplyForm() {
   const yearsRef = useRef<HTMLSelectElement>(null);
   const aboutRef = useRef<HTMLTextAreaElement>(null);
 
-  /** Update one field and clear its error, matching the source's live clearing. */
   const change = (field: FieldName) => (value: string) => {
     setValues((prev) => ({ ...prev, [field]: value }));
-    setErrors((prev) => (prev[field] ? { ...prev, [field]: false } : prev));
   };
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const next: Errors = {
-      name: !values.name.trim(),
-      email: !EMAIL_RE.test(values.email.trim()),
-      subject: !values.subject,
-      years: !values.years,
-      about: !values.about.trim(),
-    };
-    setErrors(next);
+  const errors = {
+    applicantName: fieldError(state, "applicantName"),
+    email: fieldError(state, "email"),
+    subject: fieldError(state, "subject"),
+    yearsExperience: fieldError(state, "yearsExperience"),
+    about: fieldError(state, "about"),
+  } satisfies Record<FieldName, string | undefined>;
 
-    if (next.name) return nameRef.current?.focus();
-    if (next.email) return emailRef.current?.focus();
-    if (next.subject) return subjectRef.current?.focus();
-    if (next.years) return yearsRef.current?.focus();
-    if (next.about) return aboutRef.current?.focus();
-
-    setSubmitted(true);
-  };
-
-  const reset = () => {
-    setValues(EMPTY);
-    setErrors({});
-    setSubmitted(false);
-  };
+  /** Focus the first field the server rejected, in visual order. */
+  useEffect(() => {
+    if (state.status !== "error") return;
+    if (errors.applicantName) nameRef.current?.focus();
+    else if (errors.email) emailRef.current?.focus();
+    else if (errors.subject) subjectRef.current?.focus();
+    else if (errors.yearsExperience) yearsRef.current?.focus();
+    else if (errors.about) aboutRef.current?.focus();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- keyed on the action result
+  }, [state]);
 
   const fieldClass = (field: FieldName, extra?: string) =>
     cn(APPLY_FIELD, extra, errors[field] ? APPLY_FIELD_ERROR : APPLY_FIELD_REST);
@@ -85,7 +85,7 @@ export function ApplyForm() {
   const describedBy = (field: FieldName, id: string) =>
     errors[field] ? `${id}-error` : undefined;
 
-  if (submitted) {
+  if (state.status === "success") {
     return (
       <div
         role="status"
@@ -99,49 +99,54 @@ export function ApplyForm() {
           Thanks for applying
         </h3>
         <p className="mx-auto max-w-[42ch] text-[15px] leading-[1.65] text-muted">
-          This is a demo, so nothing was actually submitted. On the live site, our team would review
-          your credentials and references before your profile is listed.
+          {state.message ??
+            "We've got your application and we'll be in touch by email."}{" "}
+          Our team reviews your credentials and runs a background check before your
+          profile is listed, so this takes a few days. There&rsquo;s no account to
+          sign in to yet — we&rsquo;ll email you either way.
         </p>
-        <Button type="button" variant="outline" onClick={reset} className="mt-[22px]">
-          Submit another
-        </Button>
       </div>
     );
   }
 
+  const alert = formMessage(state);
+  const hasFieldError = Object.values(errors).some(Boolean);
+
   return (
-    <form onSubmit={handleSubmit} noValidate className={CARD}>
+    <form action={formAction} noValidate className={CARD}>
+      {alert && !hasFieldError ? (
+        <p
+          role="alert"
+          className="mb-5 rounded-[11px] border-[1.5px] border-[rgba(178,59,59,0.35)] bg-[#fdf3f2] px-4 py-3 text-[13.5px] leading-[1.5] text-[#b23b3b]"
+        >
+          {alert}
+        </p>
+      ) : null}
+
       <FieldRow
-        id="apply-name"
+        id="applicantName"
         label="Full name"
-        error="Please enter your name."
-        invalid={Boolean(errors.name)}
+        error={errors.applicantName}
         className="mb-5"
       >
         <input
-          id="apply-name"
+          id="applicantName"
           ref={nameRef}
-          name="name"
+          name="applicantName"
           type="text"
           autoComplete="name"
           placeholder="Your full name"
-          value={values.name}
-          onChange={(event) => change("name")(event.target.value)}
-          aria-invalid={errors.name || undefined}
-          aria-describedby={describedBy("name", "apply-name")}
-          className={fieldClass("name")}
+          value={values.applicantName}
+          onChange={(event) => change("applicantName")(event.target.value)}
+          aria-invalid={errors.applicantName ? true : undefined}
+          aria-describedby={describedBy("applicantName", "applicantName")}
+          className={fieldClass("applicantName")}
         />
       </FieldRow>
 
-      <FieldRow
-        id="apply-email"
-        label="Email"
-        error="Please enter a valid email address."
-        invalid={Boolean(errors.email)}
-        className="mb-5"
-      >
+      <FieldRow id="email" label="Email" error={errors.email} className="mb-5">
         <input
-          id="apply-email"
+          id="email"
           ref={emailRef}
           name="email"
           type="email"
@@ -149,28 +154,23 @@ export function ApplyForm() {
           placeholder="you@example.com"
           value={values.email}
           onChange={(event) => change("email")(event.target.value)}
-          aria-invalid={errors.email || undefined}
-          aria-describedby={describedBy("email", "apply-email")}
+          aria-invalid={errors.email ? true : undefined}
+          aria-describedby={describedBy("email", "email")}
           className={fieldClass("email")}
         />
       </FieldRow>
 
       <div className="mb-5 grid grid-cols-2 gap-[18px] max-[560px]:grid-cols-1 max-[560px]:gap-5">
-        <FieldRow
-          id="apply-subject"
-          label="Subject you teach"
-          error="Please choose a subject."
-          invalid={Boolean(errors.subject)}
-        >
+        <FieldRow id="subject" label="Subject you teach" error={errors.subject}>
           <div className="relative">
             <select
-              id="apply-subject"
+              id="subject"
               ref={subjectRef}
               name="subject"
               value={values.subject}
               onChange={(event) => change("subject")(event.target.value)}
-              aria-invalid={errors.subject || undefined}
-              aria-describedby={describedBy("subject", "apply-subject")}
+              aria-invalid={errors.subject ? true : undefined}
+              aria-describedby={describedBy("subject", "subject")}
               className={fieldClass("subject", "appearance-none pr-[42px]")}
             >
               <option value="">Select a subject</option>
@@ -185,21 +185,20 @@ export function ApplyForm() {
         </FieldRow>
 
         <FieldRow
-          id="apply-years"
+          id="yearsExperience"
           label="Years of experience"
-          error="Please select your experience."
-          invalid={Boolean(errors.years)}
+          error={errors.yearsExperience}
         >
           <div className="relative">
             <select
-              id="apply-years"
+              id="yearsExperience"
               ref={yearsRef}
-              name="years"
-              value={values.years}
-              onChange={(event) => change("years")(event.target.value)}
-              aria-invalid={errors.years || undefined}
-              aria-describedby={describedBy("years", "apply-years")}
-              className={fieldClass("years", "appearance-none pr-[42px]")}
+              name="yearsExperience"
+              value={values.yearsExperience}
+              onChange={(event) => change("yearsExperience")(event.target.value)}
+              aria-invalid={errors.yearsExperience ? true : undefined}
+              aria-describedby={describedBy("yearsExperience", "yearsExperience")}
+              className={fieldClass("yearsExperience", "appearance-none pr-[42px]")}
             >
               <option value="">Select</option>
               {APPLY_EXPERIENCE.map((option) => (
@@ -213,34 +212,47 @@ export function ApplyForm() {
         </FieldRow>
       </div>
 
-      <FieldRow
-        id="apply-about"
-        label="About you"
-        error="Please tell us a little about yourself."
-        invalid={Boolean(errors.about)}
-        className="mb-5"
-      >
+      <FieldRow id="about" label="About you" error={errors.about} className="mb-5">
         <textarea
-          id="apply-about"
+          id="about"
           ref={aboutRef}
           name="about"
           placeholder="A few sentences about your background, how you like to teach, and the learners you work with best."
           value={values.about}
           onChange={(event) => change("about")(event.target.value)}
-          aria-invalid={errors.about || undefined}
-          aria-describedby={describedBy("about", "apply-about")}
+          aria-invalid={errors.about ? true : undefined}
+          aria-describedby={describedBy("about", "about")}
           className={fieldClass("about", "min-h-[120px] resize-y leading-[1.55]")}
         />
       </FieldRow>
 
-      <Button type="submit" variant="primary" className="mt-2">
-        Submit Application
-      </Button>
+      <ApplySubmitButton />
 
       <p className="mt-4 text-[12.5px] leading-[1.55] text-muted">
-        Every educator&rsquo;s credentials are reviewed before their profile is listed. This is a
-        demo form &mdash; no data is stored or transmitted.
+        Every educator&rsquo;s credentials are reviewed and a background check is run
+        before their profile is listed. Applying doesn&rsquo;t create an account —
+        we&rsquo;ll email you an invite if you&rsquo;re approved.
       </p>
     </form>
+  );
+}
+
+/**
+ * A separate component because `useFormStatus` reports the pending state of the
+ * form *above* it — calling it inside `ApplyForm` itself would always read false.
+ */
+function ApplySubmitButton() {
+  const { pending } = useFormStatus();
+
+  return (
+    <Button
+      type="submit"
+      variant="primary"
+      disabled={pending}
+      aria-busy={pending}
+      className="mt-2 disabled:cursor-wait disabled:opacity-70 disabled:hover:translate-y-0 disabled:hover:tracking-[0.01em] disabled:hover:shadow-none"
+    >
+      {pending ? "Sending…" : "Submit Application"}
+    </Button>
   );
 }

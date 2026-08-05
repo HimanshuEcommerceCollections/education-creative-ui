@@ -9,12 +9,16 @@ interface AuthSuccessProps {
   show: boolean;
   title: string;
   message: string;
-  againLabel: string;
-  onAgain: () => void;
+  /**
+   * Optional reset affordance. Omitted by the sign-in and sign-up flows, which
+   * navigate away on success — there's nothing to go back to.
+   */
+  againLabel?: string;
+  onAgain?: () => void;
 }
 
 /**
- * Confirmation overlay that fills the form panel after a (demo) submit,
+ * Confirmation overlay that fills the form panel after a successful submit,
  * fading and scaling in over the form beneath it.
  */
 export function AuthSuccess({ show, title, message, againLabel, onAgain }: AuthSuccessProps) {
@@ -37,13 +41,15 @@ export function AuthSuccess({ show, title, message, againLabel, onAgain }: AuthS
       </div>
       <h2 className="font-serif text-[26px] font-semibold tracking-[-0.01em]">{title}</h2>
       <p className="mt-[10px] max-w-[340px] text-[14.5px] leading-[1.6] text-muted">{message}</p>
-      <button
-        type="button"
-        onClick={onAgain}
-        className="mt-6 rounded-[30px] border-[1.5px] border-line px-[22px] py-[11px] text-[13.5px] font-semibold text-ink transition-colors hover:border-slate hover:bg-[rgba(var(--slate-rgb),0.05)]"
-      >
-        {againLabel}
-      </button>
+      {againLabel && onAgain ? (
+        <button
+          type="button"
+          onClick={onAgain}
+          className="mt-6 rounded-[30px] border-[1.5px] border-line px-[22px] py-[11px] text-[13.5px] font-semibold text-ink transition-colors hover:border-slate hover:bg-[rgba(var(--slate-rgb),0.05)]"
+        >
+          {againLabel}
+        </button>
+      ) : null}
     </div>
   );
 }

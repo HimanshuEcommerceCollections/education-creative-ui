@@ -16,3 +16,6 @@ export const FIELD_ERROR =
   "border-[#c2483c] shadow-[0_0_0_4px_rgba(194,72,60,0.12)]";
 
 export const FIELD_WRAP = "mb-4";
+
+/** Inline validation message shown under an invalid input. */
+export const FIELD_MESSAGE = "mt-[6px] text-[12.5px] leading-[1.45] text-[#c2483c]";

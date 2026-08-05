@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { Container } from "@/components/common/container";
 import { BOOK_HREF, SIGNIN_HREF, SITE } from "@/constants/site";
 import { MAIN_NAV } from "@/data/navigation";
+import { accountHref, useSessionSummary } from "@/hooks/use-session-summary";
 import { cn } from "@/lib/utils";
 import type { NavLink } from "@/types/navigation";
 
@@ -58,6 +59,12 @@ export function Header() {
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  /**
+   * Undefined until the probe returns, which renders as signed-out. Fetched
+   * rather than read server-side so the marketing pages under `(site)` stay
+   * statically rendered — `cookies()` in the layout would deopt all of them.
+   */
+  const session = useSessionSummary();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > SOLID_THRESHOLD);
@@ -121,7 +128,7 @@ export function Header() {
 
         <div className="hidden items-center gap-2 min-[1240px]:flex">
           <Link
-            href={SIGNIN_HREF}
+            href={session?.signedIn ? accountHref(session) : SIGNIN_HREF}
             className={cn(
               "whitespace-nowrap rounded-[40px] px-[18px] py-3 text-[14px] font-semibold tracking-[0.01em] no-underline transition-[background-color,color] duration-[400ms] ease-brand",
               darkText
@@ -129,7 +136,7 @@ export function Header() {
                 : "text-[#F6F3EC] [text-shadow:0_1px_8px_rgba(0,0,0,0.4)] hover:bg-white/10",
             )}
           >
-            Sign in
+            {session?.signedIn ? session.firstName || "My account" : "Sign in"}
           </Link>
 
           <Link
@@ -173,11 +180,11 @@ export function Header() {
               </Link>
             ))}
             <Link
-              href={SIGNIN_HREF}
+              href={session?.signedIn ? accountHref(session) : SIGNIN_HREF}
               onClick={() => setMenuOpen(false)}
               className="py-2 text-[15px] font-semibold text-ink no-underline"
             >
-              Sign in
+              {session?.signedIn ? "My account" : "Sign in"}
             </Link>
             <Link
               href={BOOK_HREF}
