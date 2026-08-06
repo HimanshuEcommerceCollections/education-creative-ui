@@ -5,7 +5,13 @@ import { useState, type RefObject } from "react";
 import { cn } from "@/lib/utils";
 
 import { EyeIcon, EyeOffIcon } from "./auth-icons";
-import { FIELD_BASE, FIELD_ERROR, FIELD_LABEL, FIELD_WRAP } from "./field-styles";
+import {
+  FIELD_BASE,
+  FIELD_ERROR,
+  FIELD_LABEL,
+  FIELD_MESSAGE,
+  FIELD_WRAP,
+} from "./field-styles";
 
 interface PasswordFieldProps {
   id: string;
@@ -14,7 +20,12 @@ interface PasswordFieldProps {
   onChange: (value: string) => void;
   placeholder?: string;
   autoComplete?: string;
-  error?: boolean;
+  /** Message to show, or undefined when valid. */
+  error?: string;
+  /** Hint rendered under the input when there's no error to show. */
+  hint?: string;
+  /** Defaults to `id`. Set when the API's field name differs from the input's. */
+  name?: string;
   /** Parent-owned ref; also used to restore focus after toggling visibility. */
   inputRef: RefObject<HTMLInputElement | null>;
   /** Notify the study-buddy of focus and reveal state. */
@@ -31,11 +42,15 @@ export function PasswordField({
   placeholder,
   autoComplete,
   error,
+  hint,
+  name,
   inputRef,
   onFocusChange,
   onVisibleChange,
 }: PasswordFieldProps) {
   const [visible, setVisible] = useState(false);
+  const messageId = `${id}-error`;
+  const hintId = `${id}-hint`;
 
   function toggle() {
     const next = !visible;
@@ -53,7 +68,7 @@ export function PasswordField({
         <input
           ref={inputRef}
           id={id}
-          name={id}
+          name={name ?? id}
           type={visible ? "text" : "password"}
           value={value}
           onChange={(event) => onChange(event.target.value)}
@@ -61,6 +76,8 @@ export function PasswordField({
           onBlur={() => onFocusChange?.(false)}
           placeholder={placeholder}
           autoComplete={autoComplete}
+          aria-invalid={error ? true : undefined}
+          aria-describedby={error ? messageId : hint ? hintId : undefined}
           className={cn(FIELD_BASE, "pr-12", error && FIELD_ERROR)}
         />
         <button
@@ -76,6 +93,15 @@ export function PasswordField({
           )}
         </button>
       </div>
+      {error ? (
+        <p id={messageId} className={FIELD_MESSAGE}>
+          {error}
+        </p>
+      ) : hint ? (
+        <p id={hintId} className="mt-[6px] text-[12.5px] leading-[1.45] text-muted">
+          {hint}
+        </p>
+      ) : null}
     </div>
   );
 }

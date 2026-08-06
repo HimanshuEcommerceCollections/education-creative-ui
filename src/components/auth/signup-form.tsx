@@ -1,37 +1,35 @@
 "use client";
 
 import Link from "next/link";
-import { useRef, useState, type FormEvent } from "react";
+import { useRouter } from "next/navigation";
+import { useActionState, useEffect, useRef, useState } from "react";
 
-import { Button } from "@/components/ui/button";
-import { SIGNUP_CONSENT } from "@/data/auth";
+import { PASSWORD_MIN_LENGTH } from "@contracts/auth.ts";
+import { CURRENT_SIGNUP_CONSENT_TEXT } from "@contracts/consent.ts";
+
+import { signupAction } from "@/app/(auth)/actions";
+import { IDLE, fieldError, formMessage } from "@/lib/auth/form-state";
 import { cn } from "@/lib/utils";
 
 import { AuthSuccess } from "./auth-success";
-import { Confetti, createConfettiPieces, type ConfettiPiece } from "./confetti";
+import { Confetti } from "./confetti";
+import { FormAlert } from "./form-alert";
 import { PasswordField } from "./password-field";
 import { StudyBuddy, type BuddyState } from "./study-buddy";
 import { SubjectChips } from "./subject-chips";
+import { SubmitButton } from "./submit-button";
 import { TextField } from "./text-field";
 
-const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
-
-interface Errors {
-  name?: boolean;
-  email?: boolean;
-  password?: boolean;
-  consent?: boolean;
-}
+const SUCCESS_DWELL_MS = 1800;
 
 /** Create-account form panel: details, optional subjects, guardian consent. */
 export function SignupForm() {
-  const [name, setName] = useState("");
+  const router = useRouter();
+  const [state, formAction] = useActionState(signupAction, IDLE);
+
+  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [consent, setConsent] = useState(false);
-  const [errors, setErrors] = useState<Errors>({});
-  const [submitted, setSubmitted] = useState(false);
-  const [confetti, setConfetti] = useState<ConfettiPiece[]>([]);
 
   const [pwFocused, setPwFocused] = useState(false);
   const [pwVisible, setPwVisible] = useState(false);
@@ -42,27 +40,30 @@ export function SignupForm() {
   const passwordRef = useRef<HTMLInputElement>(null);
   const consentRef = useRef<HTMLInputElement>(null);
 
-  function handleSubmit(event: FormEvent) {
-    event.preventDefault();
-    const next: Errors = {
-      name: name.trim().length < 2,
-      email: !EMAIL_RE.test(email.trim()),
-      password: password.length < 6,
-      consent: !consent,
-    };
-    setErrors(next);
-    if (next.name) return nameRef.current?.focus();
-    if (next.email) return emailRef.current?.focus();
-    if (next.password) return passwordRef.current?.focus();
-    if (next.consent) return consentRef.current?.focus();
-    setSubmitted(true);
-    setConfetti(createConfettiPieces());
-  }
+  const succeeded = state.status === "success";
 
-  function reset() {
-    setSubmitted(false);
-    setConfetti([]);
-  }
+  useEffect(() => {
+    if (state.status !== "success") return;
+
+    const timer = setTimeout(() => router.replace(state.redirectTo), SUCCESS_DWELL_MS);
+    return () => clearTimeout(timer);
+  }, [state, router]);
+
+  useEffect(() => {
+    if (state.status !== "error") return;
+    const errors = state.fieldErrors;
+    if (errors?.fullName) nameRef.current?.focus();
+    else if (errors?.email) emailRef.current?.focus();
+    else if (errors?.password) passwordRef.current?.focus();
+    else if (errors?.consentGiven) consentRef.current?.focus();
+  }, [state]);
+
+  const nameError = fieldError(state, "fullName");
+  const emailError = fieldError(state, "email");
+  const passwordError = fieldError(state, "password");
+  const consentError = fieldError(state, "consentGiven");
+  const hasFieldError = Boolean(nameError || emailError || passwordError || consentError);
+  const alert = hasFieldError ? undefined : formMessage(state);
 
   return (
     <>
@@ -76,15 +77,17 @@ export function SignupForm() {
           For parents &amp; guardians — there&rsquo;s no separate child login.
         </p>
 
-        <form onSubmit={handleSubmit} noValidate>
+        <FormAlert message={alert} />
+
+        <form action={formAction} noValidate>
           <TextField
-            id="name"
+            id="fullName"
             label="Parent / guardian name"
             placeholder="Your name"
             autoComplete="name"
-            value={name}
-            onChange={setName}
-            error={errors.name}
+            value={fullName}
+            onChange={setFullName}
+            error={nameError}
             inputRef={nameRef}
           />
           <TextField
@@ -95,7 +98,7 @@ export function SignupForm() {
             autoComplete="email"
             value={email}
             onChange={setEmail}
-            error={errors.email}
+            error={emailError}
             inputRef={emailRef}
           />
           <PasswordField
@@ -105,7 +108,8 @@ export function SignupForm() {
             autoComplete="new-password"
             value={password}
             onChange={setPassword}
-            error={errors.password}
+            error={passwordError}
+            hint={`At least ${PASSWORD_MIN_LENGTH} characters.`}
             inputRef={passwordRef}
             onFocusChange={setPwFocused}
             onVisibleChange={setPwVisible}
@@ -113,25 +117,39 @@ export function SignupForm() {
 
           <SubjectChips />
 
+          {/*
+            The guardian consent gate. The server hashes its own canonical copy of
+            this text — never the string posted from here — and writes the consent
+            record in the same transaction as the account, so an account cannot
+            exist without it.
+          */}
           <label
             className={cn(
-              "my-1 mb-5 flex cursor-pointer select-none items-start gap-[10px] text-[13px] leading-[1.5]",
-              errors.consent ? "text-[#c2483c]" : "text-muted",
+              "my-1 flex cursor-pointer select-none items-start gap-[10px] text-[13px] leading-[1.5]",
+              consentError ? "text-[#c2483c]" : "text-muted",
             )}
           >
             <input
               ref={consentRef}
               type="checkbox"
-              checked={consent}
-              onChange={(event) => setConsent(event.target.checked)}
+              name="consentGiven"
+              aria-invalid={consentError ? true : undefined}
+              aria-describedby={consentError ? "consent-error" : undefined}
               className="mt-[2px] h-[17px] w-[17px] shrink-0 accent-slate"
             />
-            {SIGNUP_CONSENT}
+            {CURRENT_SIGNUP_CONSENT_TEXT}
           </label>
+          {consentError ? (
+            <p id="consent-error" className="mb-1 mt-[6px] text-[12.5px] text-[#c2483c]">
+              {consentError}
+            </p>
+          ) : null}
 
-          <Button type="submit" variant="primary" className="w-full">
-            Create account
-          </Button>
+          <div className="mt-5">
+            <SubmitButton pendingLabel="Creating your account…">
+              Create account
+            </SubmitButton>
+          </div>
         </form>
 
         <p className="mt-[22px] text-center text-sm text-muted">
@@ -143,13 +161,11 @@ export function SignupForm() {
       </div>
 
       <AuthSuccess
-        show={submitted}
+        show={succeeded}
         title="Welcome aboard!"
-        message="This is a demo, so no account was actually created — but your family's journey would start right here."
-        againLabel="Back to form"
-        onAgain={reset}
+        message="Your account is ready — check your inbox to confirm your email address."
       />
-      <Confetti pieces={confetti} />
+      <Confetti show={succeeded} />
     </>
   );
 }

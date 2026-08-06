@@ -3,16 +3,21 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "contracts:sync": "node scripts/sync-contracts.mjs",
+    "predev": "npm run contracts:sync",
     "dev": "next dev",
+    "prebuild": "npm run contracts:sync",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "pretypecheck": "npm run contracts:sync",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "next": "16.2.10",
     "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react-dom": "19.2.4",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

@@ -1,21 +1,23 @@
-import type { CSSProperties } from "react";
+"use client";
+
+import { useState, type CSSProperties } from "react";
 
 import styles from "./confetti.module.css";
 
 const COLORS = ["#D2A241", "#2E3A73", "#F6F5F1", "#e6bd6a", "#3a4890"];
 const COUNT = 70;
 
-export interface ConfettiPiece {
+interface ConfettiPiece {
   id: number;
   style: CSSProperties;
 }
 
 /**
- * Build a burst of confetti pieces. Called from an event handler (a demo
- * submit) — never during render — so the randomness stays out of the render
- * path. Returns an empty burst under reduced motion.
+ * Build a burst of confetti pieces. Randomised, so it runs exactly once per
+ * burst — as the lazy initialiser of the burst component's state, which mounts
+ * only after a successful submit. Returns an empty burst under reduced motion.
  */
-export function createConfettiPieces(): ConfettiPiece[] {
+function createConfettiPieces(): ConfettiPiece[] {
   if (
     typeof window !== "undefined" &&
     window.matchMedia("(prefers-reduced-motion: reduce)").matches
@@ -41,8 +43,16 @@ export function createConfettiPieces(): ConfettiPiece[] {
   });
 }
 
-/** Renders a confetti burst inside its overflow-hidden, positioned parent. */
-export function Confetti({ pieces }: { pieces: ConfettiPiece[] }) {
+/**
+ * Generates its pieces on mount and never re-randomises them.
+ *
+ * Split from `Confetti` so the randomness is tied to mounting rather than
+ * pushed in from an effect — a form that owned the pieces in state had to
+ * `setState` inside an effect to fill them, which triggers a cascading render.
+ */
+function ConfettiBurst() {
+  const [pieces] = useState(createConfettiPieces);
+
   if (pieces.length === 0) return null;
 
   return (
@@ -52,4 +62,10 @@ export function Confetti({ pieces }: { pieces: ConfettiPiece[] }) {
       ))}
     </div>
   );
+}
+
+/** Confetti burst inside its overflow-hidden, positioned parent. */
+export function Confetti({ show }: { show: boolean }) {
+  if (!show) return null;
+  return <ConfettiBurst />;
 }
