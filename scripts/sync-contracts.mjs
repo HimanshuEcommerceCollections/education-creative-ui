@@ -101,7 +101,19 @@ async function main() {
 
   for (const file of files) {
     const contents = await readFile(path.join(SOURCE, file), "utf8");
-    await writeFile(path.join(TARGET, file), BANNER + contents, "utf8");
+    /*
+     * Normalised to LF rather than copied verbatim.
+     *
+     * The source files are in a different repository with its own checkout, so on
+     * Windows their line endings depend on that repo's autocrlf setting and on
+     * whether a given file was last written by git or by an editor. Copying bytes
+     * through made the output non-deterministic: identical contracts produced
+     * different bytes here depending on which, so the copies showed as modified
+     * for no real reason. `.gitattributes` pins this directory to LF; this makes
+     * the script agree.
+     */
+    const normalised = contents.replace(/\r\n/g, "\n");
+    await writeFile(path.join(TARGET, file), BANNER + normalised, "utf8");
   }
 
   console.log(`sync-contracts: ${files.length} file(s) → src/generated/contracts`);
