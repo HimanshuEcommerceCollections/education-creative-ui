@@ -8,10 +8,15 @@
  * pressure that `next dev` restarted itself. Keeping every bundled file inside
  * `client/` avoids all of it.
  *
- * `server/src/contracts` stays the single source of truth. The copies are
- * gitignored, carry a do-not-edit banner, and are refreshed by the `predev` and
- * `prebuild` hooks, so they can't drift on a normal build. If you edit a contract
- * during a long-running `next dev`, re-run `npm run contracts:sync`.
+ * `server/src/contracts` stays the single source of truth. The copies carry a
+ * do-not-edit banner and are refreshed by the `predev` and `prebuild` hooks, so
+ * they can't drift on a normal build. If you edit a contract during a long-running
+ * `next dev`, re-run `npm run contracts:sync`.
+ *
+ * **The copies are committed**, which looks redundant but isn't: the API is a
+ * separate repository, and a CI or Vercel build clones only this one. With nothing
+ * to copy from, the build has to use what's in the tree. When the sibling *is*
+ * present the copies are regenerated, so a stale commit shows up as a git diff.
  *
  * Plain Node ESM with no dependencies so it can run before anything is built.
  */
@@ -28,21 +33,47 @@ const BANNER = `// -------------------------------------------------------------
 // ---------------------------------------------------------------------------
 `;
 
+/** How many committed contract files are already in place. */
+async function committedFileCount() {
+  try {
+    const existing = await readdir(TARGET, { withFileTypes: true });
+    return existing.filter((entry) => entry.isFile() && entry.name.endsWith(".ts")).length;
+  } catch {
+    return 0;
+  }
+}
+
 async function main() {
   let entries;
   try {
     entries = await readdir(SOURCE, { withFileTypes: true });
   } catch {
-    // The API lives in a separate repository, so a fresh clone of this one alone
-    // cannot build. Say so plainly rather than surfacing an ENOENT.
+    /*
+     * No sibling API checkout. This is the normal case on Vercel and CI, which
+     * clone this repository alone — so fall back to the committed copies rather
+     * than failing the build, which is what broke the first preview deployment.
+     *
+     * Only an actual absence of contracts is fatal.
+     */
+    const committed = await committedFileCount();
+
+    if (committed > 0) {
+      console.log(
+        `sync-contracts: no sibling server/ checkout — using ${committed} committed file(s) ` +
+          "in src/generated/contracts",
+      );
+      return;
+    }
+
     console.error(
       [
         "",
-        "sync-contracts: could not read the API contracts.",
+        "sync-contracts: no API contracts to build against.",
         `  looked in: ${SOURCE}`,
+        `  and found nothing committed in: ${TARGET}`,
         "",
-        "  The API is a separate repository and must be cloned as a sibling of",
-        "  this one, because the shared request/response contracts live there:",
+        "  The API is a separate repository. Either clone it as a sibling of this",
+        "  one and re-run, or commit the generated copies:",
         "",
         "    <parent>/",
         "      client/   <- this repo (education-creative-ui)",

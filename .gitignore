@@ -17,9 +17,15 @@
 /.next/
 /out/
 
-# contracts copied from ../server by scripts/sync-contracts.mjs — the originals
-# are the source of truth, these are rebuilt by predev/prebuild
-/src/generated/
+# Contracts copied from ../server by scripts/sync-contracts.mjs.
+#
+# Deliberately COMMITTED, not ignored: the API is a separate repository, and CI and
+# Vercel clone only this one — with nothing to copy from, the build has to use
+# what's in the tree. Ignoring these is what broke the first preview deployment.
+#
+# The originals in server/src/contracts remain the source of truth. predev and
+# prebuild regenerate them whenever the sibling checkout exists, so a stale commit
+# shows up as a git diff rather than silently drifting.
 
 # production
 /build
