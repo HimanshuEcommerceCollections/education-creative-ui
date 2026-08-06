@@ -1,0 +1,11 @@
+# Normalise text files in the repository to LF.
+* text=auto
+
+# `scripts/sync-contracts.mjs` always writes LF. With `core.autocrlf=true` (the
+# Windows default) git checks these out as CRLF, so every `predev`/`prebuild`
+# rewrote them as LF and reported all six as modified.
+#
+# That was noise on every build, and worse: it meant a *real* contract change
+# looked exactly like the usual dirty state, so the "a stale commit shows up as a
+# git diff" property these files depend on stopped working.
+/src/generated/contracts/** text eol=lf
