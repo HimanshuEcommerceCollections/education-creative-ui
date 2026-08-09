@@ -309,13 +309,6 @@ export function AcceptInviteForm({
 
         <SubmitButton pendingLabel="Activating…">Activate my account</SubmitButton>
       </form>
-
-      {role === "admin" || role === "coordinator" ? (
-        <p className="mt-5 text-center text-[12.5px] leading-[1.5] text-muted">
-          Staff accounts need an authenticator app. We&rsquo;ll set that up right
-          after this step.
-        </p>
-      ) : null}
     </div>
   );
 }

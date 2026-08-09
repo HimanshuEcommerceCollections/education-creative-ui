@@ -39,8 +39,7 @@ export function LoginForm() {
   /**
    * Celebrate, then go where the **server** said to. `redirectTo` is derived from
    * the session's role — customers to the homepage, educators and staff to their
-   * dashboards, and a staff account short of its second factor to the TOTP step.
-   * Nothing here inspects a role to make that choice.
+   * dashboards. Nothing here inspects a role to make that choice.
    */
   useEffect(() => {
     if (state.status !== "success") return;

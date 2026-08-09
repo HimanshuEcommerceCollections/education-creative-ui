@@ -57,7 +57,6 @@ result was a **105-second cold compile** and enough memory pressure that
 |---|---|---|
 | `/login` | dynamic | **One sign-in page for all four roles.** Sends an existing session to its role's home. |
 | `/signup` | static | Customers only. Educators apply; staff are invited. |
-| `/login/mfa` · `/login/mfa/setup` | dynamic | Staff TOTP. The session exists before this step but authorises nothing. |
 | `/forgot-password` · `/reset-password` | static / dynamic | |
 | `/verify-email` | dynamic | Confirms on a button press, not on load — the token is single-use and mail scanners prefetch links. |
 | `/accept-invite` | dynamic | Set-password for approved educators and invited staff. |
@@ -114,8 +113,8 @@ can react to specific cases (an expired reset link offers a fresh one).
 
 Coarse cookie-presence redirects for `/account`, `/dashboard`, and `/educator`, and
 nothing else. It **is not the security boundary** and must not become one: it can't
-tell a valid session from a forged cookie value, know the user's role, or see
-whether staff have cleared MFA. Real enforcement is the API's role guards, with each
+tell a valid session from a forged cookie value or know the user's role. Real
+enforcement is the API's role guards, with each
 page's `getSession()` as a second gate.
 
 ## Verified

@@ -18,18 +18,12 @@ export const metadata: Metadata = {
  * The single sign-in page for all four roles.
  *
  * Someone who already holds a live session is sent to their role's home rather
- * than shown a form they don't need. A staff session that hasn't cleared TOTP goes
- * to that step instead — it exists, but authorises nothing until it does.
+ * than shown a form they don't need.
  */
 export default async function LoginPage() {
   const session = await getSession();
 
-  if (session) {
-    if (session.isStaff && !session.fullyAuthenticated) {
-      redirect(session.mfaEnrolled ? "/login/mfa" : "/login/mfa/setup");
-    }
-    redirect(homeForRole(session.activeRole));
-  }
+  if (session) redirect(homeForRole(session.activeRole));
 
   return (
     <AuthLayout crumb="Sign in" panel={LOGIN_PANEL}>

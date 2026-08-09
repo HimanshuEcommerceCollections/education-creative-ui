@@ -32,12 +32,6 @@ export const getSession = cache(async (): Promise<SessionResponse | null> => {
   }
 });
 
-/** True only when every precondition for acting as the active role is met. */
-export async function isFullyAuthenticated(): Promise<boolean> {
-  const session = await getSession();
-  return session?.fullyAuthenticated === true;
-}
-
 export async function getActiveRole(): Promise<UserRole | null> {
   const session = await getSession();
   return session?.activeRole ?? null;
@@ -45,6 +39,6 @@ export async function getActiveRole(): Promise<UserRole | null> {
 
 export async function hasRole(...roles: UserRole[]): Promise<boolean> {
   const session = await getSession();
-  if (!session?.fullyAuthenticated) return false;
+  if (!session) return false;
   return roles.includes(session.activeRole);
 }

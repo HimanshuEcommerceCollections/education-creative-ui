@@ -14,10 +14,10 @@ import { getSession } from "@/lib/auth/session";
  * The parent's `/account` stays in `(site)`, since a parent moves between their
  * account and the public pages constantly.
  *
- * The gate here is broad: a session, and for staff a satisfied second factor.
- * Each page keeps its own role check as well — a layout runs once for a subtree,
- * so it can't be the only thing standing between a coordinator and an admin page.
- * The API is the actual enforcement point either way.
+ * The gate here is broad: a session, and not a customer. Each page keeps its own
+ * role check as well — a layout runs once for a subtree, so it can't be the only
+ * thing standing between a coordinator and an admin page. The API is the actual
+ * enforcement point either way.
  */
 export default async function DashboardLayout({
   children,
@@ -27,12 +27,6 @@ export default async function DashboardLayout({
 
   // A customer has no surface in here.
   if (session.activeRole === "customer") redirect("/account");
-
-  // A staff session that hasn't cleared TOTP can't perform any action on these
-  // pages, so send them to finish rather than render a shell of dead buttons.
-  if (session.isStaff && !session.fullyAuthenticated) {
-    redirect(session.mfaEnrolled ? "/login/mfa" : "/login/mfa/setup");
-  }
 
   return (
     <div className="flex min-h-screen flex-col bg-ivory min-[1000px]:flex-row">
