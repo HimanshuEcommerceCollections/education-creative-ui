@@ -7,9 +7,7 @@ import {
   forgotPasswordRequestSchema,
   type LoginResponse,
   loginRequestSchema,
-  mfaVerifyRequestSchema,
   resetPasswordRequestSchema,
-  type SessionResponse,
   signupRequestSchema,
   verifyEmailRequestSchema,
 } from "@contracts/auth.ts";
@@ -17,7 +15,6 @@ import { submitEducatorApplicationSchema } from "@contracts/educator-application
 
 import {
   callApi,
-  callApiAuthed,
   checkbox,
   optionalText,
   parseForm,
@@ -95,53 +92,8 @@ export async function loginAction(
     await persistSession(result);
 
     // `redirectTo` is decided server-side from the session's role — a customer
-    // lands on the homepage, an educator on their dashboard, staff on theirs, and
-    // a staff account short of its second factor on the TOTP step. The browser
-    // never derives this from a role it could tamper with.
-    return {
-      status: "success",
-      redirectTo: result.redirectTo,
-      ...(result.outcome === "authenticated" ? {} : { message: "One more step." }),
-    };
-  } catch (error) {
-    return toErrorState(error);
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Staff TOTP
-// ---------------------------------------------------------------------------
-
-export async function mfaVerifyAction(
-  _previous: AuthFormState,
-  formData: FormData,
-): Promise<AuthFormState> {
-  const parsed = parseForm(mfaVerifyRequestSchema, { code: text(formData, "code") });
-  if (!parsed.ok) return parsed.state;
-
-  try {
-    const result = await callApiAuthed<{ redirectTo: string; session: SessionResponse }>(
-      "/auth/mfa/verify",
-      { method: "POST", body: parsed.data },
-    );
-    return { status: "success", redirectTo: result.redirectTo };
-  } catch (error) {
-    return toErrorState(error);
-  }
-}
-
-export async function mfaEnrolAction(
-  _previous: AuthFormState,
-  formData: FormData,
-): Promise<AuthFormState> {
-  const parsed = parseForm(mfaVerifyRequestSchema, { code: text(formData, "code") });
-  if (!parsed.ok) return parsed.state;
-
-  try {
-    const result = await callApiAuthed<{ redirectTo: string; session: SessionResponse }>(
-      "/auth/mfa/enrol",
-      { method: "POST", body: parsed.data },
-    );
+    // lands on the homepage, an educator on their dashboard, staff on theirs. The
+    // browser never derives this from a role it could tamper with.
     return { status: "success", redirectTo: result.redirectTo };
   } catch (error) {
     return toErrorState(error);
