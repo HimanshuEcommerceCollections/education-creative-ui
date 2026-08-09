@@ -1,6 +1,6 @@
 import "server-only";
 
-import type { ErrorCode, ErrorResponse } from "@contracts/errors.ts";
+import { ERROR_CODES, type ErrorCode, type ErrorResponse } from "@contracts/errors.ts";
 
 /**
  * The only way this app talks to the Node API. `server-only` makes an accidental
@@ -55,12 +55,23 @@ export interface ApiRequestOptions {
   signal?: AbortSignal;
 }
 
+const KNOWN_ERROR_CODES = new Set<string>(ERROR_CODES);
+
+/**
+ * Recognises *our* failure envelope, not merely something shaped like it.
+ *
+ * Vercel's edge answers `Accept: application/json` with the same
+ * `{ error: { code, message } }` shape — a blocked request returns
+ * `{"error":{"code":"401","message":"Protected deployment"}}` — so accepting any
+ * string code hands platform copy to the user as though the API had said it, with
+ * a `code` no caller can branch on. Only the contract's own codes count.
+ */
 function isErrorResponse(value: unknown): value is ErrorResponse {
   return (
     typeof value === "object" &&
     value !== null &&
     "error" in value &&
-    typeof (value as ErrorResponse).error?.code === "string"
+    KNOWN_ERROR_CODES.has((value as ErrorResponse).error?.code)
   );
 }
 
@@ -116,6 +127,14 @@ export async function apiFetch<T>(
         payload.error.fieldErrors,
       );
     }
+    // Not the API refusing — something between here and it (deployment protection,
+    // a gateway, a wrong `API_BASE_URL`). The user gets the generic message; the
+    // function log gets what actually came back, because that body is the only
+    // clue to which of those it was.
+    console.error(
+      `apiFetch: unrecognised ${response.status} from ${options.method ?? "GET"} ${path}`,
+      raw.slice(0, 300),
+    );
     throw new ApiError(
       "internal_error",
       "Something went wrong. Please try again.",
