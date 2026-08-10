@@ -2,6 +2,7 @@ import { Container } from "@/components/common/container";
 import { Highlight } from "@/components/common/highlight";
 import { Reveal } from "@/components/common/reveal";
 import { Button } from "@/components/ui/button";
+import { bookHrefFor } from "@/constants/site";
 import type { EducatorProfile } from "@/data/educators";
 
 import { ArrowRightIcon } from "./educator-icons";
@@ -20,8 +21,8 @@ export function EducatorCta({ profile }: { profile: EducatorProfile }) {
               {profile.ctaBody}
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-[14px]">
-              <Button href="/contact" variant="primary">
-                Request a Booking
+              <Button href={bookHrefFor(profile.slug)} variant="primary">
+                Book a Session
                 <ArrowRightIcon className="h-[17px] w-[17px]" />
               </Button>
               <Button href="/browse" variant="ghost">

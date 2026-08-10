@@ -9,6 +9,8 @@ import { ServicesGrid } from "@/components/services/services-grid";
 import { ServicesHero } from "@/components/services/services-hero";
 import { Button } from "@/components/ui/button";
 import { COPPA_POINTS } from "@/data/coppa";
+import { SERVICES } from "@/data/services";
+import { fromRatesBySubject, loadPricingSnapshot } from "@/lib/pricing/snapshot";
 
 export const metadata: Metadata = {
   title: "Services",
@@ -16,12 +18,29 @@ export const metadata: Metadata = {
     "Six subjects, one trusted marketplace — academic tutoring, college admissions, music, languages, arts & crafts, and cooking, taught in your home or online by vetted independent educators.",
 };
 
-export default function ServicesPage() {
+export default async function ServicesPage() {
+  /*
+   * Live pricing overlay: each card's "from" rate is its subject band's minimum
+   * from the admin-controlled snapshot, falling back to the in-repo figure when
+   * the API can't answer. The card's slug is the tail of its /subjects/* href.
+   */
+  const snapshot = await loadPricingSnapshot();
+  const fromRates = fromRatesBySubject(snapshot);
+  const services = SERVICES.map((service) => {
+    const subjectSlug = service.href.split("/").at(-1) ?? "";
+    const from = fromRates[subjectSlug];
+    if (from === undefined) return service;
+    return {
+      ...service,
+      rateFrom: `$${Number.isInteger(from) ? from : from.toFixed(2)}`,
+    };
+  });
+
   return (
     <main>
       <ServicesHero />
 
-      <ServicesGrid />
+      <ServicesGrid services={services} />
 
       <SessionFormats />
 
