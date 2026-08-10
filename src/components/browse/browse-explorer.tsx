@@ -107,14 +107,23 @@ function EducatorCard({ educator, delay }: { educator: Educator; delay: RevealDe
  * a filterable, sortable educator grid. Search + subject filter + sort are all
  * derived in one memo; the hero and grid share this component's state.
  */
-export function BrowseExplorer() {
+export function BrowseExplorer({
+  educators = EDUCATORS,
+}: {
+  /**
+   * The grid's educators, with prices already overlaid from the live pricing
+   * snapshot by the page. Defaults to the in-repo data so the component still
+   * renders in isolation (and when the API is unreachable).
+   */
+  educators?: Educator[];
+}) {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("all");
   const [sort, setSort] = useState<BrowseSort>("rating");
 
   const results = useMemo(() => {
     const q = query.trim().toLowerCase();
-    const filtered = EDUCATORS.filter((educator) => {
+    const filtered = educators.filter((educator) => {
       const subject = educator.subject.toLowerCase();
       const okFilter = filter === "all" || subject.includes(filter);
       const okQuery = !q || educator.name.toLowerCase().includes(q) || subject.includes(q);
@@ -125,7 +134,7 @@ export function BrowseExplorer() {
       if (sort === "priceHigh") return b.price - a.price;
       return b.rating - a.rating;
     });
-  }, [query, filter, sort]);
+  }, [educators, query, filter, sort]);
 
   return (
     <>
@@ -234,7 +243,7 @@ export function BrowseExplorer() {
           </Reveal>
 
           <p className="mb-7 text-[13.5px] font-semibold text-muted" aria-live="polite">
-            Showing <b className="text-slate">{results.length}</b> of {EDUCATORS.length} educators
+            Showing <b className="text-slate">{results.length}</b> of {educators.length} educators
           </p>
 
           {results.length > 0 ? (

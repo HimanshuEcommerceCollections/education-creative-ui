@@ -9,6 +9,13 @@ export interface BrowseFilter {
 
 /** One educator card in the browse grid. */
 export interface Educator {
+  /**
+   * Stable identifier for this person, matching their `/educators/[slug]` route
+   * and the `?educator=` parameter the booking flow prefills from. The seed plan
+   * (ARCHITECTURE.md §6) reconciles `browse.ts`, `tutors.ts` and `educators.ts`
+   * into one row per educator keyed on exactly this value.
+   */
+  slug: string;
   name: string;
   subject: string;
   /** Hourly rate in USD. */
@@ -40,6 +47,7 @@ export const BROWSE_FILTERS: BrowseFilter[] = [
 
 export const EDUCATORS: Educator[] = [
   {
+    slug: "elena",
     name: "Elena M.",
     subject: "Academic Tutoring",
     price: 55,
@@ -48,6 +56,7 @@ export const EDUCATORS: Educator[] = [
     image: { src: "/assets/browse/images/educator-elena.jpg", alt: "Elena M." },
   },
   {
+    slug: "daniel",
     name: "Daniel A.",
     subject: "Academic Tutoring",
     price: 50,
@@ -56,6 +65,7 @@ export const EDUCATORS: Educator[] = [
     image: { src: "/assets/browse/images/educator-daniel.jpg", alt: "Daniel A." },
   },
   {
+    slug: "priya",
     name: "Priya S.",
     subject: "College Admissions",
     price: 65,
@@ -64,6 +74,7 @@ export const EDUCATORS: Educator[] = [
     image: { src: "/assets/browse/images/educator-priya.jpg", alt: "Priya S." },
   },
   {
+    slug: "marcus",
     name: "Marcus T.",
     subject: "Music",
     price: 60,
@@ -72,6 +83,7 @@ export const EDUCATORS: Educator[] = [
     image: { src: "/assets/browse/images/educator-marcus.jpg", alt: "Marcus T." },
   },
   {
+    slug: "rosa",
     name: "Rosa N.",
     subject: "Cooking & Music",
     price: 54,
@@ -80,6 +92,7 @@ export const EDUCATORS: Educator[] = [
     image: { src: "/assets/browse/images/educator-rosa.jpg", alt: "Rosa N." },
   },
   {
+    slug: "james",
     name: "James O.",
     subject: "Cooking",
     price: 58,
@@ -88,6 +101,7 @@ export const EDUCATORS: Educator[] = [
     image: { src: "/assets/browse/images/educator-james.jpg", alt: "James O." },
   },
   {
+    slug: "lena",
     name: "Lena K.",
     subject: "Languages (Spanish & French)",
     price: 52,
@@ -96,6 +110,7 @@ export const EDUCATORS: Educator[] = [
     image: { src: "/assets/browse/images/educator-lena.jpg", alt: "Lena K." },
   },
   {
+    slug: "sofia",
     name: "Sofia R.",
     subject: "Languages (Hindi & English)",
     price: 48,
@@ -104,6 +119,7 @@ export const EDUCATORS: Educator[] = [
     image: { src: "/assets/browse/images/educator-sofia.jpg", alt: "Sofia R." },
   },
   {
+    slug: "theo",
     name: "Theo W.",
     subject: "Arts & Crafts",
     price: 45,

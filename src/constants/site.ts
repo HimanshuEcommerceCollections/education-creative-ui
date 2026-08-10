@@ -8,8 +8,13 @@ export const SITE = {
     "Book vetted tutors for academics, music, arts, languages, cooking, and more — online or in your home.",
 } as const;
 
-/** Destination for the header "Book" call-to-action (the contact page). */
-export const BOOK_HREF = "/contact";
+/** Destination for the header "Book" call-to-action. */
+export const BOOK_HREF = "/book";
+
+/** Booking href prefilled with an educator, for their profile page CTAs. */
+export function bookHrefFor(educatorSlug: string): string {
+  return `${BOOK_HREF}?educator=${encodeURIComponent(educatorSlug)}`;
+}
 
 /** Route for the header "Sign in" action. */
 export const SIGNIN_HREF = "/login";

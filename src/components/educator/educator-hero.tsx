@@ -4,6 +4,7 @@ import { Container } from "@/components/common/container";
 import { Eyebrow } from "@/components/common/eyebrow";
 import { Reveal } from "@/components/common/reveal";
 import { Button } from "@/components/ui/button";
+import { bookHrefFor } from "@/constants/site";
 import type { EducatorProfile } from "@/data/educators";
 
 import { ArrowRightIcon, HomeIcon, PinIcon } from "./educator-icons";
@@ -73,8 +74,8 @@ export function EducatorHero({ profile }: { profile: EducatorProfile }) {
             </div>
 
             <div className="flex flex-wrap gap-[14px]">
-              <Button href="/contact" variant="primary">
-                Request a Booking
+              <Button href={bookHrefFor(profile.slug)} variant="primary">
+                Book a Session
                 <ArrowRightIcon className="h-[17px] w-[17px]" />
               </Button>
               <Button href="/contact" variant="ghost">

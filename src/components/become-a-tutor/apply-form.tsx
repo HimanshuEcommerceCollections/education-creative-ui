@@ -5,13 +5,13 @@ import { useFormStatus } from "react-dom";
 
 import { submitApplicationAction } from "@/app/(auth)/actions";
 import { Button } from "@/components/ui/button";
+import { FieldRow, SelectChevron, fieldClasses } from "@/components/ui/field";
 import { APPLY_EXPERIENCE, APPLY_SUBJECTS } from "@/data/become-a-tutor";
 import { IDLE, fieldError, formMessage } from "@/lib/auth/form-state";
 import { cn } from "@/lib/utils";
 
-import { APPLY_FIELD, APPLY_FIELD_ERROR, APPLY_FIELD_REST, FieldRow } from "./apply-field";
 import styles from "./apply-form.module.css";
-import { CheckIcon, ChevronDownIcon } from "./become-icons";
+import { CheckIcon } from "./become-icons";
 
 const CARD =
   "rounded-[22px] border border-line bg-white px-10 pb-9 pt-10 " +
@@ -27,15 +27,6 @@ const EMPTY: Record<FieldName, string> = {
   yearsExperience: "",
   about: "",
 };
-
-/** Chevron indicator for the native selects, which render `appearance-none`. */
-function SelectChevron() {
-  return (
-    <span className="pointer-events-none absolute right-[15px] top-1/2 -translate-y-1/2 text-muted">
-      <ChevronDownIcon className="h-4 w-4" />
-    </span>
-  );
-}
 
 /**
  * The educator application: name, email, subject, experience, and a short
@@ -80,7 +71,7 @@ export function ApplyForm() {
   }, [state]);
 
   const fieldClass = (field: FieldName, extra?: string) =>
-    cn(APPLY_FIELD, extra, errors[field] ? APPLY_FIELD_ERROR : APPLY_FIELD_REST);
+    fieldClasses(Boolean(errors[field]), extra);
 
   const describedBy = (field: FieldName, id: string) =>
     errors[field] ? `${id}-error` : undefined;

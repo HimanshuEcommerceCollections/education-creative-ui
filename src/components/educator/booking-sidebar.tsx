@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { bookHrefFor } from "@/constants/site";
 import type { EducatorProfile } from "@/data/educators";
 
 import { ArrowRightIcon, ShieldIcon } from "./educator-icons";
@@ -19,14 +20,15 @@ export function BookingSidebar({ profile }: { profile: EducatorProfile }) {
         <p className="text-[14px] leading-[1.55] text-muted">{profile.availabilitySummary}</p>
       </div>
 
-      <Button href="/contact" variant="primary" className="mt-6 w-full">
-        Request a Booking
+      <Button href={bookHrefFor(profile.slug)} variant="primary" className="mt-6 w-full">
+        Book a Session
         <ArrowRightIcon className="h-[17px] w-[17px]" />
       </Button>
 
       <p className="mt-4 flex items-start gap-2 text-[12.5px] leading-[1.5] text-muted">
         <ShieldIcon className="mt-px h-4 w-4 flex-none text-slate" />
-        A parent or guardian books and supervises every session.
+        A parent or guardian books and supervises every session. You pay when you book;
+        a coordinator then confirms the time.
       </p>
     </aside>
   );
