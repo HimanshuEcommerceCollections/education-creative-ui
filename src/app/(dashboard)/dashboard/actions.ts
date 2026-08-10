@@ -6,6 +6,7 @@ import {
   approveEducatorApplicationSchema,
   reviewEducatorApplicationSchema,
 } from "@contracts/educator-applications.ts";
+import { inviteCoordinatorRequestSchema } from "@contracts/staff-invites.ts";
 
 import {
   callApiAuthed,
@@ -44,6 +45,34 @@ export async function reviewApplicationAction(
     // preview, the applications page the full list.
     revalidatePath("/dashboard");
     revalidatePath("/dashboard/applications");
+    return { status: "success", redirectTo: "", message: result.message };
+  } catch (error) {
+    return toErrorState(error);
+  }
+}
+
+/**
+ * Coordinator invite — the staff counterpart of educator approval. The API
+ * creates the `invited` account, grants the role, and emails the single-use
+ * set-password link; admin-only at the enforcement point, not here.
+ */
+export async function inviteCoordinatorAction(
+  _previous: AuthFormState,
+  formData: FormData,
+): Promise<AuthFormState> {
+  const parsed = parseForm(inviteCoordinatorRequestSchema, {
+    fullName: text(formData, "fullName"),
+    email: text(formData, "email"),
+    phone: optionalText(formData, "phone"),
+  });
+  if (!parsed.ok) return parsed.state;
+
+  try {
+    const result = await callApiAuthed<{ message: string }>("/staff/invites", {
+      method: "POST",
+      body: parsed.data,
+    });
+    revalidatePath("/dashboard/staff");
     return { status: "success", redirectTo: "", message: result.message };
   } catch (error) {
     return toErrorState(error);

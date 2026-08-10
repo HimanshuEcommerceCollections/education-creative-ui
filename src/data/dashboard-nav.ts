@@ -119,7 +119,6 @@ export const STAFF_NAV: DashboardNavSection[] = [
         href: "/dashboard/staff",
         icon: "staff",
         roles: ADMIN_ONLY,
-        phase: "Phase 2",
         adminOnly: true,
       },
     ],
