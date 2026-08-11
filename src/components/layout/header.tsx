@@ -19,6 +19,10 @@ const SOLID_THRESHOLD = 40;
  * Routes whose hero is light (ivory/soft wash) from the very top. Over these,
  * the not-yet-scrolled header uses dark ink text instead of the white treatment
  * (which would be invisible). Mirrors the source design's `header.onLight`.
+ *
+ * Any new page that opens on ivory rather than a dark hero image belongs here —
+ * `/book` and `/account` have no hero band at all, so they sit straight on the
+ * ivory body.
  */
 const LIGHT_HERO_ROUTES = new Set([
   "/contact",
@@ -26,6 +30,8 @@ const LIGHT_HERO_ROUTES = new Set([
   "/terms",
   "/cookie-policy",
   "/child-safety",
+  "/book",
+  "/account",
 ]);
 
 function DesktopNavLink({ link, darkText }: { link: NavLink; darkText: boolean }) {
