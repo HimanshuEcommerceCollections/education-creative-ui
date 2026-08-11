@@ -12,6 +12,7 @@ import { SubjectCta } from "@/components/subject/subject-cta";
 import { SubjectHero } from "@/components/subject/subject-hero";
 import { SubjectStats } from "@/components/subject/subject-stats";
 import { EDUCATORS, MUSIC_MARQUEE, MUSIC_STATS, OFFERS } from "@/data/music";
+import { loadPricingSnapshot, withLiveRates } from "@/lib/pricing/snapshot";
 
 export const metadata: Metadata = {
   title: "Music",
@@ -19,7 +20,11 @@ export const metadata: Metadata = {
     "Piano, guitar, voice, strings and more — taught at home or online by vetted independent musicians who meet learners where they are.",
 };
 
-export default function MusicSubjectPage() {
+export default async function MusicSubjectPage() {
+  // Card content stays in-repo; the hourly rate is the admin-set figure, so this
+  // page can't drift from the same educator on browse or their profile.
+  const educators = withLiveRates(EDUCATORS, await loadPricingSnapshot(), "music");
+
   return (
     <main>
       <SubjectHero
@@ -70,7 +75,7 @@ export default function MusicSubjectPage() {
           </>
         }
         bgImage={{ src: "/assets/music/images/educators-bg.jpg", alt: "" }}
-        educators={EDUCATORS}
+        educators={educators}
       />
 
       <SubjectStats stats={MUSIC_STATS} />

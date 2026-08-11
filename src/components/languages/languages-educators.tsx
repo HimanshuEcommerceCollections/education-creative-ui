@@ -5,14 +5,17 @@ import { Container } from "@/components/common/container";
 import { Eyebrow } from "@/components/common/eyebrow";
 import { Highlight } from "@/components/common/highlight";
 import { Reveal } from "@/components/common/reveal";
-import { LANGUAGE_EDUCATORS } from "@/data/languages";
+import type { LanguageEducator } from "@/data/languages";
 import type { RevealDelay } from "@/lib/reveal";
 
 /**
  * "Two voices, five languages" — the featured educators on a dark, photo-backed
  * band, each in a light card with rating, experience, price, and a bio.
+ *
+ * Takes its educators as a prop rather than reading the module directly, so the
+ * page can overlay admin-set rates before they render.
  */
-export function LanguagesEducators() {
+export function LanguagesEducators({ educators }: { educators: LanguageEducator[] }) {
   return (
     <section className="relative overflow-hidden border-y border-[rgba(210,162,65,0.18)] bg-[#12131C] py-24">
       <div
@@ -37,7 +40,7 @@ export function LanguagesEducators() {
         </Reveal>
 
         <div className="mx-auto grid max-w-[900px] grid-cols-2 gap-[30px] max-[960px]:max-w-[440px] max-[960px]:grid-cols-1">
-          {LANGUAGE_EDUCATORS.map((educator, index) => (
+          {educators.map((educator, index) => (
             <Reveal key={educator.id} delay={(index + 1) as RevealDelay}>
               <article className="group overflow-hidden rounded-[20px] border border-line bg-white shadow-[0_30px_60px_rgba(0,0,0,0.45)] transition-[transform,box-shadow] duration-[450ms] hover:-translate-y-2 hover:shadow-[0_30px_55px_rgba(18,19,28,0.14)]">
                 <div className="relative aspect-[4/3.4] overflow-hidden bg-[linear-gradient(160deg,var(--slate),var(--slate-deep))]">

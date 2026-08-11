@@ -7,7 +7,8 @@ import { LanguagesEducators } from "@/components/languages/languages-educators";
 import { LanguagesHero } from "@/components/languages/languages-hero";
 import { SubjectCta } from "@/components/subject/subject-cta";
 import { SubjectStats } from "@/components/subject/subject-stats";
-import { LANGUAGES_STATS } from "@/data/languages";
+import { LANGUAGE_EDUCATORS, LANGUAGES_STATS } from "@/data/languages";
+import { loadPricingSnapshot, withLiveRates } from "@/lib/pricing/snapshot";
 
 export const metadata: Metadata = {
   title: "Languages",
@@ -15,7 +16,15 @@ export const metadata: Metadata = {
     "Spanish, French, and Hindi with educators who teach conversation first — real talk from lesson one, grammar sneaking in while you're busy speaking.",
 };
 
-export default function LanguagesSubjectPage() {
+export default async function LanguagesSubjectPage() {
+  // Card content stays in-repo; the hourly rate is the admin-set figure, so this
+  // page can't drift from the same educator on browse or their profile.
+  const educators = withLiveRates(
+    LANGUAGE_EDUCATORS,
+    await loadPricingSnapshot(),
+    "languages",
+  );
+
   return (
     <main>
       <LanguagesHero />
@@ -24,7 +33,7 @@ export default function LanguagesSubjectPage() {
 
       <LanguagesApproach />
 
-      <LanguagesEducators />
+      <LanguagesEducators educators={educators} />
 
       <SubjectStats stats={LANGUAGES_STATS} />
 

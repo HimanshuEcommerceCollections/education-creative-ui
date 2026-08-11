@@ -16,6 +16,7 @@ import {
   TUTORING_OFFERS,
   TUTORING_STATS,
 } from "@/data/tutoring";
+import { loadPricingSnapshot, withLiveRates } from "@/lib/pricing/snapshot";
 
 export const metadata: Metadata = {
   title: "Academic Tutoring",
@@ -23,7 +24,15 @@ export const metadata: Metadata = {
     "Maths, sciences, reading and writing — steady one-to-one support from vetted educators, at home or online, for school-age and adult learners.",
 };
 
-export default function TutoringSubjectPage() {
+export default async function TutoringSubjectPage() {
+  // Card content stays in-repo; the hourly rate is the admin-set figure, so this
+  // page can't drift from the same educator on browse or their profile.
+  const educators = withLiveRates(
+    TUTORING_EDUCATORS,
+    await loadPricingSnapshot(),
+    "tutoring",
+  );
+
   return (
     <main>
       <SubjectHero
@@ -75,7 +84,7 @@ export default function TutoringSubjectPage() {
           </>
         }
         bgImage={{ src: "/assets/tutoring/images/educators-bg.jpg", alt: "" }}
-        educators={TUTORING_EDUCATORS}
+        educators={educators}
       />
 
       <SubjectStats stats={TUTORING_STATS} />

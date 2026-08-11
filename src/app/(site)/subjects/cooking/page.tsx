@@ -15,6 +15,7 @@ import {
   COOKING_EDUCATORS,
   COOKING_STATS,
 } from "@/data/cooking";
+import { loadPricingSnapshot, withLiveRates } from "@/lib/pricing/snapshot";
 
 export const metadata: Metadata = {
   title: "Cooking",
@@ -24,7 +25,15 @@ export const metadata: Metadata = {
 
 const SIZZLE = ["Poach", "Simmer", "Sauté", "Sear", "Char", "Roast"];
 
-export default function CookingSubjectPage() {
+export default async function CookingSubjectPage() {
+  // Card content stays in-repo; the hourly rate is the admin-set figure, so this
+  // page can't drift from the same educator on browse or their profile.
+  const educators = withLiveRates(
+    COOKING_EDUCATORS,
+    await loadPricingSnapshot(),
+    "cooking",
+  );
+
   return (
     <main>
       <CookingHero />
@@ -56,7 +65,7 @@ export default function CookingSubjectPage() {
           </>
         }
         bgImage={{ src: "/assets/cooking/images/educators-bg.jpg", alt: "" }}
-        educators={COOKING_EDUCATORS}
+        educators={educators}
         note="For learners under 18, a parent or guardian books and supervises every session — always."
       />
 
