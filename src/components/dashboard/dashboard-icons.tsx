@@ -47,16 +47,6 @@ function BookingsIcon(props: SVGProps<SVGSVGElement>) {
   );
 }
 
-function TeamsIcon(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg {...base} {...props}>
-      <circle cx="9" cy="8" r="3.2" />
-      <path d="M3 20c0-3.2 2.7-5.5 6-5.5s6 2.3 6 5.5" />
-      <path d="M16.5 5.6a3.2 3.2 0 0 1 0 6.3M18 20c0-2.3-.8-4-2-5.2" />
-    </svg>
-  );
-}
-
 function EducatorsIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <svg {...base} {...props}>
@@ -146,7 +136,6 @@ export const DASHBOARD_ICONS: Record<
   overview: OverviewIcon,
   applications: ApplicationsIcon,
   bookings: BookingsIcon,
-  teams: TeamsIcon,
   educators: EducatorsIcon,
   reviews: ReviewsIcon,
   pricing: PricingIcon,

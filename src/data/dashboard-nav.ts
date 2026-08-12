@@ -28,7 +28,6 @@ export type DashboardIconName =
   | "overview"
   | "applications"
   | "bookings"
-  | "teams"
   | "educators"
   | "reviews"
   | "pricing"
@@ -63,14 +62,6 @@ export const STAFF_NAV: DashboardNavSection[] = [
         href: "/dashboard/bookings",
         icon: "bookings",
         roles: STAFF,
-        phase: "Phase 3",
-      },
-      {
-        label: "Teams",
-        href: "/dashboard/teams",
-        icon: "teams",
-        roles: STAFF,
-        phase: "Phase 2",
       },
       {
         label: "Educators",
@@ -139,7 +130,6 @@ export const EDUCATOR_NAV: DashboardNavSection[] = [
         href: "/educator/sessions",
         icon: "sessions",
         roles: ["educator"],
-        phase: "Phase 3",
       },
       {
         label: "Earnings",
