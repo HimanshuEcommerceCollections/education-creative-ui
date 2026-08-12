@@ -24,7 +24,7 @@ const SOLID_THRESHOLD = 40;
  * `/book` and `/account` have no hero band at all, so they sit straight on the
  * ivory body.
  */
-const LIGHT_HERO_ROUTES = new Set([
+const LIGHT_HERO_ROUTES = [
   "/contact",
   "/privacy",
   "/terms",
@@ -32,7 +32,18 @@ const LIGHT_HERO_ROUTES = new Set([
   "/child-safety",
   "/book",
   "/account",
-]);
+] as const;
+
+/**
+ * Matched as prefixes, so a nested page inherits its parent's treatment —
+ * `/account/bookings` is the same ivory shell as `/account` and must not have to
+ * be listed twice to be legible.
+ */
+function hasLightHero(pathname: string): boolean {
+  return LIGHT_HERO_ROUTES.some(
+    (route) => pathname === route || pathname.startsWith(`${route}/`),
+  );
+}
 
 function DesktopNavLink({ link, darkText }: { link: NavLink; darkText: boolean }) {
   return (
@@ -88,7 +99,7 @@ export function Header() {
     reset();
   }, [pathname]);
 
-  const isLight = LIGHT_HERO_ROUTES.has(pathname);
+  const isLight = hasLightHero(pathname);
   const opaque = scrolled || menuOpen;
   const darkText = opaque || isLight;
 

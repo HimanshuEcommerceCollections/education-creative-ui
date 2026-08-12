@@ -44,8 +44,18 @@ export default async function AccountPage() {
     <AccountShell
       eyebrow="Your account"
       title={`Hello, ${user.fullName.split(" ")[0]}`}
-      description="Manage your details and sessions here. Bookings and messaging arrive in a later release."
-      actions={<SignOutButton />}
+      description="Manage your details and sessions here. Messaging arrives in a later release."
+      actions={
+        <>
+          <Link
+            href="/account/bookings"
+            className="rounded-[40px] border border-ink px-[22px] py-[11px] text-[14px] font-semibold text-ink no-underline transition-all duration-[400ms] ease-brand hover:bg-slate hover:text-ivory"
+          >
+            My bookings
+          </Link>
+          <SignOutButton />
+        </>
+      }
     >
       {!user.emailVerified ? (
         <div className="mb-7">

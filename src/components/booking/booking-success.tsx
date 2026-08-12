@@ -189,10 +189,10 @@ export function BookingSuccess({ recap, onClose, onBookAnother }: BookingSuccess
 
         <div className="grid gap-[10px]">
           <Link
-            href="/account"
+            href="/account/bookings"
             className="inline-flex w-full items-center justify-center rounded-[40px] bg-slate px-7 py-4 text-[15px] font-bold text-white no-underline transition-[transform,background-color] duration-300 ease-brand hover:-translate-y-[2px] hover:bg-slate-deep motion-reduce:transition-none"
           >
-            Go to my account
+            See my bookings
           </Link>
           <button
             type="button"
