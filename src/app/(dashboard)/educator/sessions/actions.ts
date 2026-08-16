@@ -1,7 +1,51 @@
 "use server";
 
-import { callApiAuthed, text, toErrorState } from "@/lib/auth/action-helpers";
+import { revalidatePath } from "next/cache";
+
+import type { BookingChildDetails } from "@contracts/bookings.ts";
+
+import {
+  callApiAuthed,
+  optionalText,
+  text,
+  toErrorState,
+} from "@/lib/auth/action-helpers";
 import type { AuthFormState } from "@/lib/auth/form-state";
+import { recordBookingOutcome } from "@/lib/dashboard/booking-outcome";
+
+/**
+ * The educator marks their own session delivered, or records a no-show.
+ *
+ * §12.2 and this dashboard's own sidebar both scope the launch educator surface to
+ * "set a password, see assignments, **mark sessions delivered**", so the third of
+ * those needs a control the educator can reach on the session itself — "Show the
+ * address" is not one.
+ *
+ * Whether the endpoint accepts an educator principal or is staff-only is the part
+ * that needs confirming; if it's the latter, the API refuses this with a message
+ * the card renders, and the staff queue's own control is unaffected.
+ */
+export async function recordSessionOutcomeAction(
+  _previous: AuthFormState,
+  formData: FormData,
+): Promise<AuthFormState> {
+  const id = text(formData, "id");
+
+  try {
+    const state = await recordBookingOutcome(
+      id,
+      text(formData, "outcome"),
+      optionalText(formData, "note"),
+    );
+    if (state.status === "success") {
+      revalidatePath("/educator/sessions");
+      revalidatePath("/dashboard/bookings");
+    }
+    return state;
+  } catch (error) {
+    return toErrorState(error);
+  }
+}
 
 /**
  * Reveals the address for one in-home session the educator is assigned to.
@@ -18,15 +62,10 @@ export async function revealSessionAddressAction(
   const id = text(formData, "id");
 
   try {
-    const details = await callApiAuthed<{
-      address: {
-        line1: string;
-        line2?: string | null;
-        city: string;
-        state: string;
-        postalCode: string;
-      } | null;
-    }>(`/bookings/${encodeURIComponent(id)}/child-details`);
+    // The contract's own type, rather than a third inline copy of it.
+    const details = await callApiAuthed<BookingChildDetails>(
+      `/bookings/${encodeURIComponent(id)}/child-details`,
+    );
 
     if (!details.address) {
       return {

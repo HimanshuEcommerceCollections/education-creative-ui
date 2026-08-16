@@ -1,9 +1,10 @@
 import { redirect } from "next/navigation";
 
 import { SignOutButton } from "@/components/account/sign-out-button";
+import { ServiceUnavailable } from "@/components/auth/service-unavailable";
 import { Sidebar } from "@/components/dashboard/sidebar";
 import { navForRole } from "@/data/dashboard-nav";
-import { getSession } from "@/lib/auth/session";
+import { guardSession } from "@/lib/auth/session";
 
 /**
  * Shell for every signed-in staff and educator surface: a sidebar beside the
@@ -22,8 +23,16 @@ import { getSession } from "@/lib/auth/session";
 export default async function DashboardLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  const session = await getSession();
-  if (!session) redirect("/login");
+  /*
+   * No `next` here: a layout can't know which of its pages was asked for, and a
+   * wrong destination after sign-in is worse than the role default. Each page
+   * passes its own path, and this layout's redirect only fires if the page's
+   * guard somehow didn't.
+   */
+  const guard = await guardSession();
+  if (!guard.ok) return <ServiceUnavailable message={guard.message} />;
+
+  const { session } = guard;
 
   // A customer has no surface in here.
   if (session.activeRole === "customer") redirect("/account");

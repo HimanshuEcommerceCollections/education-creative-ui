@@ -127,11 +127,22 @@ export const ADMISSIONS_HELP: HelpCard[] = [
   },
 ];
 
-/** Subject stats strip. */
+/**
+ * Subject stats strip.
+ *
+ * On a page aimed at families making a college decision, a decorative statistic is
+ * the last thing that belongs, so every tile states only what the page and the
+ * policy guarantee: the roadmap below has five milestones, credentials are reviewed
+ * before a counselor is listed, and an unconfirmed booking refunds itself. Nothing
+ * in the product collects a review and nothing counts delivered work, so no tile
+ * may claim an average rating, families guided, or essays workshopped.
+ */
 export const ADMISSIONS_STATS: SubjectStat[] = [
-  { id: "families", value: 85, suffix: "+", label: "Families guided" },
-  { id: "essays", value: 120, suffix: "+", label: "Essays workshopped" },
-  { id: "rating", value: 4.9, decimals: 1, label: "Average rating" },
+  { id: "milestones", value: ADMISSIONS_MILESTONES.length, label: "Milestones mapped" },
+  { id: "checked", value: 100, suffix: "%", label: "Credentials reviewed" },
+  // BOOKING_POLICY.confirmationSlaDays on the server, and the same promise the
+  // booking flow makes before anyone pays.
+  { id: "confirmation", value: 2, suffix: " days", label: "To confirm, or refund" },
 ];
 
 /** Honest answers to the questions every family asks. */

@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { EducatorPage } from "@/components/educator/educator-page";
 import { EDUCATOR_SLUGS, getEducator } from "@/data/educators";
+import { loadEducatorReviews } from "@/lib/educators/reviews";
 import { loadPricingSnapshot, ratesBySlug } from "@/lib/pricing/snapshot";
 
 interface EducatorRouteProps {
@@ -45,13 +46,24 @@ export default async function EducatorProfileRoute({
    * answer. Same pattern as /browse, so the two pages can't quote different
    * prices for the same educator.
    */
-  const rates = ratesBySlug(await loadPricingSnapshot());
+  /*
+   * Ratings and reviews come from the API's public read, never from
+   * `data/educators.ts`. Both loads degrade to "nothing known" on failure, so a
+   * build with no API running produces the same page an unreviewed educator gets:
+   * no stars, no breakdown, and "No reviews yet" in the tab.
+   */
+  const [snapshot, reviews] = await Promise.all([
+    loadPricingSnapshot(),
+    loadEducatorReviews(slug),
+  ]);
+
+  const rates = ratesBySlug(snapshot);
   const livePrice = rates[slug];
   const priced = livePrice !== undefined ? { ...profile, price: livePrice } : profile;
 
   return (
     <main>
-      <EducatorPage profile={priced} />
+      <EducatorPage profile={priced} reviews={reviews} />
     </main>
   );
 }

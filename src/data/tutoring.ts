@@ -49,7 +49,6 @@ export const TUTORING_EDUCATORS: SubjectEducator[] = [
     name: "Elena M.",
     role: "Academic Tutor",
     meta: "8 yrs experience · Online · In-home",
-    rating: "4.9",
     bio: "Patient and structured, wonderful with exam nerves across core academic subjects.",
     price: "$55/hr",
     href: "/educators/elena",
@@ -60,7 +59,6 @@ export const TUTORING_EDUCATORS: SubjectEducator[] = [
     name: "Daniel A.",
     role: "Academic Tutor",
     meta: "5 yrs experience · Online",
-    rating: "4.7",
     bio: "Maths and sciences made calm and clear, one concept at a time.",
     price: "$50/hr",
     href: "/browse",
@@ -68,9 +66,18 @@ export const TUTORING_EDUCATORS: SubjectEducator[] = [
   },
 ];
 
-/** Subject stats strip. */
+/**
+ * Subject stats strip.
+ *
+ * Every tile is checkable: the two counts come from the arrays this page renders, and
+ * the confirmation window is the policy the booking flow is built on. Ratings are
+ * published per educator, with no platform-wide average behind a tile, and there is no
+ * session history behind a monthly total, so neither may appear here.
+ */
 export const TUTORING_STATS: SubjectStat[] = [
-  { id: "monthly", value: 210, suffix: "+", label: "Tutoring sessions monthly" },
-  { id: "tutors", value: 2, label: "Vetted tutors" },
-  { id: "rating", value: 4.8, decimals: 1, label: "Average rating" },
+  { id: "subjects", value: TUTORING_MARQUEE.length, label: "Subject areas covered" },
+  { id: "tutors", value: TUTORING_EDUCATORS.length, label: "Vetted tutors" },
+  // BOOKING_POLICY.confirmationSlaDays on the server, and the same promise the
+  // booking flow makes before anyone pays.
+  { id: "confirmation", value: 2, suffix: " days", label: "To confirm, or refund" },
 ];

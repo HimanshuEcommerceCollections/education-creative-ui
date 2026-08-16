@@ -49,7 +49,6 @@ export const EDUCATORS: SubjectEducator[] = [
     name: "Marcus T.",
     role: "Music Educator",
     meta: "12 yrs experience · In-home",
-    rating: "5.0",
     bio: "Classically trained, but happiest teaching the songs you actually want to play.",
     price: "$60/hr",
     href: "/browse",
@@ -60,7 +59,6 @@ export const EDUCATORS: SubjectEducator[] = [
     name: "Rosa N.",
     role: "Music Educator",
     meta: "11 yrs experience · Online · In-home",
-    rating: "4.8",
     bio: "Violin and viola, from first bow-hold to youth orchestra auditions.",
     price: "$54/hr",
     href: "/browse",
@@ -68,9 +66,19 @@ export const EDUCATORS: SubjectEducator[] = [
   },
 ];
 
-/** Subject stats strip. */
+/**
+ * Subject stats strip.
+ *
+ * Every tile is a fact a reader can check against the page itself or against the
+ * booking policy — the two counts are read off the arrays this page renders, so they
+ * cannot drift from what is on screen. Ratings are published per educator, not as a
+ * platform average, and there is no session history to count, so no tile may state an
+ * average rating or a monthly lesson total.
+ */
 export const MUSIC_STATS: SubjectStat[] = [
-  { id: "monthly", value: 140, suffix: "+", label: "Music lessons monthly" },
-  { id: "educators", value: 2, label: "Vetted music educators" },
-  { id: "rating", value: 4.9, decimals: 1, label: "Average rating" },
+  { id: "instruments", value: MUSIC_MARQUEE.length, label: "Instruments & skills taught" },
+  { id: "educators", value: EDUCATORS.length, label: "Vetted music educators" },
+  // BOOKING_POLICY.confirmationSlaDays on the server, and the same promise the
+  // booking flow makes before anyone pays.
+  { id: "confirmation", value: 2, suffix: " days", label: "To confirm, or refund" },
 ];

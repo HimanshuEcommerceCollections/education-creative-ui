@@ -40,8 +40,14 @@ export const REQUIREMENTS: RequirementItem[] = [
     body: "A clear bio, the subjects you offer, your rates, and your availability. This is what families read first, so keeping it accurate matters.",
   },
   {
-    title: "Reliable communication through the platform",
-    body: "Messages, scheduling, and session details stay on the platform. It keeps a clear record for everyone and helps families reach you with confidence.",
+    /*
+     * Was "Messages, scheduling, and session details stay on the platform" —
+     * there is no messaging, and scheduling runs through a coordinator rather
+     * than through the educator. What is actually required of an educator is
+     * being reachable by that coordinator.
+     */
+    title: "Reachable when a coordinator calls",
+    body: "A coordinator phones you to confirm each session before it’s assigned, so a booking only goes ahead once you’ve said yes. Answering promptly is what keeps families from waiting — and session details reach you through the platform, where there’s a record of them.",
   },
 ];
 
@@ -61,7 +67,7 @@ export const REVIEW_STEPS: ReviewStep[] = [
   },
   {
     title: "Listed to families",
-    body: "Your profile goes live in Browse. Families can find you, message you, and book sessions directly.",
+    body: "Your profile goes live in Browse, and families can request you by name. A coordinator confirms each request with you before it becomes a session — nothing lands on your calendar without that call.",
   },
 ];
 

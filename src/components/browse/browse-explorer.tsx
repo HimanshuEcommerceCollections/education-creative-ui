@@ -8,12 +8,13 @@ import { Container } from "@/components/common/container";
 import { Eyebrow } from "@/components/common/eyebrow";
 import { Highlight } from "@/components/common/highlight";
 import { Reveal } from "@/components/common/reveal";
+import { bookHrefFor } from "@/constants/site";
 import { useInView } from "@/hooks/use-in-view";
+import type { EducatorRating } from "@/lib/educators/rating";
 import { revealClassName, type RevealDelay } from "@/lib/reveal";
 import {
   BROWSE_FILTERS,
   EDUCATORS,
-  PROFILE_HREF,
   type BrowseSort,
   type Educator,
 } from "@/data/browse";
@@ -23,7 +24,16 @@ import { ArrowRightIcon, SearchIcon, StarIcon } from "./browse-icons";
 import styles from "./browse-explorer.module.css";
 
 /** A single educator card — entrance reveal, hover-lift, and cursor tilt. */
-function EducatorCard({ educator, delay }: { educator: Educator; delay: RevealDelay }) {
+function EducatorCard({
+  educator,
+  rating,
+  delay,
+}: {
+  educator: Educator;
+  /** This educator's published rating, or undefined — see `BrowseExplorer`. */
+  rating?: EducatorRating;
+  delay: RevealDelay;
+}) {
   const { ref, inView } = useInView<HTMLElement>({ rootMargin: "0px 0px -8% 0px" });
   const innerRef = useRef<HTMLDivElement>(null);
 
@@ -75,10 +85,17 @@ function EducatorCard({ educator, delay }: { educator: Educator; delay: RevealDe
 
             <div className={styles.reveal}>
               <div className="mb-2 flex items-center gap-4">
-                <span className="inline-flex items-center gap-[5px] text-[14px] font-bold text-white">
-                  <StarIcon className="h-[15px] w-[15px] text-gold" />
-                  {educator.rating.toFixed(1)}
-                </span>
+                {/*
+                  Drawn only for an educator the API returned a rating for. A card
+                  with no rating shows the rate alone — "0.0" or a grey star row
+                  would put an unreviewed educator below a badly reviewed one.
+                */}
+                {rating ? (
+                  <span className="inline-flex items-center gap-[5px] text-[14px] font-bold text-white">
+                    <StarIcon className="h-[15px] w-[15px] text-gold" />
+                    {rating.average.toFixed(1)}
+                  </span>
+                ) : null}
                 <span className="font-serif text-[16px] font-bold text-white">
                   ${educator.price}
                   <i className="text-[12px] font-medium not-italic text-[rgba(244,241,234,0.6)]">/hr</i>
@@ -87,13 +104,32 @@ function EducatorCard({ educator, delay }: { educator: Educator; delay: RevealDe
               <p className="mb-3 text-[13px] leading-[1.55] text-[rgba(244,241,234,0.82)]">
                 {educator.description}
               </p>
-              <Link
-                href={PROFILE_HREF}
-                className="group/link inline-flex items-center gap-[7px] text-[13px] font-bold text-gold"
-              >
-                View profile
-                <ArrowRightIcon className="h-[14px] w-[14px] transition-transform duration-300 group-hover/link:translate-x-1" />
-              </Link>
+              {/*
+                Every link on this card goes to *this* educator, and no href may be
+                shared across the grid: one profile href behind all nine cards means
+                opening "Marcus T. (Music)" shows Elena's tutoring profile and its
+                CTA pre-fills `?educator=elena` — a silent swap of who is being
+                booked, discovered at the payment step or not at all. Only cards
+                whose profile actually exists offer one.
+              */}
+              <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+                {educator.profileHref ? (
+                  <Link
+                    href={educator.profileHref}
+                    className="group/link inline-flex items-center gap-[7px] text-[13px] font-bold text-gold"
+                  >
+                    View profile
+                    <ArrowRightIcon className="h-[14px] w-[14px] transition-transform duration-300 group-hover/link:translate-x-1" />
+                  </Link>
+                ) : null}
+                <Link
+                  href={bookHrefFor(educator.slug)}
+                  className="group/book inline-flex items-center gap-[7px] text-[13px] font-bold text-white"
+                >
+                  Request a session with {educator.name.split(" ")[0]}
+                  <ArrowRightIcon className="h-[14px] w-[14px] transition-transform duration-300 group-hover/book:translate-x-1" />
+                </Link>
+              </div>
             </div>
           </div>
         </div>
@@ -109,6 +145,7 @@ function EducatorCard({ educator, delay }: { educator: Educator; delay: RevealDe
  */
 export function BrowseExplorer({
   educators = EDUCATORS,
+  ratings = {},
 }: {
   /**
    * The grid's educators, with prices already overlaid from the live pricing
@@ -116,10 +153,24 @@ export function BrowseExplorer({
    * renders in isolation (and when the API is unreachable).
    */
   educators?: Educator[];
+  /**
+   * Published ratings by educator slug, from the API's directory. A slug that
+   * isn't in here has no published reviews (or the read failed), and its card
+   * shows no rating at all — the map is deliberately sparse rather than filled
+   * with zeroes.
+   */
+  ratings?: Record<string, EducatorRating>;
 }) {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("all");
-  const [sort, setSort] = useState<BrowseSort>("rating");
+
+  /*
+   * Whether anyone on this page has a rating at all. With none — no API, or a
+   * platform where nobody has been reviewed yet — "By rating" is an order with
+   * nothing behind it, so the option isn't offered and the grid opens by name.
+   */
+  const hasRatings = educators.some((educator) => ratings[educator.slug]);
+  const [sort, setSort] = useState<BrowseSort>(hasRatings ? "rating" : "name");
 
   const results = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -132,9 +183,25 @@ export function BrowseExplorer({
     return filtered.sort((a, b) => {
       if (sort === "priceLow") return a.price - b.price;
       if (sort === "priceHigh") return b.price - a.price;
-      return b.rating - a.rating;
+      if (sort === "rating") {
+        /*
+         * Rated educators first, best average first; everyone without a rating
+         * keeps a stable alphabetical order behind them. Sorting the unrated as
+         * though they scored zero would bury a new educator under a bad one, and
+         * inventing a midpoint for them would be a rating nobody gave.
+         */
+        const ratingA = ratings[a.slug]?.average;
+        const ratingB = ratings[b.slug]?.average;
+        if (ratingA === undefined && ratingB === undefined) {
+          return a.name.localeCompare(b.name);
+        }
+        if (ratingA === undefined) return 1;
+        if (ratingB === undefined) return -1;
+        return ratingB - ratingA || a.name.localeCompare(b.name);
+      }
+      return a.name.localeCompare(b.name);
     });
-  }, [educators, query, filter, sort]);
+  }, [educators, ratings, query, filter, sort]);
 
   return (
     <>
@@ -167,8 +234,8 @@ export function BrowseExplorer({
           <Reveal delay={2}>
             <p className="mt-5 max-w-[560px] text-[17px] leading-[1.6] text-[rgba(244,241,234,0.9)] [text-shadow:0_1px_12px_rgba(0,0,0,0.6)]">
               Explore independent tutors, coaches, and mentors across academics, admissions, music,
-              languages, arts, and cooking. Filter by subject, sort by rating or price, and find a
-              fit for your family.
+              languages, arts, and cooking. Filter by subject, sort by price, and find a fit for
+              your family.
             </p>
           </Reveal>
           <Reveal delay={3}>
@@ -234,7 +301,8 @@ export function BrowseExplorer({
                   aria-label="Sort educators"
                   className="cursor-pointer rounded-[30px] border border-line bg-white px-4 py-[10px] text-[14px] font-semibold text-ink focus:border-slate focus:outline-none"
                 >
-                  <option value="rating">By Rating</option>
+                  {hasRatings ? <option value="rating">By Rating</option> : null}
+                  <option value="name">Name (A–Z)</option>
                   <option value="priceLow">Price (low to high)</option>
                   <option value="priceHigh">Price (high to low)</option>
                 </select>
@@ -252,6 +320,7 @@ export function BrowseExplorer({
                 <EducatorCard
                   key={educator.name}
                   educator={educator}
+                  rating={ratings[educator.slug]}
                   delay={((i % 3) + 1) as RevealDelay}
                 />
               ))}

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
+import { ServiceUnavailable } from "@/components/auth/service-unavailable";
 import {
   DashboardCard,
   DashboardPage,
@@ -11,7 +12,7 @@ import {
   FormatPolicyForm,
   RateBandRow,
 } from "@/components/dashboard/pricing-editors";
-import { getSession } from "@/lib/auth/session";
+import { guardSession } from "@/lib/auth/session";
 import { loadPricingAdmin } from "@/lib/dashboard/pricing";
 
 export const metadata: Metadata = {
@@ -29,9 +30,11 @@ export const metadata: Metadata = {
  * the booking estimate pick the change up on their next request.
  */
 export default async function PricingPage() {
-  const session = await getSession();
-  if (!session) redirect("/login");
-  if (session.activeRole !== "admin") redirect("/dashboard");
+  const guard = await guardSession("/dashboard/pricing");
+  if (!guard.ok) {
+    return <ServiceUnavailable message={guard.message} retryHref="/dashboard/pricing" />;
+  }
+  if (guard.session.activeRole !== "admin") redirect("/dashboard");
 
   const { view, error } = await loadPricingAdmin();
 

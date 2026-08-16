@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 
-import { BOOKING_MIN_NOTICE_HOURS, type BookingEducator } from "@/data/booking";
+import type { BookingEducator, BookingRules } from "@/data/booking";
 import {
   WEEKDAY_INITIALS,
   daysInMonth,
@@ -25,10 +25,29 @@ interface SchedulePickerProps {
   educator: BookingEducator;
   /** Owned by the flow so the calendar and the flow agree on the notice window. */
   now: CivilNow;
+  /**
+   * The live notice and window rules from site configuration. Owned by the flow
+   * for the same reason `now` is: the calendar's greyed-out days and the flow's
+   * own re-checks have to be answering the same question.
+   */
+  rules: BookingRules;
   date: CivilDate | null;
   time: string | null;
   alternateTime: string | null;
   flexible: boolean;
+  /**
+   * Validation messages from the shared contract, keyed by its own field names.
+   *
+   * This step has to be able to show one, or a collision between the preferred and
+   * the alternate time is invisible: the contract rejects it at `alternateTime`, and
+   * with nowhere to render that, the summary says "please check the highlighted
+   * fields" while nothing anywhere is highlighted.
+   */
+  errors?: {
+    preferredDate?: string;
+    preferredTime?: string;
+    alternateTime?: string;
+  };
   onDate: (date: CivilDate) => void;
   onTime: (time: string) => void;
   onAlternateTime: (time: string | null) => void;
@@ -51,16 +70,18 @@ interface SchedulePickerProps {
 export function SchedulePicker({
   educator,
   now,
+  rules,
   date,
   time,
   alternateTime,
   flexible,
+  errors,
   onDate,
   onTime,
   onAlternateTime,
   onFlexible,
 }: SchedulePickerProps) {
-  const limit = useMemo(() => lastOpenMonth(now), [now]);
+  const limit = useMemo(() => lastOpenMonth(now, rules), [now, rules]);
 
   /**
    * Which month is on screen is *derived*, not synchronised.
@@ -75,8 +96,8 @@ export function SchedulePicker({
   const [pagedTo, setPagedTo] = useState<{ year: number; month: number } | null>(null);
 
   const fallback = useMemo(
-    () => firstOpenDate(educator, now) ?? now,
-    [educator, now],
+    () => firstOpenDate(educator, now, rules) ?? now,
+    [educator, now, rules],
   );
 
   const anchor = date ?? fallback;
@@ -97,7 +118,7 @@ export function SchedulePicker({
   const total = daysInMonth(view.year, view.month);
   const days = Array.from({ length: total }, (_, index) => index + 1);
 
-  const slots = date ? openSlots(date, educator, now) : [];
+  const slots = date ? openSlots(date, educator, now, rules) : [];
   const alternatives = slots.filter((slot) => slot !== time);
 
   return (
@@ -147,7 +168,7 @@ export function SchedulePicker({
 
           {days.map((day) => {
             const cell: CivilDate = { year: view.year, month: view.month, day };
-            const open = isDateOpen(cell, educator, now);
+            const open = isDateOpen(cell, educator, now, rules);
             const active = isSameDate(cell, date);
 
             return (
@@ -174,8 +195,16 @@ export function SchedulePicker({
 
         <p className="mt-3 text-[12.5px] leading-[1.55] text-muted">
           Open days are {educator.name.split(" ")[0]}&rsquo;s usual teaching days. We need
-          at least {BOOKING_MIN_NOTICE_HOURS} hours&rsquo; notice, so today and tomorrow
+          at least {rules.minNoticeHours} hours&rsquo; notice, so today and tomorrow
           may be closed.
+        </p>
+
+        <p
+          id="booking-date-error"
+          hidden={!errors?.preferredDate}
+          className="mt-[9px] text-[12.5px] font-semibold text-[#b23b3b]"
+        >
+          {errors?.preferredDate}
         </p>
       </div>
 
@@ -222,6 +251,14 @@ export function SchedulePicker({
             </p>
           </>
         )}
+
+        <p
+          id="booking-time-error"
+          hidden={!errors?.preferredTime}
+          className="mt-[9px] text-[12.5px] font-semibold text-[#b23b3b]"
+        >
+          {errors?.preferredTime}
+        </p>
       </fieldset>
 
       {date && time ? (
@@ -241,7 +278,14 @@ export function SchedulePicker({
                 name="alternateTime"
                 value={alternateTime ?? ""}
                 onChange={(event) => onAlternateTime(event.target.value || null)}
-                className="w-full cursor-pointer appearance-none rounded-[11px] border-[1.5px] border-line bg-white px-[15px] py-[11px] pr-[42px] text-[14px] font-semibold text-ink focus:border-slate focus:outline-none"
+                aria-invalid={errors?.alternateTime ? true : undefined}
+                aria-describedby={
+                  errors?.alternateTime ? "booking-alternate-error" : undefined
+                }
+                className={cn(
+                  "w-full cursor-pointer appearance-none rounded-[11px] border-[1.5px] bg-white px-[15px] py-[11px] pr-[42px] text-[14px] font-semibold text-ink focus:border-slate focus:outline-none",
+                  errors?.alternateTime ? "border-[#b23b3b]" : "border-line",
+                )}
               >
                 <option value="">No second choice</option>
                 {alternatives.map((slot) => (
@@ -252,6 +296,14 @@ export function SchedulePicker({
               </select>
             </div>
           ) : null}
+
+          <p
+            id="booking-alternate-error"
+            hidden={!errors?.alternateTime}
+            className="mb-3 text-[12.5px] font-semibold text-[#b23b3b]"
+          >
+            {errors?.alternateTime}
+          </p>
 
           <label className="flex cursor-pointer select-none items-start gap-[11px] text-[13.5px] leading-[1.5] text-muted">
             <input

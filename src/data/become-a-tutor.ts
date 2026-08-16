@@ -34,7 +34,7 @@ export const TEACH_BENEFITS: TeachBenefit[] = [
   {
     icon: "calendar",
     title: "Parent-managed bookings",
-    body: "Scheduling, messaging, and payment run through the parent account. You focus on teaching while families handle the logistics on their side.",
+    body: "A coordinator confirms every session with the parent, and payment runs through their account. You focus on teaching while we handle the logistics.",
   },
   {
     icon: "pin",

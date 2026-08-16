@@ -28,6 +28,16 @@ function OverviewIcon(props: SVGProps<SVGSVGElement>) {
   );
 }
 
+/** An envelope in a tray — an enquiry someone sent us, waiting to be picked up. */
+function QueriesIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...base} {...props}>
+      <rect x="3" y="5" width="18" height="14" rx="2" />
+      <path d="M3.5 7l8.5 6 8.5-6" />
+    </svg>
+  );
+}
+
 function ApplicationsIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <svg {...base} {...props}>
@@ -134,6 +144,7 @@ export const DASHBOARD_ICONS: Record<
   (props: SVGProps<SVGSVGElement>) => React.ReactElement
 > = {
   overview: OverviewIcon,
+  queries: QueriesIcon,
   applications: ApplicationsIcon,
   bookings: BookingsIcon,
   educators: EducatorsIcon,

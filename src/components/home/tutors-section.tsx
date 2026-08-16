@@ -3,11 +3,19 @@ import { Reveal } from "@/components/common/reveal";
 import { Section } from "@/components/common/section";
 import { SectionHeading } from "@/components/common/section-heading";
 import { TutorStack } from "@/components/home/tutor-stack";
+import { loadEducatorRatings } from "@/lib/educators/directory";
 
-export function TutorsSection() {
+/**
+ * Async so the ratings on the featured cards are the API's, resolved on the
+ * server. The stack itself stays a client island; this only hands it the numbers.
+ */
+export async function TutorsSection() {
+  const ratings = await loadEducatorRatings();
+
   return (
     <Section id="tutors" className="overflow-hidden bg-ivory py-[17vh]">
       <TutorStack
+        ratings={ratings}
         heading={
           <Reveal>
             <SectionHeading

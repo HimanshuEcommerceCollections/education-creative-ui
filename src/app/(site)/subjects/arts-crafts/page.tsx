@@ -58,7 +58,7 @@ export default function ArtsCraftsSubjectPage() {
             Make something <Highlight tone="gold">this weekend.</Highlight>
           </>
         }
-        description="Tell Theo what you'd love to try — painting, pottery, or paper — and book a first session at your own table."
+        description="Choose a craft educator, pick a time at your own table, and pay to place the request. A coordinator confirms it with them within two days — or you're refunded in full, automatically."
         bgImage={{ src: "/assets/arts/images/cta-bg.jpg", alt: "" }}
       />
     </main>

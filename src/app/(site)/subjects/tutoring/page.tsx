@@ -16,6 +16,7 @@ import {
   TUTORING_OFFERS,
   TUTORING_STATS,
 } from "@/data/tutoring";
+import { loadEducatorRatings } from "@/lib/educators/directory";
 import { loadPricingSnapshot, withLiveRates } from "@/lib/pricing/snapshot";
 
 export const metadata: Metadata = {
@@ -25,13 +26,16 @@ export const metadata: Metadata = {
 };
 
 export default async function TutoringSubjectPage() {
-  // Card content stays in-repo; the hourly rate is the admin-set figure, so this
-  // page can't drift from the same educator on browse or their profile.
-  const educators = withLiveRates(
-    TUTORING_EDUCATORS,
-    await loadPricingSnapshot(),
-    "tutoring",
-  );
+  /*
+   * Card content stays in-repo; the hourly rate is the admin-set figure and the
+   * rating is the API's published average, so this page can't drift from the same
+   * educator on browse or their profile. No rating for someone means no pill.
+   */
+  const [snapshot, ratings] = await Promise.all([
+    loadPricingSnapshot(),
+    loadEducatorRatings(),
+  ]);
+  const educators = withLiveRates(TUTORING_EDUCATORS, snapshot, "tutoring");
 
   return (
     <main>
@@ -85,6 +89,7 @@ export default async function TutoringSubjectPage() {
         }
         bgImage={{ src: "/assets/tutoring/images/educators-bg.jpg", alt: "" }}
         educators={educators}
+        ratings={ratings}
       />
 
       <SubjectStats stats={TUTORING_STATS} />
@@ -95,7 +100,7 @@ export default async function TutoringSubjectPage() {
             Ready for <Highlight tone="gold">steadier progress?</Highlight>
           </>
         }
-        description="Start with a free 20-minute intro call. Tell us where things stand, and we’ll match a tutor who fits — no commitment."
+        description="Choose a tutor, a time, and a format, then pay to place the request. A coordinator confirms it with them within two days — or you’re refunded in full, automatically."
         bgImage={{ src: "/assets/tutoring/images/cta-bg.jpg", alt: "" }}
       />
     </main>

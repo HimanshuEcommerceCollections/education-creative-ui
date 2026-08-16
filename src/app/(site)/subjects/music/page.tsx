@@ -12,6 +12,7 @@ import { SubjectCta } from "@/components/subject/subject-cta";
 import { SubjectHero } from "@/components/subject/subject-hero";
 import { SubjectStats } from "@/components/subject/subject-stats";
 import { EDUCATORS, MUSIC_MARQUEE, MUSIC_STATS, OFFERS } from "@/data/music";
+import { loadEducatorRatings } from "@/lib/educators/directory";
 import { loadPricingSnapshot, withLiveRates } from "@/lib/pricing/snapshot";
 
 export const metadata: Metadata = {
@@ -21,9 +22,16 @@ export const metadata: Metadata = {
 };
 
 export default async function MusicSubjectPage() {
-  // Card content stays in-repo; the hourly rate is the admin-set figure, so this
-  // page can't drift from the same educator on browse or their profile.
-  const educators = withLiveRates(EDUCATORS, await loadPricingSnapshot(), "music");
+  /*
+   * Card content stays in-repo; the hourly rate is the admin-set figure and the
+   * rating is the API's published average, so this page can't drift from the same
+   * educator on browse or their profile. No rating for someone means no pill.
+   */
+  const [snapshot, ratings] = await Promise.all([
+    loadPricingSnapshot(),
+    loadEducatorRatings(),
+  ]);
+  const educators = withLiveRates(EDUCATORS, snapshot, "music");
 
   return (
     <main>
@@ -76,6 +84,7 @@ export default async function MusicSubjectPage() {
         }
         bgImage={{ src: "/assets/music/images/educators-bg.jpg", alt: "" }}
         educators={educators}
+        ratings={ratings}
       />
 
       <SubjectStats stats={MUSIC_STATS} />
@@ -86,7 +95,7 @@ export default async function MusicSubjectPage() {
             Ready to make <Highlight tone="gold">some noise?</Highlight>
           </>
         }
-        description="Start with a free 20-minute intro call with a music educator. Meet them, talk goals, and see if it clicks — no commitment."
+        description="Pick a music educator, choose a time, and pay to place the request. A coordinator confirms it with them within two days — or the booking is refunded in full, automatically."
         bgImage={{ src: "/assets/music/images/cta-bg.jpg", alt: "" }}
       />
     </main>

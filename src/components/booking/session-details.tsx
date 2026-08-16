@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import type { ReactNode } from "react";
 
 import {
@@ -69,7 +70,17 @@ interface SessionDetailsProps {
   subject: BookingTopic | null;
   format: BookingFormat;
   duration: SessionDuration;
-  subjectError?: string;
+  /**
+   * Validation messages for this step's three fields. All three have to be rendered,
+   * not just the subject one: the flow collects them from the shared contract, and a
+   * rejected format or length with nowhere to appear produces "please check the
+   * highlighted fields" with nothing highlighted.
+   */
+  errors?: {
+    subject?: string;
+    format?: string;
+    duration?: string;
+  };
   onSubject: (subject: BookingTopic) => void;
   onFormat: (format: BookingFormat) => void;
   onDuration: (duration: SessionDuration) => void;
@@ -88,7 +99,7 @@ export function SessionDetails({
   subject,
   format,
   duration,
-  subjectError,
+  errors,
   onSubject,
   onFormat,
   onDuration,
@@ -101,25 +112,39 @@ export function SessionDetails({
           <span className="text-slate">*</span>
         </legend>
 
-        <div className="flex flex-wrap gap-[10px]">
-          {educator.subjects.map((option) => (
-            <ChoiceChip
-              key={option.label}
-              name="subjectTopic"
-              value={option.label}
-              label={option.label}
-              checked={subject?.label === option.label}
-              onSelect={() => onSubject(option)}
-            />
-          ))}
-        </div>
+        {educator.subjects.length > 0 ? (
+          <div className="flex flex-wrap gap-[10px]">
+            {educator.subjects.map((option) => (
+              <ChoiceChip
+                key={option.label}
+                name="subjectTopic"
+                value={option.label}
+                label={option.label}
+                checked={subject?.label === option.label}
+                onSelect={() => onSubject(option)}
+              />
+            ))}
+          </div>
+        ) : (
+          /* Reachable when the pricing snapshot has no priced category for anything
+           * this educator teaches. Saying so beats offering a chip the API refuses. */
+          <p className="text-[14px] leading-[1.55] text-muted">
+            We can&rsquo;t price any of {educator.name.split(" ")[0]}&rsquo;s subjects at
+            the moment, so this booking can&rsquo;t be taken online. Choose another
+            educator above, or{" "}
+            <Link href="/contact" className="font-semibold text-slate underline">
+              contact us
+            </Link>{" "}
+            and a coordinator will arrange it.
+          </p>
+        )}
 
         <p
           id="booking-subject-error"
-          hidden={!subjectError}
+          hidden={!errors?.subject}
           className="mt-[9px] text-[12.5px] font-semibold text-[#b23b3b]"
         >
-          {subjectError}
+          {errors?.subject}
         </p>
       </fieldset>
 
@@ -178,6 +203,14 @@ export function SessionDetails({
             );
           })}
         </div>
+
+        <p
+          id="booking-format-error"
+          hidden={!errors?.format}
+          className="mt-[9px] text-[12.5px] font-semibold text-[#b23b3b]"
+        >
+          {errors?.format}
+        </p>
       </fieldset>
 
       <fieldset>
@@ -197,6 +230,14 @@ export function SessionDetails({
             />
           ))}
         </div>
+
+        <p
+          id="booking-duration-error"
+          hidden={!errors?.duration}
+          className="mt-[9px] text-[12.5px] font-semibold text-[#b23b3b]"
+        >
+          {errors?.duration}
+        </p>
       </fieldset>
     </div>
   );

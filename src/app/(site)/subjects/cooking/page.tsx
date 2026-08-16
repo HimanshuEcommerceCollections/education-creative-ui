@@ -15,6 +15,7 @@ import {
   COOKING_EDUCATORS,
   COOKING_STATS,
 } from "@/data/cooking";
+import { loadEducatorRatings } from "@/lib/educators/directory";
 import { loadPricingSnapshot, withLiveRates } from "@/lib/pricing/snapshot";
 
 export const metadata: Metadata = {
@@ -26,13 +27,16 @@ export const metadata: Metadata = {
 const SIZZLE = ["Poach", "Simmer", "Sauté", "Sear", "Char", "Roast"];
 
 export default async function CookingSubjectPage() {
-  // Card content stays in-repo; the hourly rate is the admin-set figure, so this
-  // page can't drift from the same educator on browse or their profile.
-  const educators = withLiveRates(
-    COOKING_EDUCATORS,
-    await loadPricingSnapshot(),
-    "cooking",
-  );
+  /*
+   * Card content stays in-repo; the hourly rate is the admin-set figure and the
+   * rating is the API's published average, so this page can't drift from the same
+   * educator on browse or their profile. No rating for someone means no pill.
+   */
+  const [snapshot, ratings] = await Promise.all([
+    loadPricingSnapshot(),
+    loadEducatorRatings(),
+  ]);
+  const educators = withLiveRates(COOKING_EDUCATORS, snapshot, "cooking");
 
   return (
     <main>
@@ -66,6 +70,7 @@ export default async function CookingSubjectPage() {
         }
         bgImage={{ src: "/assets/cooking/images/educators-bg.jpg", alt: "" }}
         educators={educators}
+        ratings={ratings}
         note="For learners under 18, a parent or guardian books and supervises every session — always."
       />
 
@@ -77,7 +82,7 @@ export default async function CookingSubjectPage() {
             Cook something <Highlight tone="gold">tonight.</Highlight>
           </>
         }
-        description="Tell James or Rosa what you'd love to make — a weeknight dinner, fresh bread, a dish from somewhere far — and book your first session at your own stove."
+        description="Open James's profile or Rosa's, pick a time at your own stove, and pay to place the request. A coordinator confirms it with them within two days — or you're refunded in full, automatically."
         bgImage={{ src: "/assets/cooking/images/cta-bg.jpg", alt: "" }}
       />
     </main>

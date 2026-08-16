@@ -3,28 +3,31 @@
 import { useActionState, useState } from "react";
 import { useFormStatus } from "react-dom";
 
-import { REFUND_POLICY } from "@contracts/bookings.ts";
-import type { BookingStatus, CoordinatorBooking } from "@contracts/bookings.ts";
+import { BOOKING_TIMEZONE, REFUND_POLICY } from "@contracts/bookings.ts";
+import type {
+  AssignableEducator,
+  BookingStatus,
+  CoordinatorBooking,
+} from "@contracts/bookings.ts";
 
 import {
   cannotConfirmBookingAction,
   confirmBookingAction,
+  reassignBookingAction,
+  recordBookingOutcomeAction,
   refundBookingAction,
+  rescheduleBookingAction,
   revealChildDetailsAction,
 } from "@/app/(dashboard)/dashboard/bookings/actions";
-import { IDLE, formMessage } from "@/lib/auth/form-state";
+import { SessionExpiredAlert } from "@/components/auth/session-expired-alert";
+import { IDLE, fieldError, formMessage, sessionExpired } from "@/lib/auth/form-state";
 import { cn } from "@/lib/utils";
-
-/** An educator a coordinator may assign. Approved only — the API refuses others. */
-export interface AssignableEducator {
-  slug: string;
-  name: string;
-}
 
 const STATUS_STYLES: Partial<Record<BookingStatus, string>> = {
   paid_unconfirmed: "border-[rgba(210,162,65,0.5)] bg-[rgba(210,162,65,0.12)] text-[#7a5a12]",
   confirmed: "border-[rgba(45,120,80,0.35)] bg-[rgba(45,120,80,0.09)] text-[#256a45]",
   completed: "border-[rgba(46,58,115,0.3)] bg-[rgba(var(--slate-rgb),0.08)] text-slate",
+  no_show: "border-[rgba(194,72,60,0.35)] bg-[rgba(194,72,60,0.08)] text-[#a63a30]",
   refunded: "border-[rgba(194,72,60,0.35)] bg-[rgba(194,72,60,0.08)] text-[#a63a30]",
   partially_refunded:
     "border-[rgba(194,72,60,0.35)] bg-[rgba(194,72,60,0.08)] text-[#a63a30]",
@@ -51,6 +54,16 @@ const FIELD =
   "rounded-[11px] border-[1.5px] border-line bg-sand px-[13px] py-[9px] text-[13px] " +
   "text-ink placeholder:text-[rgba(99,99,110,0.6)] focus:border-slate focus:bg-white focus:outline-none";
 
+/**
+ * `America/New_York` → `New York`. Every date and time on a booking is a *civil*
+ * value in `BOOKING_TIMEZONE`, so the reschedule fields have to name whose clock
+ * they mean — a coordinator on a laptop set to UTC would otherwise type theirs.
+ */
+const TIMEZONE_LABEL = BOOKING_TIMEZONE.split("/").pop()?.replace(/_/g, " ") ?? BOOKING_TIMEZONE;
+
+/** Statuses where the session hasn't happened yet, so its time can still move. */
+const RESCHEDULABLE: readonly BookingStatus[] = ["confirmed", "paid_unconfirmed"];
+
 function money(cents: number, currency: string): string {
   return new Intl.NumberFormat("en-US", {
     style: "currency",
@@ -59,9 +72,16 @@ function money(cents: number, currency: string): string {
   }).format(cents / 100);
 }
 
+/** `4:00 PM` from an `HH:MM` civil time. */
+function timeLabel(time: string): string {
+  const [hour, minute] = time.split(":").map(Number);
+  const suffix = (hour ?? 0) < 12 ? "AM" : "PM";
+  const twelve = (hour ?? 0) % 12 === 0 ? 12 : (hour ?? 0) % 12;
+  return `${twelve}:${String(minute ?? 0).padStart(2, "0")} ${suffix}`;
+}
+
 /** `Sat, Aug 15 · 4:00 PM` from the civil date and time on the booking. */
 function whenLabel(date: string, time: string): string {
-  const [hour, minute] = time.split(":").map(Number);
   const stamp = new Date(`${date}T${time}:00`);
   const day = Number.isNaN(stamp.getTime())
     ? date
@@ -70,9 +90,7 @@ function whenLabel(date: string, time: string): string {
         month: "short",
         day: "numeric",
       });
-  const suffix = (hour ?? 0) < 12 ? "AM" : "PM";
-  const twelve = (hour ?? 0) % 12 === 0 ? 12 : (hour ?? 0) % 12;
-  return `${day} · ${twelve}:${String(minute ?? 0).padStart(2, "0")} ${suffix}`;
+  return `${day} · ${timeLabel(time)}`;
 }
 
 /**
@@ -136,23 +154,73 @@ export function BookingQueueRow({
   const [refundState, refundAction] = useActionState(cannotConfirmBookingAction, IDLE);
   const [detailsState, detailsAction] = useActionState(revealChildDetailsAction, IDLE);
   const [partialState, partialAction] = useActionState(refundBookingAction, IDLE);
+  const [outcomeState, outcomeAction] = useActionState(recordBookingOutcomeAction, IDLE);
+  const [moveState, moveAction] = useActionState(rescheduleBookingAction, IDLE);
+  const [handoverState, handoverAction] = useActionState(reassignBookingAction, IDLE);
   const [refunding, setRefunding] = useState(false);
   const [issuingRefund, setIssuingRefund] = useState(false);
+  const [recordingOutcome, setRecordingOutcome] = useState(false);
+  /*
+   * Rescheduling and reassigning share one slot rather than getting a disclosure
+   * each: they are the same decision from the same phone call, and two forms open
+   * at once invites saving one and forgetting the other.
+   */
+  const [changing, setChanging] = useState<"reschedule" | "reassign" | null>(null);
 
-  const message =
-    formMessage(confirmState) ??
-    formMessage(refundState) ??
-    formMessage(partialState) ??
-    (confirmState.status === "success" ? confirmState.message : undefined) ??
-    (refundState.status === "success" ? refundState.message : undefined) ??
-    (partialState.status === "success" ? partialState.message : undefined);
+  /*
+   * The staff idle window is 45 minutes, and this row is exactly where it closes
+   * under someone — mid-note, on a booking a family has already paid for. That
+   * gets its own unmistakable notice instead of a red box beside a field.
+   */
+  const expired = sessionExpired(
+    confirmState,
+    refundState,
+    partialState,
+    outcomeState,
+    moveState,
+    handoverState,
+    detailsState,
+  );
+
+  const message = expired
+    ? undefined
+    : formMessage(confirmState) ??
+      formMessage(refundState) ??
+      formMessage(partialState) ??
+      formMessage(outcomeState) ??
+      formMessage(moveState) ??
+      formMessage(handoverState) ??
+      (confirmState.status === "success" ? confirmState.message : undefined) ??
+      (refundState.status === "success" ? refundState.message : undefined) ??
+      (partialState.status === "success" ? partialState.message : undefined) ??
+      (outcomeState.status === "success" ? outcomeState.message : undefined) ??
+      (moveState.status === "success" ? moveState.message : undefined) ??
+      (handoverState.status === "success" ? handoverState.message : undefined);
 
   const failed =
     confirmState.status === "error" ||
     refundState.status === "error" ||
-    partialState.status === "error";
+    partialState.status === "error" ||
+    outcomeState.status === "error" ||
+    moveState.status === "error" ||
+    handoverState.status === "error";
   const awaiting = booking.status === "paid_unconfirmed";
   const sla = slaLabel(booking.slaDeadline, readAt);
+  /** Only a confirmed session can be delivered or missed. */
+  const canRecordOutcome = booking.status === "confirmed";
+  /** A session that hasn't happened can still move; a finished one can't. */
+  const canReschedule = RESCHEDULABLE.includes(booking.status);
+  /** Handing it over presupposes somebody is holding it — i.e. a confirm. */
+  const canReassign = booking.status === "confirmed";
+  /*
+   * Who is actually on the hook. `assignedEducator` is set by the confirm, so on a
+   * confirmed booking it is the answer; the requested educator is the fallback for
+   * the impossible case of a confirmed row without one, so the form never renders
+   * a blank name.
+   */
+  const holder = booking.assignedEducator ?? booking.requestedEducator;
+  /** The API refuses a no-op reassign, so the current holder isn't offered. */
+  const substitutes = educators.filter((educator) => educator.slug !== holder.slug);
 
   /*
    * An educator the parent requested who isn't in the approved list still shows
@@ -197,7 +265,8 @@ export function BookingQueueRow({
             <b className="font-semibold text-ink">{booking.reference}</b>
             {" · "}
             {whenLabel(booking.preferredDate, booking.preferredTime)}
-            {booking.alternateTime ? ` (or ${booking.alternateTime})` : ""}
+            {/* Formatted like the primary time, so a raw `16:00` never leaks out here. */}
+            {booking.alternateTime ? ` (or ${timeLabel(booking.alternateTime)})` : ""}
             {booking.flexibleTime ? " · flexible" : ""}
             {" · "}
             {booking.format === "in_home" ? "In-home" : "Online"}
@@ -255,7 +324,7 @@ export function BookingQueueRow({
           </span>
         </p>
       ) : null}
-      {detailsState.status === "error" ? (
+      {detailsState.status === "error" && !expired ? (
         <p
           role="alert"
           className="mt-3 rounded-[11px] border-[1.5px] border-[rgba(194,72,60,0.35)] bg-[rgba(194,72,60,0.07)] px-[14px] py-[10px] text-[13px] text-[#a63a30]"
@@ -276,6 +345,70 @@ export function BookingQueueRow({
         >
           {message}
         </p>
+      ) : null}
+
+      {expired ? <SessionExpiredAlert /> : null}
+
+      {canRecordOutcome ? (
+        /*
+         * How `completed` and `no_show` are finally reachable. Both states had
+         * parent-facing copy and a queue label, and nothing in the product could
+         * put a booking into either — a delivered session stayed "Confirmed"
+         * forever. Staff get this because a coordinator usually hears about a
+         * no-show first; the educator's own session card posts to the same
+         * endpoint.
+         */
+        <div className="mt-5 border-t border-line pt-5">
+          {recordingOutcome ? (
+            <form action={outcomeAction} className="flex flex-wrap items-end gap-3">
+              <input type="hidden" name="id" value={booking.id} />
+              <label className="flex flex-col gap-[6px] text-[12px] font-semibold uppercase tracking-[0.07em] text-muted">
+                Outcome
+                <select name="outcome" defaultValue="completed" className={cn(FIELD, "w-[180px]")}>
+                  <option value="completed">Delivered</option>
+                  <option value="no_show">No-show</option>
+                </select>
+              </label>
+              <label className="flex flex-1 flex-col gap-[6px] text-[12px] font-semibold uppercase tracking-[0.07em] text-muted">
+                Note (optional)
+                <input
+                  name="note"
+                  placeholder="Ran the full hour; parent present"
+                  className={FIELD}
+                />
+              </label>
+              <PendingButton
+                label="Record outcome"
+                pendingLabel="Saving…"
+                className="border-transparent bg-slate text-white hover:bg-slate-deep"
+              />
+              <button
+                type="button"
+                onClick={() => setRecordingOutcome(false)}
+                className="pb-[9px] text-[13px] font-semibold text-muted transition-colors hover:text-ink"
+              >
+                Cancel
+              </button>
+              {fieldError(outcomeState, "note") ? (
+                <p className="w-full text-[12px] text-[#a63a30]">
+                  {fieldError(outcomeState, "note")}
+                </p>
+              ) : null}
+              <p className="w-full text-[12px] text-muted">
+                A no-show is not refunded automatically — use the refund control below
+                if the family is owed something back.
+              </p>
+            </form>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setRecordingOutcome(true)}
+              className="text-[13px] font-semibold text-slate transition-colors hover:text-gold"
+            >
+              Record the outcome &mdash; delivered or no-show
+            </button>
+          )}
+        </div>
       ) : null}
 
       {awaiting ? (
@@ -360,8 +493,19 @@ export function BookingQueueRow({
                   inputMode="decimal"
                   defaultValue={(booking.refundableCents / 100).toFixed(2)}
                   aria-describedby={`refund-limit-${booking.id}`}
+                  aria-invalid={Boolean(fieldError(partialState, "amount"))}
                   className={cn(FIELD, "w-[120px]")}
                 />
+                {/*
+                  The action re-keys the contract's `amountCents` onto this input's
+                  name, so an over-cap refusal lands on the box the number was typed
+                  into rather than only in the form alert.
+                */}
+                {fieldError(partialState, "amount") ? (
+                  <span className="text-[12px] font-normal normal-case tracking-normal text-[#a63a30]">
+                    {fieldError(partialState, "amount")}
+                  </span>
+                ) : null}
               </label>
               <label className="flex flex-1 flex-col gap-[6px] text-[12px] font-semibold uppercase tracking-[0.07em] text-muted">
                 Why? The parent is told this.
@@ -405,6 +549,238 @@ export function BookingQueueRow({
             >
               Refund some or all of {money(booking.refundableCents, booking.currency)}
             </button>
+          )}
+        </div>
+      ) : null}
+
+      {canReschedule || canReassign ? (
+        /*
+         * The two ways a session changes after it has been sold: a new time, a
+         * different educator, or — on a bad day — both. They share one disclosure
+         * slot for the same reason the refund and outcome controls have theirs:
+         * this row already carries five decisions, and two more permanently-open
+         * forms would bury the one that matters most on a given booking.
+         */
+        <div className="mt-5 border-t border-line pt-5">
+          {changing === "reschedule" ? (
+            <form
+              /*
+               * Re-keyed on the booking's own date and time. A successful move
+               * revalidates the queue and this row comes back with the new values,
+               * but an uncontrolled input ignores a changed `defaultValue` — so
+               * without the key the form would sit there still showing the old
+               * time and the reason that has already been emailed.
+               */
+              key={`${booking.preferredDate}T${booking.preferredTime}`}
+              action={moveAction}
+              className="flex flex-wrap items-end gap-3"
+            >
+              <input type="hidden" name="id" value={booking.id} />
+
+              {/* What it is now, beside what it is becoming. */}
+              <div className="flex flex-col gap-[6px] text-[12px] font-semibold uppercase tracking-[0.07em] text-muted">
+                Currently
+                <span className="rounded-[11px] border-[1.5px] border-dashed border-line bg-sand px-[13px] py-[9px] text-[13px] font-normal normal-case tracking-normal text-ink">
+                  {whenLabel(booking.preferredDate, booking.preferredTime)}
+                </span>
+              </div>
+              <span aria-hidden="true" className="pb-[11px] text-[15px] text-muted">
+                &rarr;
+              </span>
+
+              <label className="flex flex-col gap-[6px] text-[12px] font-semibold uppercase tracking-[0.07em] text-muted">
+                New date
+                <input
+                  type="date"
+                  name="preferredDate"
+                  required
+                  defaultValue={booking.preferredDate}
+                  aria-invalid={Boolean(fieldError(moveState, "preferredDate"))}
+                  className={cn(FIELD, "w-[165px]")}
+                />
+                {fieldError(moveState, "preferredDate") ? (
+                  <span className="text-[12px] font-normal normal-case tracking-normal text-[#a63a30]">
+                    {fieldError(moveState, "preferredDate")}
+                  </span>
+                ) : null}
+              </label>
+
+              <label className="flex flex-col gap-[6px] text-[12px] font-semibold uppercase tracking-[0.07em] text-muted">
+                New time
+                <input
+                  type="time"
+                  name="preferredTime"
+                  required
+                  defaultValue={booking.preferredTime}
+                  aria-invalid={Boolean(fieldError(moveState, "preferredTime"))}
+                  className={cn(FIELD, "w-[130px]")}
+                />
+                {fieldError(moveState, "preferredTime") ? (
+                  <span className="text-[12px] font-normal normal-case tracking-normal text-[#a63a30]">
+                    {fieldError(moveState, "preferredTime")}
+                  </span>
+                ) : null}
+              </label>
+
+              <label className="flex flex-1 basis-[220px] flex-col gap-[6px] text-[12px] font-semibold uppercase tracking-[0.07em] text-muted">
+                Why it moved. Everyone is told this.
+                <input
+                  name="reason"
+                  required
+                  placeholder="Parent asked to move it a week"
+                  aria-invalid={Boolean(fieldError(moveState, "reason"))}
+                  className={FIELD}
+                />
+                {fieldError(moveState, "reason") ? (
+                  <span className="text-[12px] font-normal normal-case tracking-normal text-[#a63a30]">
+                    {fieldError(moveState, "reason")}
+                  </span>
+                ) : null}
+              </label>
+
+              <PendingButton
+                label="Move the session"
+                pendingLabel="Moving…"
+                className="border-transparent bg-slate text-white hover:bg-slate-deep"
+              />
+              <button
+                type="button"
+                onClick={() => setChanging(null)}
+                className="pb-[9px] text-[13px] font-semibold text-muted transition-colors hover:text-ink"
+              >
+                Cancel
+              </button>
+
+              <p className="w-full text-[12px] leading-[1.55] text-muted">
+                Times are {TIMEZONE_LABEL} time. Saving emails the parent
+                {booking.assignedEducator
+                  ? ` and ${booking.assignedEducator.name}`
+                  : " and the educator on this booking"}{" "}
+                the new time and this reason — it goes out the moment you save, so
+                make the call first.
+              </p>
+            </form>
+          ) : changing === "reassign" ? (
+            /* Keyed on the current holder for the same reason as the date above. */
+            <form key={holder.slug} action={handoverAction} className="flex flex-wrap items-end gap-3">
+              <input type="hidden" name="id" value={booking.id} />
+
+              {/* Named, not implied: this is who the session is being taken from. */}
+              <div className="flex flex-col gap-[6px] text-[12px] font-semibold uppercase tracking-[0.07em] text-muted">
+                Teaching it now
+                <span className="rounded-[11px] border-[1.5px] border-dashed border-line bg-sand px-[13px] py-[9px] text-[13px] font-normal normal-case tracking-normal text-ink">
+                  {holder.name}
+                </span>
+              </div>
+              <span aria-hidden="true" className="pb-[11px] text-[15px] text-muted">
+                &rarr;
+              </span>
+
+              {substitutes.length === 0 ? (
+                <>
+                  <p className="flex-1 basis-[260px] pb-[10px] text-[13px] leading-[1.55] text-muted">
+                    There is no other approved educator with a current background check
+                    to hand this to. Approve one first, or refund the booking.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setChanging(null)}
+                    className="pb-[9px] text-[13px] font-semibold text-muted transition-colors hover:text-ink"
+                  >
+                    Cancel
+                  </button>
+                </>
+              ) : (
+                <>
+                  <label className="flex flex-col gap-[6px] text-[12px] font-semibold uppercase tracking-[0.07em] text-muted">
+                    Hand it to
+                    <select
+                      name="educatorSlug"
+                      required
+                      defaultValue=""
+                      aria-invalid={Boolean(fieldError(handoverState, "educatorSlug"))}
+                      className={cn(FIELD, "w-[240px]")}
+                    >
+                      <option value="" disabled>
+                        Choose an educator
+                      </option>
+                      {substitutes.map((educator) => (
+                        <option key={educator.slug} value={educator.slug}>
+                          {educator.subjects.length > 0
+                            ? `${educator.name} — ${educator.subjects.join(", ")}`
+                            : educator.name}
+                        </option>
+                      ))}
+                    </select>
+                    {fieldError(handoverState, "educatorSlug") ? (
+                      <span className="text-[12px] font-normal normal-case tracking-normal text-[#a63a30]">
+                        {fieldError(handoverState, "educatorSlug")}
+                      </span>
+                    ) : null}
+                  </label>
+
+                  <label className="flex flex-1 basis-[220px] flex-col gap-[6px] text-[12px] font-semibold uppercase tracking-[0.07em] text-muted">
+                    Why it moved. Everyone is told this.
+                    <input
+                      name="reason"
+                      required
+                      placeholder="Original educator is ill"
+                      aria-invalid={Boolean(fieldError(handoverState, "reason"))}
+                      className={FIELD}
+                    />
+                    {fieldError(handoverState, "reason") ? (
+                      <span className="text-[12px] font-normal normal-case tracking-normal text-[#a63a30]">
+                        {fieldError(handoverState, "reason")}
+                      </span>
+                    ) : null}
+                  </label>
+
+                  <PendingButton
+                    label="Reassign"
+                    pendingLabel="Reassigning…"
+                    className="border-transparent bg-slate text-white hover:bg-slate-deep"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setChanging(null)}
+                    className="pb-[9px] text-[13px] font-semibold text-muted transition-colors hover:text-ink"
+                  >
+                    Cancel
+                  </button>
+
+                  <p className="w-full text-[12px] leading-[1.55] text-muted">
+                    Saving emails all three straight away — the parent, the educator
+                    taking it on, and {holder.name}, who is told they no longer have
+                    this session. Phone {holder.name} before you save, not after.
+                  </p>
+                </>
+              )}
+            </form>
+          ) : (
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+              {canReschedule ? (
+                <button
+                  type="button"
+                  onClick={() => setChanging("reschedule")}
+                  className="text-[13px] font-semibold text-slate transition-colors hover:text-gold"
+                >
+                  Move this session to another time
+                </button>
+              ) : null}
+              {canReassign ? (
+                <button
+                  type="button"
+                  onClick={() => setChanging("reassign")}
+                  className="text-[13px] font-semibold text-slate transition-colors hover:text-gold"
+                >
+                  Hand it to a different educator
+                </button>
+              ) : null}
+              <span className="w-full text-[12px] text-muted">
+                Either one emails the parent and the educators involved the moment you
+                save it.
+              </span>
+            </div>
           )}
         </div>
       ) : null}

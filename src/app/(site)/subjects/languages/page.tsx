@@ -43,7 +43,7 @@ export default async function LanguagesSubjectPage() {
             Your first <Highlight tone="gold">hola</Highlight> is one click away.
           </>
         }
-        description="Meet Lena or Sofia, tell them your goal, and book a first conversation — in whichever language you like."
+        description="Open Lena's profile or Sofia's, pick a time, and pay to place the request. A coordinator confirms it with them within two days — or you're refunded in full, automatically."
         bgImage={{ src: "/assets/languages/images/cta-bg.jpg", alt: "" }}
       />
     </main>

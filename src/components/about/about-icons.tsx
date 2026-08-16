@@ -64,7 +64,7 @@ export function RecordIcon({ className }: IconProps) {
   );
 }
 
-/** Star — "Verified Ratings". */
+/** Star — "Confirmed, or Refunded". */
 export function StarIcon({ className }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" strokeWidth={1.8} className={className} {...STROKE}>

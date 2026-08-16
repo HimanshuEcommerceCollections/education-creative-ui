@@ -45,14 +45,20 @@ export default async function AcceptInvitePage({
           role={invite.role}
         />
       ) : (
+        /*
+         * No self-service path exists here on purpose: only an administrator can
+         * re-issue an invite (the reset and resend-verification flows both refuse
+         * accounts that have never set a password). So this points at support
+         * rather than at a link the visitor can't actually request.
+         */
         <AuthNotice
           title="This invite isn't usable"
           message={
             problem ??
-            "Open the invite link from your email again. If it's expired, reply to that email and we'll send a fresh one."
+            "Open the invite link from your email again — the whole URL has to come across. If it has expired, only an administrator can issue a new one, so get in touch and we'll sort it."
           }
           tone="error"
-          action={{ label: "Go to sign in", href: "/login" }}
+          action={{ label: "Get help", href: "/support" }}
         />
       )}
     </AuthLayout>

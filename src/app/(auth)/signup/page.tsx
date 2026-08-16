@@ -7,7 +7,7 @@ import { SIGNUP_PANEL } from "@/data/auth";
 export const metadata: Metadata = {
   title: "Create Account",
   description:
-    "Create a parent account to browse vetted educators, message the ones who fit, and book sessions — in your home or online.",
+    "Create a parent account to browse vetted educators and book sessions — in your home or online.",
 };
 
 export default function SignupPage() {

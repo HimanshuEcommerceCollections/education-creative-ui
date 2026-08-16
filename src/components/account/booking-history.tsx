@@ -2,7 +2,11 @@ import Link from "next/link";
 
 import type { BookingStatus, ParentBooking } from "@contracts/bookings.ts";
 
+import type { ReviewState, ReviewStates } from "@/lib/reviews/eligibility";
 import { cn } from "@/lib/utils";
+
+import { BookingActions } from "./booking-actions";
+import { ReviewForm } from "./review-form";
 
 /**
  * What each state means **to a parent**. The internal vocabulary
@@ -13,17 +17,19 @@ import { cn } from "@/lib/utils";
 const STATUS_COPY: Record<BookingStatus, { label: string; note: string; tone: Tone }> = {
   pending_payment: {
     label: "Payment not finished",
-    note: "We didn't complete the payment, so this session isn't booked. You can book it again.",
+    // Was "You can book it again", which meant re-entering the whole form. The
+    // booking still exists and its checkout can be picked up — see `BookingActions`.
+    note: "The payment wasn't completed, so this session isn't booked yet. You can pick up where you left off, or cancel it — nothing has been charged.",
     tone: "neutral",
   },
   paid_unconfirmed: {
     label: "Paid · confirming",
-    note: "Paid. A coordinator is confirming your educator and time — we'll email you as soon as it's set.",
+    note: "Paid. A coordinator is confirming your educator and time — we'll email you as soon as it's set. Cancel at least 24 hours before the session for a full refund.",
     tone: "waiting",
   },
   confirmed: {
     label: "Confirmed",
-    note: "All set. A parent or guardian supervises the session.",
+    note: "All set. A parent or guardian supervises the session. Cancel at least 24 hours ahead for a full refund.",
     tone: "good",
   },
   completed: {
@@ -91,12 +97,80 @@ function whenLabel(date: string, time: string): string {
 }
 
 /**
+ * The review slot on a completed session.
+ *
+ * A Server Component that decides *which* of three things a card shows, so the
+ * interactive form is only ever sent to the browser for a booking that can
+ * actually take one. The states it can't offer a form for still say something:
+ * a review already written is acknowledged rather than silently replaced by
+ * nothing, and a failed eligibility check admits it was a failure — an absent
+ * control would otherwise read as "you've already done this".
+ */
+function ReviewSlot({
+  booking,
+  state,
+}: {
+  booking: ParentBooking;
+  state: ReviewState | undefined;
+}) {
+  if (state === "ok") {
+    return (
+      <ReviewForm
+        bookingId={booking.id}
+        educatorName={
+          booking.assignedEducator?.name ?? booking.requestedEducator.name
+        }
+      />
+    );
+  }
+
+  if (state === "already_reviewed") {
+    return (
+      <p className="mt-5 border-t border-line pt-5 text-[13.5px] leading-[1.6] text-muted">
+        You&rsquo;ve already reviewed this session &mdash; thank you. It goes live on
+        the educator&rsquo;s profile once our team has read it.
+      </p>
+    );
+  }
+
+  if (state === "paused") {
+    return (
+      <p className="mt-5 border-t border-line pt-5 text-[13.5px] leading-[1.6] text-muted">
+        We&rsquo;re not taking new reviews just now. This session stays open for one
+        &mdash; please come back in a little while and tell us how it went.
+      </p>
+    );
+  }
+
+  if (state === "unknown") {
+    return (
+      <p className="mt-5 border-t border-line pt-5 text-[13.5px] leading-[1.6] text-muted">
+        We couldn&rsquo;t check whether this session is still open for a review just
+        now. Reload the page in a moment and it&rsquo;ll be here.
+      </p>
+    );
+  }
+
+  return null;
+}
+
+/**
  * One booking in the parent's history.
  *
- * A server component: nothing here is interactive, and a parent's own booking
- * list has no reason to ship JavaScript.
+ * Still a Server Component: the card itself ships no JavaScript, and only the
+ * resume/cancel controls at the bottom are a Client Component — so a list of
+ * completed sessions costs nothing to render.
  */
-function BookingCard({ booking }: { booking: ParentBooking }) {
+function BookingCard({
+  booking,
+  readAt,
+  reviewState,
+}: {
+  booking: ParentBooking;
+  readAt: number;
+  /** Absent for anything that isn't a completed session — see `ReviewSlot`. */
+  reviewState: ReviewState | undefined;
+}) {
   const copy = STATUS_COPY[booking.status];
   const substituted =
     booking.assignedEducator !== null &&
@@ -166,12 +240,25 @@ function BookingCard({ booking }: { booking: ParentBooking }) {
           </div>
         ))}
       </dl>
+
+      <BookingActions booking={booking} readAt={readAt} />
+      <ReviewSlot booking={booking} state={reviewState} />
     </li>
   );
 }
 
 /** The parent's full history, newest request first. */
-export function BookingHistory({ bookings }: { bookings: ParentBooking[] }) {
+export function BookingHistory({
+  bookings,
+  readAt,
+  reviewStates,
+}: {
+  bookings: ParentBooking[];
+  /** When the page was read, so every card judges the 24-hour window identically. */
+  readAt: number;
+  /** Keyed by booking id, and only populated for completed sessions. */
+  reviewStates: ReviewStates;
+}) {
   if (bookings.length === 0) {
     return (
       <div className="rounded-[20px] border border-line bg-white p-7 text-center shadow-[0_30px_60px_-48px_rgba(35,40,70,0.42)]">
@@ -192,7 +279,12 @@ export function BookingHistory({ bookings }: { bookings: ParentBooking[] }) {
   return (
     <ul className="flex flex-col gap-5">
       {bookings.map((booking) => (
-        <BookingCard key={booking.id} booking={booking} />
+        <BookingCard
+          key={booking.id}
+          booking={booking}
+          readAt={readAt}
+          reviewState={reviewStates[booking.id]}
+        />
       ))}
     </ul>
   );

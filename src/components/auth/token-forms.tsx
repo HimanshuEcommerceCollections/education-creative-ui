@@ -10,6 +10,7 @@ import type { UserRole } from "@contracts/roles.ts";
 import {
   acceptInviteAction,
   forgotPasswordAction,
+  resendVerificationAction,
   resetPasswordAction,
   verifyEmailAction,
 } from "@/app/(auth)/actions";
@@ -53,6 +54,17 @@ export function ForgotPasswordForm() {
       </p>
 
       <FormAlert message={fieldError(state, "email") ? undefined : formMessage(state)} />
+
+      {/*
+        The one code with a real instruction attached: asking again immediately
+        will fail again, and nothing else on this form says so.
+      */}
+      {state.status === "error" && state.code === "rate_limited" ? (
+        <p className="mb-4 rounded-[12px] border-[1.5px] border-[rgba(210,162,65,0.45)] bg-[rgba(210,162,65,0.09)] px-4 py-3 text-[13px] leading-[1.55] text-ink">
+          Give it a minute before trying again — and check your spam folder in the
+          meantime, in case an earlier link already arrived.
+        </p>
+      ) : null}
 
       <form action={formAction} noValidate>
         <TextField
@@ -161,15 +173,55 @@ export function ResetPasswordForm({ token }: { token: string }) {
 // Verify email
 // ---------------------------------------------------------------------------
 
-export function VerifyEmailForm({ token }: { token: string }) {
+/**
+ * The confirm-my-email button, and every way it can end.
+ *
+ * `signedIn` is the whole reason this takes a prop: the same link gets clicked on
+ * the laptop that signed up and on a phone that never has, and the two need
+ * different exits. Sending a signed-out visitor to `/account` sent them to a login
+ * form with no word about the confirmation that had just succeeded.
+ */
+export function VerifyEmailForm({
+  token,
+  signedIn,
+}: {
+  token: string;
+  signedIn: boolean;
+}) {
   const [state, formAction] = useActionState(verifyEmailAction, IDLE);
 
   if (state.status === "success") {
     return (
       <AuthNotice
         title="Email confirmed"
-        message="Thanks — that's everything we needed. You can book a session whenever you're ready."
-        action={{ label: "Go to my account", href: "/account" }}
+        message={
+          signedIn
+            ? "Thanks — that's everything we needed. You can request a session whenever you're ready."
+            : "Thanks — that's everything we needed. Sign in on this device whenever you'd like to request a session."
+        }
+        action={
+          signedIn
+            ? { label: "Go to my account", href: "/account" }
+            : { label: "Sign in", href: "/login?next=%2Faccount" }
+        }
+      />
+    );
+  }
+
+  /*
+   * A dead token is the common failure and the only one with a real remedy, so it
+   * gets the resend form rather than a link into a section this visitor may not be
+   * able to reach.
+   */
+  if (
+    state.status === "error" &&
+    (state.code === "token_expired" || state.code === "invalid_token")
+  ) {
+    return (
+      <ResendVerificationForm
+        title="That link has expired"
+        body={state.message}
+        signedIn={signedIn}
       />
     );
   }
@@ -180,7 +232,11 @@ export function VerifyEmailForm({ token }: { token: string }) {
         title="We couldn't confirm that"
         message={state.message}
         tone="error"
-        action={{ label: "Go to my account", href: "/account" }}
+        action={
+          signedIn
+            ? { label: "Go to my account", href: "/account" }
+            : { label: "Get help", href: "/support" }
+        }
       />
     );
   }
@@ -203,6 +259,91 @@ export function VerifyEmailForm({ token }: { token: string }) {
         <input type="hidden" name="token" value={token} />
         <SubmitButton pendingLabel="Confirming…">Confirm my email</SubmitButton>
       </form>
+    </div>
+  );
+}
+
+/**
+ * Ask for a fresh confirmation link **without being signed in**.
+ *
+ * The gap this closes: an expired confirmation link left its owner with a page
+ * whose only exit was `/account`, which for a signed-out visitor meant a login
+ * form and no way to get another link. `POST /auth/resend-verification` is public
+ * and non-enumerating precisely so this form can exist, and the copy below has to
+ * hold that line — the reply is the same whether or not the address has an account
+ * waiting, and it must not be written as if it confirmed one.
+ */
+export function ResendVerificationForm({
+  title,
+  body,
+  signedIn,
+  /** Pre-filled when we already know it, so nobody retypes their own address. */
+  knownEmail,
+}: {
+  title: string;
+  body: string;
+  signedIn: boolean;
+  knownEmail?: string;
+}) {
+  const [state, formAction] = useActionState(resendVerificationAction, IDLE);
+  const [email, setEmail] = useState(knownEmail ?? "");
+
+  if (state.status === "success") {
+    return (
+      <AuthNotice
+        title="Check your inbox"
+        message={
+          state.message ??
+          "If that address is waiting to be confirmed, a new link is on its way. It's good for 24 hours."
+        }
+        action={
+          signedIn
+            ? { label: "Go to my account", href: "/account" }
+            : { label: "Back to sign in", href: "/login" }
+        }
+      />
+    );
+  }
+
+  return (
+    <div className="w-full max-w-[400px] text-center">
+      <div className="mx-auto mb-[22px] flex h-[72px] w-[72px] items-center justify-center rounded-full border-[1.5px] border-[rgba(194,72,60,0.35)] bg-[rgba(194,72,60,0.07)] text-[26px] font-semibold text-[#a63a30]">
+        !
+      </div>
+
+      <h1 className="font-serif text-[26px] font-semibold tracking-[-0.01em]">{title}</h1>
+      <p className="mx-auto mt-[10px] max-w-[38ch] text-[14.5px] leading-[1.6] text-muted">
+        {body}
+      </p>
+
+      <div className="mt-6 text-left">
+        <FormAlert message={fieldError(state, "email") ? undefined : formMessage(state)} />
+
+        <form action={formAction} noValidate>
+          <TextField
+            id="resend-email"
+            label="Your email"
+            type="email"
+            placeholder="you@example.com"
+            autoComplete="email"
+            value={email}
+            onChange={setEmail}
+            error={fieldError(state, "email")}
+          />
+          <div className="mt-2">
+            <SubmitButton pendingLabel="Sending…">Send me a new link</SubmitButton>
+          </div>
+        </form>
+      </div>
+
+      <p className="mt-6 text-center text-sm text-muted">
+        <Link
+          href={signedIn ? "/account" : "/login"}
+          className="font-semibold text-slate transition-colors hover:text-gold"
+        >
+          {signedIn ? "Back to my account" : "Back to sign in"}
+        </Link>
+      </p>
     </div>
   );
 }
@@ -249,6 +390,25 @@ export function AcceptInviteForm({
         title="You're all set"
         message="Signing you in…"
         action={{ label: "Continue", href: state.redirectTo }}
+      />
+    );
+  }
+
+  /*
+   * The token can die between this page rendering and the form being submitted —
+   * invites are single-use and expire. Terminal, and with no self-service remedy:
+   * re-issuing an invite is an admin action, so support is the only honest exit.
+   */
+  if (
+    state.status === "error" &&
+    (state.code === "token_expired" || state.code === "invalid_token")
+  ) {
+    return (
+      <AuthNotice
+        title="This invite has expired"
+        message={`${state.message} Only an administrator can issue a new one — get in touch and we'll have a fresh link sent to ${email}.`}
+        tone="error"
+        action={{ label: "Get help", href: "/support" }}
       />
     );
   }

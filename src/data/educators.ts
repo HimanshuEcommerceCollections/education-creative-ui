@@ -2,26 +2,15 @@
  * Full educator-profile content for the `/educators/[slug]` route. This is the
  * richer counterpart to the summary cards in `data/tutors.ts` — one entry per
  * educator, keyed by the slug used in their profile href.
+ *
+ * **No ratings, reviews or review counts, and no fields for them.** The profile
+ * page shows all three again, but every one of them comes from
+ * `GET /educators/:slug/reviews` — reviews anchored to a completed booking somebody
+ * paid for — loaded by `lib/educators/reviews`. A `4.9`, a `38 reviews`, a facet
+ * breakdown or a testimonial written *here* would render on the profile as though a
+ * parent had given it, which is the one thing a page about a person who teaches
+ * children must never do. An educator the API has no rating for shows none.
  */
-
-export interface EducatorReview {
-  /** Avatar initial (single letter). */
-  initial: string;
-  /** Reviewer role, e.g. "Parent of a 9th grader". */
-  role: string;
-  /** Star rating shown on the review. */
-  rating: number;
-  /** Review body. */
-  body: string;
-}
-
-export interface RatingFacet {
-  label: string;
-  /** Displayed value, e.g. "4.9 / 5". */
-  value: string;
-  /** Bar fill as a percentage (0–100). */
-  percent: number;
-}
 
 export type DayState = "open" | "some" | "closed";
 
@@ -39,11 +28,6 @@ export interface EducatorProfile {
   firstName: string;
   initials: string;
   subject: string;
-  /** Displayed rating string, e.g. "4.9". */
-  rating: string;
-  /** Numeric rating for the star row. */
-  ratingValue: number;
-  reviewCount: number;
   location: string;
   formats: string;
   price: number;
@@ -51,8 +35,6 @@ export interface EducatorProfile {
   /** About-section paragraphs. */
   about: string[];
   subjects: string[];
-  reviews: EducatorReview[];
-  ratingBreakdown: RatingFacet[];
   availability: AvailabilityDay[];
   /** Sidebar "usually available" summary. */
   availabilitySummary: string;
@@ -67,9 +49,6 @@ const EDUCATOR_PROFILES: Record<string, EducatorProfile> = {
     firstName: "Elena",
     initials: "EM",
     subject: "Academic Tutoring",
-    rating: "4.9",
-    ratingValue: 4.9,
-    reviewCount: 38,
     location: "Raleigh, NC",
     formats: "In-home & online",
     price: 55,
@@ -87,38 +66,6 @@ const EDUCATOR_PROFILES: Record<string, EducatorProfile> = {
       "Middle-school science",
       "Study skills",
     ],
-    reviews: [
-      {
-        initial: "P",
-        role: "Parent of a 9th grader",
-        rating: 5,
-        body: "Elena is calm and organized. She sends a quick plan before each session so we know what she'll cover, and my son actually looks forward to Algebra now. No pressure — just steady practice.",
-      },
-      {
-        initial: "P",
-        role: "Parent of a 6th grader",
-        rating: 5,
-        body: "We booked her for middle-school science help. She's patient and explains things a few different ways until it clicks. I appreciate that she's honest about what needs more practice at home.",
-      },
-      {
-        initial: "P",
-        role: "Parent of an 11th grader",
-        rating: 5,
-        body: "Reliable and easy to schedule with. Online sessions for Pre-Calc worked well for us. She keeps things focused and we always sat in on the first few — felt very comfortable.",
-      },
-      {
-        initial: "P",
-        role: "Parent of a 4th grader",
-        rating: 4,
-        body: "Great with younger kids. My daughter was nervous about math and Elena made it feel low-stakes. Scheduling around her Saturday mornings took a little planning, but well worth it.",
-      },
-    ],
-    ratingBreakdown: [
-      { label: "Communication", value: "4.9 / 5", percent: 98 },
-      { label: "Knowledge", value: "5.0 / 5", percent: 100 },
-      { label: "Punctuality", value: "4.8 / 5", percent: 96 },
-      { label: "Patience", value: "4.9 / 5", percent: 98 },
-    ],
     availability: [
       { name: "Mon", pill: "PM", state: "some" },
       { name: "Tue", pill: "—", state: "closed" },
@@ -130,8 +77,13 @@ const EDUCATOR_PROFILES: Record<string, EducatorProfile> = {
     ],
     availabilitySummary:
       "Mon/Wed/Thu afternoons & early evenings, with some Saturday mornings. In-home across Raleigh or online.",
+    /*
+     * This copy must not promise that the educator follows up: the parent pays at
+     * the time of booking, a coordinator confirms the slot and assigns the educator,
+     * and only then does the session reach Elena at all.
+     */
     ctaBody:
-      "Send a booking request and Elena will follow up to confirm times, format and a simple plan for the first session. A parent or guardian arranges and supervises every booking.",
+      "Pick a time and pay to place the request. A coordinator confirms the slot with Elena and emails you within two days — if it can't be filled, you're refunded in full. A parent or guardian arranges and supervises every booking.",
   },
 };
 

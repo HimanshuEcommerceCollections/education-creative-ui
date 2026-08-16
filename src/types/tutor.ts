@@ -7,7 +7,5 @@ export interface Tutor {
   subject: string;
   name: string;
   experience: string;
-  /** Rating shown in the gold badge, e.g. "4.9". */
-  rating: string;
   intro: string;
 }

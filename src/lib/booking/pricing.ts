@@ -36,13 +36,45 @@ export interface PricingPolicy {
 
 /**
  * Live pricing for the flow, built by the page from `GET /pricing/snapshot`:
- * admin-set hourly rates (dollars, keyed by educator slug) plus the format
- * differential in force. Null when the API couldn't answer — the flow then
- * estimates from the in-repo figures, same numbers as before the cutover.
+ * admin-set hourly rates plus the format differential in force. Null when the API
+ * couldn't answer — the flow then estimates from the in-repo figures, same
+ * numbers as before the cutover.
+ *
+ * Rates are keyed **by educator slug and then by priced subject slug**, because
+ * the snapshot carries one rate per (educator, subject) pair. A flat per-educator
+ * map collapses a multi-subject educator onto whichever row arrived last, which
+ * is how a parent watches a music price and pays a cooking one.
  */
 export interface LivePricing {
-  rates: Record<string, number>;
+  rates: Record<string, Record<string, number>>;
   policy: PricingPolicy;
+}
+
+/**
+ * The hourly rate to show for an educator, in whole dollars.
+ *
+ * The rate for *this* subject wins. Failing that, an educator holding exactly one
+ * rate on the platform is unambiguous, so that one is used. An educator with rates
+ * in other subjects but none here keeps the in-repo figure — better a stale price
+ * than confidently printing a cooking rate against a music lesson. This is the
+ * same precedence `withLiveRates` applies on the subject landing pages.
+ *
+ * Either way this is only what the parent is *shown while choosing*: the amount
+ * charged comes from the server's quote.
+ */
+export function liveRatePerHour(
+  rates: LivePricing["rates"] | undefined,
+  educatorSlug: string,
+  subjectSlug: string | null,
+  fallback: number,
+): number {
+  const held = rates?.[educatorSlug];
+  if (!held) return fallback;
+
+  if (subjectSlug !== null && held[subjectSlug] !== undefined) return held[subjectSlug];
+
+  const all = Object.values(held);
+  return all.length === 1 ? all[0] : fallback;
 }
 
 interface EstimateInput {

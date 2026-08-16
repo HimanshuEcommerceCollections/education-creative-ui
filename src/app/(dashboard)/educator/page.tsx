@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { ServiceUnavailable } from "@/components/auth/service-unavailable";
 import { DashboardCard, DashboardPage } from "@/components/dashboard/page-frame";
-import { getSession } from "@/lib/auth/session";
+import { guardSession } from "@/lib/auth/session";
 
 export const metadata: Metadata = {
   title: "Educator Dashboard",
@@ -12,12 +14,17 @@ export const metadata: Metadata = {
 /**
  * Where an approved educator lands. Narrow on purpose: §12.2 scopes the launch
  * educator surface to setting a password, seeing assignments, and marking sessions
- * delivered. Assignments and delivery arrive with bookings in Phase 3; the
- * self-service profile and availability editor is an explicit fast-follow.
+ * delivered — all three of which exist, so this page describes them as available.
+ *
+ * Nothing here may defer a capability the sidebar two inches to the left already
+ * links to: "your assignments will appear here once booking goes live" beside a live
+ * `/educator/sessions` teaches an educator not to trust either.
  */
 export default async function EducatorOverviewPage() {
-  const session = await getSession();
-  if (!session) redirect("/login");
+  const guard = await guardSession("/educator");
+  if (!guard.ok) return <ServiceUnavailable message={guard.message} retryHref="/educator" />;
+
+  const { session } = guard;
   if (session.isStaff) redirect("/dashboard");
   if (session.activeRole !== "educator") redirect("/account");
 
@@ -27,7 +34,15 @@ export default async function EducatorOverviewPage() {
     <DashboardPage
       eyebrow="Educator"
       title={`Welcome, ${user.fullName.split(" ")[0]}`}
-      description="Your assignments will appear here once booking goes live."
+      description="Sessions a coordinator has confirmed and assigned to you appear under My sessions, with the learner's details and — for in-home lessons — the address."
+      actions={
+        <Link
+          href="/educator/sessions"
+          className="rounded-[40px] border-[1.5px] border-transparent bg-slate px-[22px] py-[10px] text-[13.5px] font-semibold text-white no-underline transition-colors hover:bg-slate-deep"
+        >
+          My sessions
+        </Link>
+      }
     >
       <div className="grid gap-6 min-[900px]:grid-cols-2">
         <DashboardCard title="Your account">
@@ -58,12 +73,41 @@ export default async function EducatorOverviewPage() {
         </DashboardCard>
       </div>
 
-      <div className="mt-6">
+      <div className="mt-6 grid gap-6 min-[900px]:grid-cols-2">
+        <DashboardCard
+          title="How a session reaches you"
+          action={
+            <Link
+              href="/educator/sessions"
+              className="text-[13px] font-semibold text-slate no-underline transition-colors hover:text-gold"
+            >
+              My sessions &rarr;
+            </Link>
+          }
+        >
+          <ol className="flex list-decimal flex-col gap-[9px] pl-5 text-[14px] leading-[1.6] text-muted">
+            <li>A parent requests you and pays — nothing is on your calendar yet.</li>
+            <li>A coordinator phones you to confirm the time before assigning it.</li>
+            <li>
+              It appears under <b>My sessions</b> with the learner&rsquo;s first name, age
+              band, and what they&rsquo;re working on.
+            </li>
+            <li>
+              For in-home lessons, the address is one click away — and every look at it
+              is recorded.
+            </li>
+            <li>
+              Afterwards, mark it <b>delivered</b> (or record a no-show) from that same
+              card.
+            </li>
+          </ol>
+        </DashboardCard>
+
         <DashboardCard title="Coming next">
           <ul className="flex flex-col gap-[9px] text-[14px] leading-[1.6] text-muted">
-            <li>Your assigned sessions, and marking them delivered (Phase 3)</li>
-            <li>Earnings and payout status (Phase 4)</li>
+            <li>Earnings and payout status &mdash; each session already shows what it earns you</li>
             <li>Editing your own profile and availability (fast-follow)</li>
+            <li>Setting your own open times, rather than a coordinator matching them</li>
           </ul>
         </DashboardCard>
       </div>

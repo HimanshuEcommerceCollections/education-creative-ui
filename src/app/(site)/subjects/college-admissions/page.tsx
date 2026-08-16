@@ -40,7 +40,7 @@ export default function CollegeAdmissionsSubjectPage() {
             Senior year is calmer <Highlight tone="gold">with a plan.</Highlight>
           </>
         }
-        description="Tell us where your student is in the journey — we'll match you with the right counselor."
+        description="Choose a counselor, pick a time, and pay to place the request. A coordinator confirms it with them within two days — or you're refunded in full, automatically."
         bgImage={{ src: "/assets/admissions/images/cta-bg.jpg", alt: "" }}
       />
     </main>

@@ -21,6 +21,17 @@ import type { AuthFormState } from "@/lib/auth/form-state";
  * request lands — no redeploy, no manual purge.
  */
 
+/**
+ * The real ceilings, derived from the contract rather than restated.
+ *
+ * `inHomeMultiplierBps` caps at 30000 — 10000 is ×1.0, so the headroom above the
+ * base rate is 200%. The travel fee caps at 20000 cents. Both are shown on the
+ * form, because a limit the person can't see is a limit they discover by failing.
+ * (Not exported — every export of a `"use server"` module has to be an async
+ * function, so the form states its own copy of the same figures.)
+ */
+const MAX_SURCHARGE_PERCENT = 200;
+
 /** "55" or "55.50" → integer cents; null for anything that isn't money. */
 function parseDollars(raw: string): number | null {
   const value = raw.trim().replace(/^\$/, "");
@@ -133,21 +144,29 @@ export async function updateFormatPolicyAction(
    */
   const surcharge = text(formData, "inHomeSurchargePercent").trim();
   if (!/^\d{1,3}(\.\d{1,2})?$/.test(surcharge)) {
-    return {
-      status: "error",
-      message: "Please check the highlighted fields.",
-      fieldErrors: {
-        inHomeSurchargePercent: "Enter the surcharge percentage, like 0 or 25.",
-      },
-      code: "validation_failed",
-    };
+    return surchargeError("Enter the surcharge percentage, like 0 or 25.");
+  }
+
+  /*
+   * The contract caps `inHomeMultiplierBps` at 30000 (×3), so the surcharge
+   * ceiling is 200%. It has to be checked here, against the input the admin is
+   * actually looking at: the contract rejects an over-cap value keyed
+   * `inHomeMultiplierBps`, a field this form doesn't have, so leaving it to the
+   * contract gives "Please check the highlighted fields" with *nothing* highlighted
+   * and no hint that a ceiling exists.
+   */
+  const percent = Number.parseFloat(surcharge);
+  if (percent > MAX_SURCHARGE_PERCENT) {
+    return surchargeError(
+      `${MAX_SURCHARGE_PERCENT}% is the ceiling — an in-home session can cost at most three times the base rate.`,
+    );
   }
 
   const parsed = parseForm(updateFormatPolicySchema, {
-    inHomeMultiplierBps: 10_000 + Math.round(Number.parseFloat(surcharge) * 100),
+    inHomeMultiplierBps: 10_000 + Math.round(percent * 100),
     travelFlatCents: travel.cents,
   });
-  if (!parsed.ok) return parsed.state;
+  if (!parsed.ok) return withSurchargeFieldName(parsed.state);
 
   try {
     const result = await callApiAuthed<{ message: string }>("/pricing/format-policy", {
@@ -157,6 +176,34 @@ export async function updateFormatPolicyAction(
     bustPricing();
     return { status: "success", redirectTo: "", message: result.message };
   } catch (error) {
-    return toErrorState(error);
+    return withSurchargeFieldName(toErrorState(error));
   }
+}
+
+function surchargeError(message: string): AuthFormState {
+  return {
+    status: "error",
+    message: "Please check the highlighted fields.",
+    fieldErrors: { inHomeSurchargePercent: message },
+    code: "validation_failed",
+  };
+}
+
+/**
+ * Re-keys the contract's field names onto the form's input names.
+ *
+ * `inHomeMultiplierBps` and `travelFlatCents` are what the contract validates;
+ * `inHomeSurchargePercent` is what the admin typed into. Without this the message
+ * arrives keyed to a field that doesn't exist on the page and renders nowhere at
+ * all. Same remapping the educator-application action does for
+ * `subjectsOfInterest` → `subject`.
+ */
+function withSurchargeFieldName(state: AuthFormState): AuthFormState {
+  if (state.status !== "error" || !state.fieldErrors?.inHomeMultiplierBps) return state;
+
+  const { inHomeMultiplierBps, ...rest } = state.fieldErrors;
+  return {
+    ...state,
+    fieldErrors: { ...rest, inHomeSurchargePercent: inHomeMultiplierBps },
+  };
 }

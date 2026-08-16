@@ -3,10 +3,13 @@
 import { redirect } from "next/navigation";
 
 import {
+  PASSWORD_MIN_LENGTH,
   acceptInviteRequestSchema,
   forgotPasswordRequestSchema,
   type LoginResponse,
   loginRequestSchema,
+  passwordSchema,
+  resendVerificationRequestSchema,
   resetPasswordRequestSchema,
   signupRequestSchema,
   verifyEmailRequestSchema,
@@ -124,21 +127,45 @@ export async function verifyEmailAction(
 
   try {
     await callApi("/auth/verify-email", { method: "POST", body: parsed.data });
-    return { status: "success", redirectTo: "/account", message: "Your email is confirmed." };
+
+    /*
+     * Where "done" leads depends on whether this device holds a session at all.
+     * Confirmation links get opened on phones that were never signed in, and
+     * sending those to `/account` bounced them through `/login?next=/account` —
+     * the confirmation succeeded and the user was shown a sign-in form with no
+     * explanation, which reads exactly like a failure.
+     */
+    const signedIn = (await readSessionToken()) !== null;
+    return {
+      status: "success",
+      redirectTo: signedIn ? "/account" : "/login",
+      message: "Your email is confirmed.",
+    };
   } catch (error) {
     return toErrorState(error);
   }
 }
 
+/**
+ * Sends a fresh confirmation link.
+ *
+ * Public and deliberately non-enumerating on the API side, which is what lets the
+ * sign-in page and the token pages offer it to someone who isn't signed in — the
+ * reply is identical whether or not the address has an unconfirmed account.
+ */
 export async function resendVerificationAction(
   _previous: AuthFormState,
   formData: FormData,
 ): Promise<AuthFormState> {
-  const email = text(formData, "email");
+  const parsed = parseForm(resendVerificationRequestSchema, {
+    email: text(formData, "email"),
+  });
+  if (!parsed.ok) return parsed.state;
+
   try {
     const result = await callApi<{ message: string }>("/auth/resend-verification", {
       method: "POST",
-      body: { email },
+      body: parsed.data,
     });
     return { status: "success", redirectTo: "", message: result.message };
   } catch (error) {
@@ -191,6 +218,83 @@ export async function resetPasswordAction(
     return { status: "success", redirectTo: "/login", message: result.message };
   } catch (error) {
     return toErrorState(error);
+  }
+}
+
+/**
+ * Changes the password of a signed-in account, current password required.
+ *
+ * Distinct from the reset flow, and the two must not be collapsed into one: mailing a
+ * `/forgot-password` link to someone who is already authenticated and holds their
+ * current password is a round trip through an inbox for no security gain.
+ *
+ * The API revokes every other session on success (the same rule as a reset), so
+ * this deliberately does not clear the cookie *this* device holds.
+ *
+ * The new password is checked against the shared `passwordSchema`, so this form
+ * can't accept one the API will reject. `confirmPassword` is not sent: it exists to
+ * catch a typo in the browser, and the API has no business knowing about it.
+ */
+export async function changePasswordAction(
+  _previous: AuthFormState,
+  formData: FormData,
+): Promise<AuthFormState> {
+  const currentPassword = text(formData, "currentPassword");
+  const newPassword = text(formData, "newPassword");
+  const confirmPassword = text(formData, "confirmPassword");
+
+  if (currentPassword.length === 0) {
+    return {
+      status: "error",
+      message: "Please check the highlighted fields.",
+      fieldErrors: { currentPassword: "Enter your current password." },
+      code: "validation_failed",
+    };
+  }
+
+  // Checked here rather than server-side: the confirmation box exists to catch a
+  // typo in the browser, and the API has no business knowing about it.
+  if (newPassword !== confirmPassword) {
+    return {
+      status: "error",
+      message: "Please check the highlighted fields.",
+      fieldErrors: { confirmPassword: "These two don't match." },
+      code: "validation_failed",
+    };
+  }
+
+  const parsed = parseForm(passwordSchema, newPassword);
+  if (!parsed.ok) {
+    return {
+      status: "error",
+      message: "Please check the highlighted fields.",
+      fieldErrors: {
+        newPassword: `Use at least ${PASSWORD_MIN_LENGTH} characters.`,
+      },
+      code: "validation_failed",
+    };
+  }
+
+  try {
+    const token = await readSessionToken();
+    const result = await callApi<{ message: string }>("/auth/change-password", {
+      method: "POST",
+      token,
+      body: { currentPassword, newPassword: parsed.data },
+    });
+    return {
+      status: "success",
+      redirectTo: "",
+      message: result.message ?? "Your password is updated.",
+    };
+  } catch (error) {
+    const state = toErrorState(error);
+    // The contract keys a wrong current password however it likes; attach it to
+    // the input the person is looking at.
+    if (state.status === "error" && state.code === "invalid_credentials") {
+      return { ...state, fieldErrors: { currentPassword: state.message } };
+    }
+    return state;
   }
 }
 
