@@ -31,7 +31,10 @@ export async function loadEducatorReviews(
         },
       },
     );
-  } catch {
+  } catch (caught) {
+    // Same reasoning as the directory loader: the honest fallback is invisible, so
+    // the reason for it has to be written down somewhere.
+    console.error(`loadEducatorReviews(${slug}): no reviews will render —`, caught);
     return null;
   }
 }
