@@ -90,7 +90,13 @@ export function StarRatingInput({
           {STAR_VALUES.map((star) => (
             <label
               key={star}
-              className="relative cursor-pointer rounded-[8px] p-[3px] text-gold"
+              /*
+                The drawn star stays 26px (36px for the overall rating), but the
+                tappable label is held to 44px both ways — a thumb aims at the
+                star it can see, and a 32px target on the one control every
+                review starts with is where mis-taps come from.
+              */
+              className="relative flex min-h-[44px] min-w-[44px] cursor-pointer items-center justify-center rounded-[8px] text-gold"
             >
               <input
                 type="radio"
@@ -129,7 +135,9 @@ export function StarRatingInput({
           <button
             type="button"
             onClick={() => setValue(0)}
-            className="text-[12.5px] font-semibold text-slate transition-colors hover:text-gold"
+            // Padded to a full-height target, with the margin taking the padding
+            // back out so the row doesn't grow around a text-sized button.
+            className="-my-3 inline-flex min-h-[44px] items-center px-2 text-[12.5px] font-semibold text-slate transition-colors hover:text-gold"
           >
             Clear
             <span className="sr-only"> the {legend.toLowerCase()} rating</span>

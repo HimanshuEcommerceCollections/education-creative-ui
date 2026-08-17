@@ -58,6 +58,14 @@
     font-family: var(--font-sans);
     font-size: 17px;
     line-height: 1.5;
+    /*
+     * `clip`, not `hidden`: it prevents any stray wide element from giving the
+     * whole page a horizontal scrollbar on phones, without creating a scroll
+     * container — so `position: sticky` descendants (the dashboard sidebar)
+     * keep working. This is a backstop for user-supplied strings the layout
+     * didn't anticipate, not licence to skip `break-words` where they render.
+     */
+    overflow-x: clip;
   }
 
   a {

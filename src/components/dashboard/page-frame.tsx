@@ -30,7 +30,12 @@ export function DashboardPage({
               {eyebrow}
             </p>
           ) : null}
-          <h1 className="font-serif text-[30px] font-semibold tracking-[-0.015em] max-[560px]:text-[25px]">
+          {/*
+            Some pages put a person's own text here — the queries detail titles
+            itself with the sender's name — so one long token must wrap, not size
+            the page.
+          */}
+          <h1 className="break-words font-serif text-[30px] font-semibold tracking-[-0.015em] max-[560px]:text-[25px]">
             {title}
           </h1>
           {description ? (

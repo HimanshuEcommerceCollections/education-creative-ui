@@ -85,7 +85,13 @@ export function ContactRequestRow({
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-[10px]">
-            <h3 className="font-serif text-[19px] font-semibold tracking-[-0.01em]">
+            {/*
+              `break-words` on both the name and the preview because they are the
+              public form's own text: one 150-character token — a pasted URL is the
+              common case — would otherwise set this card's width and hand the
+              whole queue page a horizontal scrollbar on a phone.
+            */}
+            <h3 className="min-w-0 break-words font-serif text-[19px] font-semibold tracking-[-0.01em]">
               <Link
                 href={href}
                 className="text-ink no-underline transition-colors hover:text-slate"
@@ -99,7 +105,7 @@ export function ContactRequestRow({
             </span>
           </div>
 
-          <p className="mt-[10px] text-[14px] leading-[1.6] text-ink">
+          <p className="mt-[10px] break-words text-[14px] leading-[1.6] text-ink">
             {preview(request.message) || (
               <span className="italic text-muted">No message text.</span>
             )}

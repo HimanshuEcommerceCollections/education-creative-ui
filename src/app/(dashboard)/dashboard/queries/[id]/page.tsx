@@ -224,7 +224,7 @@ export default async function ContactRequestDetailPage({
       <div className="mt-6">
         <DashboardCard title="What they wrote">
           {request.message.trim().length > 0 ? (
-            <p className="whitespace-pre-line rounded-[12px] border border-line bg-sand px-4 py-3 text-[14.5px] leading-[1.7] text-ink">
+            <p className="whitespace-pre-line break-words rounded-[12px] border border-line bg-sand px-4 py-3 text-[14.5px] leading-[1.7] text-ink">
               {request.message}
             </p>
           ) : (
@@ -258,7 +258,7 @@ export default async function ContactRequestDetailPage({
             </dl>
 
             {request.resolutionNote ? (
-              <p className="whitespace-pre-line rounded-[12px] border border-dashed border-line px-4 py-3 text-[14px] leading-[1.65] text-ink">
+              <p className="whitespace-pre-line break-words rounded-[12px] border border-dashed border-line px-4 py-3 text-[14px] leading-[1.65] text-ink">
                 {request.resolutionNote}
               </p>
             ) : (
