@@ -41,7 +41,15 @@ export async function loadEducatorDirectory(): Promise<PublicEducator[]> {
       },
     });
     return items;
-  } catch {
+  } catch (caught) {
+    /*
+     * Logged, because the fallback is silent by design and that makes a missing
+     * API indistinguishable from an educator nobody has reviewed. Twice now the
+     * answer to "why are there no stars" has been that the API wasn't reachable
+     * when the page rendered — and with nothing written down, there was no way to
+     * tell that from the page itself.
+     */
+    console.error("loadEducatorDirectory: no ratings will render —", caught);
     return [];
   }
 }
