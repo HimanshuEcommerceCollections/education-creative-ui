@@ -152,7 +152,8 @@ export function EducatorTabs({ profile, reviews }: EducatorTabsProps) {
                       shown rather than filtered out of the count above it.
                     */}
                     {review.body ? (
-                      <p className="text-[14.5px] leading-[1.65] text-slate-deep">
+                      /* Parent-written text on a public page: a long token wraps. */
+                      <p className="break-words text-[14.5px] leading-[1.65] text-slate-deep">
                         {review.body}
                       </p>
                     ) : null}

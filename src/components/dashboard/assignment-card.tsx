@@ -107,7 +107,8 @@ export function AssignmentCard({ assignment }: { assignment: EducatorAssignment 
             {past ? ` · ${assignment.status.replace("_", " ")}` : ""}
           </p>
           {assignment.learnerFocus ? (
-            <p className="mt-3 rounded-[12px] border border-line bg-sand px-4 py-3 text-[13.5px] leading-[1.6] text-ink">
+            /* The parent's free text about their child: a long token wraps. */
+            <p className="mt-3 break-words rounded-[12px] border border-line bg-sand px-4 py-3 text-[13.5px] leading-[1.6] text-ink">
               {assignment.learnerFocus}
             </p>
           ) : null}

@@ -150,7 +150,13 @@ export function SchedulePicker({
           </button>
         </div>
 
-        <div className="grid grid-cols-7 gap-[6px]">
+        {/*
+          Seven columns is what a week is, so on a narrow phone the cells give up
+          width, not count. The tighter mobile gap hands that width back to the
+          cells, and `min-h-[44px]` on each day keeps the tap target full height
+          even when the square's width-derived height falls below it.
+        */}
+        <div className="grid grid-cols-7 gap-[6px] max-[560px]:gap-1">
           {WEEKDAY_INITIALS.map((initial, index) => (
             <span
               // Duplicate initials (two T's, two S's) make the letter a bad key.
@@ -179,7 +185,7 @@ export function SchedulePicker({
                 aria-pressed={active}
                 onClick={() => onDate(cell)}
                 className={cn(
-                  "flex aspect-square items-center justify-center rounded-[11px] text-[14px] font-semibold transition-[background-color,color,transform] duration-[250ms] motion-reduce:transition-none",
+                  "flex aspect-square min-h-[44px] items-center justify-center rounded-[11px] text-[14px] font-semibold transition-[background-color,color,transform] duration-[250ms] motion-reduce:transition-none",
                   open
                     ? "cursor-pointer bg-ivory text-ink hover:-translate-y-[2px] hover:bg-[var(--chip-a)]"
                     : "cursor-not-allowed bg-transparent text-[#c5c5cc]",

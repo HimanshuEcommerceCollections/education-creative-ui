@@ -182,7 +182,8 @@ export function ReviewRow({ review }: { review: StaffReview }) {
 
       {body.length > 0 ? (
         <div className="mt-4">
-          <p className="whitespace-pre-line rounded-[12px] border border-line bg-sand px-4 py-3 text-[14px] leading-[1.6] text-ink">
+          {/* Parent-written free text: one long token must wrap, not size the row. */}
+          <p className="whitespace-pre-line break-words rounded-[12px] border border-line bg-sand px-4 py-3 text-[14px] leading-[1.6] text-ink">
             {shownBody}
           </p>
           {truncatable ? (
@@ -203,7 +204,7 @@ export function ReviewRow({ review }: { review: StaffReview }) {
       )}
 
       {review.moderationNote ? (
-        <p className="mt-3 rounded-[12px] border border-dashed border-line px-4 py-3 text-[13px] leading-[1.55] text-muted">
+        <p className="mt-3 break-words rounded-[12px] border border-dashed border-line px-4 py-3 text-[13px] leading-[1.55] text-muted">
           <b className="font-semibold text-ink">Moderator note:</b>{" "}
           {review.moderationNote}
         </p>
