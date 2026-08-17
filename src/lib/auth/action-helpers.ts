@@ -5,7 +5,7 @@ import { z } from "zod";
 import { ApiError, ApiUnreachableError, apiFetch, type ApiRequestOptions } from "@/lib/api/server";
 
 import { clientRequestMeta, readSessionToken } from "./cookies";
-import type { AuthFormState } from "./form-state";
+import { SESSION_EXPIRED_MESSAGE, type AuthFormState } from "./form-state";
 
 /**
  * Validates form input against the **shared** contract schema — the same one the
@@ -42,9 +42,25 @@ export function parseForm<T extends z.ZodType>(
  * Turns any API failure into a renderable state. Keeps the exact server message
  * — those are already written for users — and preserves the code so a form can
  * react to a specific case.
+ *
+ * `unauthenticated` is the one code rewritten rather than passed through. The
+ * API's own wording is fine for an API client and useless to a coordinator whose
+ * 45-minute staff window quietly closed mid-note: they need to be told to sign in
+ * again, in one sentence, in a box that doesn't look like a field error. Every
+ * surface with an action checks `sessionExpired(state)` and renders
+ * `<SessionExpiredAlert />` instead of its usual message, so this is handled once
+ * here and once per surface rather than being reinvented per form.
  */
 export function toErrorState(error: unknown): AuthFormState {
   if (error instanceof ApiError) {
+    if (error.code === "unauthenticated") {
+      return {
+        status: "error",
+        message: SESSION_EXPIRED_MESSAGE,
+        code: "unauthenticated",
+      };
+    }
+
     return {
       status: "error",
       message: error.message,

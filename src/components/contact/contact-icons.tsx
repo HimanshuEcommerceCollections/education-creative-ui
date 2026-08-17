@@ -60,11 +60,11 @@ export function ArrowIcon({ className }: IconProps) {
   );
 }
 
-/** Checkmark — the submission confirmation medallion. */
+/** Tick — the form's confirmation medallion, now that a submission really lands. */
 export function CheckIcon({ className }: IconProps) {
   return (
-    <svg viewBox="0 0 24 24" strokeWidth={2.4} className={className} {...STROKE}>
-      <path d="M20 6L9 17l-5-5" />
+    <svg viewBox="0 0 24 24" strokeWidth={2} className={className} {...STROKE}>
+      <polyline points="20 6 9 17 4 12" />
     </svg>
   );
 }

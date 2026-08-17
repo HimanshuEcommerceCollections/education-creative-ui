@@ -26,6 +26,7 @@ export interface DashboardNavSection {
 
 export type DashboardIconName =
   | "overview"
+  | "queries"
   | "applications"
   | "bookings"
   | "educators"
@@ -52,6 +53,17 @@ export const STAFF_NAV: DashboardNavSection[] = [
     items: [
       { label: "Overview", href: "/dashboard", icon: "overview", roles: STAFF },
       {
+        // Live: the public contact form lands here, and this is where an enquiry
+        // is claimed and closed out. Placed directly under Overview because it is
+        // the only operational queue fed by strangers — an unanswered enquiry
+        // ages in public, in a way an application or a booking does not, so it is
+        // the first thing worth looking at. No `phase`: it's built.
+        label: "Queries",
+        href: "/dashboard/queries",
+        icon: "queries",
+        roles: STAFF,
+      },
+      {
         label: "Educator applications",
         href: "/dashboard/applications",
         icon: "applications",
@@ -64,18 +76,23 @@ export const STAFF_NAV: DashboardNavSection[] = [
         roles: STAFF,
       },
       {
+        // Live: the directory and the verification control behind it. This is the
+        // only surface that can approve an educator, and until one does, an
+        // approved applicant can't be assigned a single booking. Staff-scoped like
+        // its neighbours — the API's `requireStaff` guard is what actually decides.
         label: "Educators",
         href: "/dashboard/educators",
         icon: "educators",
         roles: STAFF,
-        phase: "Phase 2",
       },
       {
+        // Live: the moderation queue exists, and nothing a parent writes reaches a
+        // public page without passing through it. Staff-scoped like its neighbours —
+        // the API's `requireStaff` guard is what actually decides.
         label: "Reviews",
         href: "/dashboard/reviews",
         icon: "reviews",
         roles: STAFF,
-        phase: "Phase 2",
       },
       {
         label: "Payouts",
@@ -97,11 +114,13 @@ export const STAFF_NAV: DashboardNavSection[] = [
         adminOnly: true,
       },
       {
+        // Live: the DB-backed settings store (§7). Admin-only in the sidebar,
+        // matching the rest of this section; the API models the coordinator
+        // "ops subset" §5 describes and would need only this gate widened.
         label: "Site configuration",
         href: "/dashboard/config",
         icon: "config",
         roles: ADMIN_ONLY,
-        phase: "Phase 2",
         adminOnly: true,
       },
       {

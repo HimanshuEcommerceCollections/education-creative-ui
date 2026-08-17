@@ -9,20 +9,11 @@ import {
   approveApplicationAction,
   reviewApplicationAction,
 } from "@/app/(dashboard)/dashboard/actions";
-import { IDLE, formMessage } from "@/lib/auth/form-state";
+import { SessionExpiredAlert } from "@/components/auth/session-expired-alert";
+import { IDLE, formMessage, sessionExpired } from "@/lib/auth/form-state";
+// Type-only, so nothing from that `server-only` module reaches this bundle.
+import type { EducatorApplication } from "@/lib/dashboard/applications";
 import { cn } from "@/lib/utils";
-
-export interface ApplicationSummary {
-  id: string;
-  applicantName: string;
-  email: string;
-  phone: string | null;
-  subjectsOfInterest: string[];
-  yearsExperience: string | null;
-  about: string;
-  status: EducatorApplicationStatus;
-  createdAt: string;
-}
 
 const STATUS_STYLES: Record<EducatorApplicationStatus, string> = {
   submitted: "border-[rgba(210,162,65,0.5)] bg-[rgba(210,162,65,0.12)] text-[#7a5a12]",
@@ -66,16 +57,21 @@ function PendingButton({
  * educator's account and emails an invite, so it deserves its own deliberate
  * click.
  */
-export function ApplicationRow({ application }: { application: ApplicationSummary }) {
+export function ApplicationRow({ application }: { application: EducatorApplication }) {
   const [reviewState, reviewAction] = useActionState(reviewApplicationAction, IDLE);
   const [approveState, approveAction] = useActionState(approveApplicationAction, IDLE);
   const [expanded, setExpanded] = useState(false);
 
-  const message =
-    formMessage(reviewState) ??
-    formMessage(approveState) ??
-    (approveState.status === "success" ? approveState.message : undefined) ??
-    (reviewState.status === "success" ? reviewState.message : undefined);
+  // A timed-out staff session is not a problem with this application, so it never
+  // renders as one.
+  const expired = sessionExpired(reviewState, approveState);
+
+  const message = expired
+    ? undefined
+    : formMessage(reviewState) ??
+      formMessage(approveState) ??
+      (approveState.status === "success" ? approveState.message : undefined) ??
+      (reviewState.status === "success" ? reviewState.message : undefined);
 
   const failed = reviewState.status === "error" || approveState.status === "error";
   const settled = application.status === "approved" || application.status === "rejected";
@@ -142,6 +138,8 @@ export function ApplicationRow({ application }: { application: ApplicationSummar
           {message}
         </p>
       ) : null}
+
+      {expired ? <SessionExpiredAlert /> : null}
 
       {!settled ? (
         <div className="mt-5 flex flex-wrap items-center gap-3 border-t border-line pt-5">

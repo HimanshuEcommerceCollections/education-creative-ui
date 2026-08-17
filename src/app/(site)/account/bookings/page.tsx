@@ -4,10 +4,12 @@ import { redirect } from "next/navigation";
 
 import { AccountShell } from "@/components/account/account-shell";
 import { BookingHistory } from "@/components/account/booking-history";
+import { ServiceUnavailable } from "@/components/auth/service-unavailable";
 import type { ParentBooking } from "@contracts/bookings.ts";
 import { ApiError, apiFetch } from "@/lib/api/server";
 import { readSessionToken } from "@/lib/auth/cookies";
-import { getSession } from "@/lib/auth/session";
+import { guardSession } from "@/lib/auth/session";
+import { loadReviewEligibility } from "@/lib/reviews/eligibility";
 
 export const metadata: Metadata = {
   title: "My Bookings",
@@ -15,43 +17,61 @@ export const metadata: Metadata = {
 };
 
 /**
- * The parent's own booking history.
+ * Reads `/bookings/mine`, which scopes to the caller's `customer_profiles` row on
+ * the server — nothing here passes an identifier, so there is nothing to tamper
+ * with to read someone else's. A failure comes back as data rather than throwing:
+ * "we couldn't load your bookings" is recoverable, a crash screen on the page where
+ * you check whether you were charged is not.
  *
- * Reads `/bookings/mine`, which scopes to their `customer_profiles` row on the
- * server — this page passes no identifier, so there is nothing to tamper with to
- * read someone else's. A failure renders as an inline notice rather than an error
- * page: "we couldn't load your bookings" is recoverable, a crash screen on the
- * page where you check whether you were charged is not.
+ * `readAt` is resolved here, outside the component, for two reasons: reading a clock
+ * during render is impure, and one instant for the whole page means every card
+ * judges the 24-hour cancellation window identically.
  */
+async function loadMyBookings(): Promise<{
+  bookings: ParentBooking[];
+  readAt: number;
+  error: string | null;
+}> {
+  try {
+    const token = await readSessionToken();
+    const result = await apiFetch<{ items: ParentBooking[] }>("/bookings/mine", { token });
+    return { bookings: result.items, readAt: Date.now(), error: null };
+  } catch (caught) {
+    return {
+      bookings: [],
+      readAt: Date.now(),
+      error:
+        caught instanceof ApiError
+          ? caught.message
+          : "We couldn't load your bookings just now. Please try again in a moment.",
+    };
+  }
+}
+
+/** The parent's own booking history. */
 export default async function AccountBookingsPage() {
-  const session = await getSession();
-  if (!session) redirect("/login");
+  const guard = await guardSession("/account/bookings");
+  if (!guard.ok) {
+    return <ServiceUnavailable message={guard.message} retryHref="/account/bookings" />;
+  }
 
   // Staff and educators have their own surfaces; a parent's history is theirs.
+  const { session } = guard;
   if (session.activeRole === "admin" || session.activeRole === "coordinator") {
     redirect("/dashboard/bookings");
   }
   if (session.activeRole === "educator") redirect("/educator/sessions");
 
-  let bookings: ParentBooking[] = [];
-  let error: string | null = null;
-
-  try {
-    const token = await readSessionToken();
-    const result = await apiFetch<{ items: ParentBooking[] }>("/bookings/mine", { token });
-    bookings = result.items;
-  } catch (caught) {
-    error =
-      caught instanceof ApiError
-        ? caught.message
-        : "We couldn't load your bookings just now. Please try again in a moment.";
-  }
+  const { bookings, readAt, error } = await loadMyBookings();
+  // Only asks about completed sessions, and only because the booking's own status
+  // can't tell a session still open for a review from one already reviewed.
+  const reviewStates = await loadReviewEligibility(bookings);
 
   return (
     <AccountShell
       eyebrow="Your account"
       title="My bookings"
-      description="Every session you've booked, what you paid, and where it stands. You pay when you book; a coordinator then confirms the time and assigns your educator."
+      description="Every session you've booked, what you paid, and where it stands. You pay when you book; a coordinator then confirms the time and assigns your educator. Cancel at least 24 hours before a session for a full refund."
       actions={
         <Link
           href="/account"
@@ -70,7 +90,11 @@ export default async function AccountBookingsPage() {
         </p>
       ) : null}
 
-      <BookingHistory bookings={bookings} />
+      <BookingHistory
+        bookings={bookings}
+        readAt={readAt}
+        reviewStates={reviewStates}
+      />
     </AccountShell>
   );
 }

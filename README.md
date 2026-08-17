@@ -93,6 +93,30 @@ second factor. Each page keeps its own role check too: a layout runs once for a
 whole subtree, so it can't be the only thing between a coordinator and an
 admin-only page. The API remains the real enforcement point.
 
+### Site configuration
+
+[/dashboard/config](<src/app/(dashboard)/dashboard/config/page.tsx>) edits the
+API's `config_settings` store — booking window, checkout and confirmation SLA,
+refund policy, platform economics, and the feature switches. The editors are
+entirely **data-driven**: labels, help, bounds and defaults all arrive on the API
+response, so no copy of the registry (and therefore no copy of the take rate)
+ever reaches a browser bundle. A save busts the `config` fetch tag.
+
+Two public reads come out of that tag, both through
+[src/lib/config/snapshot.ts](src/lib/config/snapshot.ts):
+
+- `bookingRules(...)` — the notice window, how far ahead the calendar opens, and
+  the confirmation SLA. The booking page passes these into `BookingFlow` as
+  `rules`; nothing in the flow imports the numbers directly any more, which is
+  what keeps the greyed-out calendar days and the refund promise beside the pay
+  button moving together. `DEFAULT_BOOKING_RULES` in
+  [src/data/booking.ts](src/data/booking.ts) is the fallback when the API can't
+  answer, and matches the server's own shipped defaults.
+- `configFlags(...)` — `/book` and the educator application form render a
+  `PausedNotice` in place of the form when their switch is off. Flags default to
+  **on** when the API is unreachable: a network blip is not an instruction to
+  close the doors, and the API refuses a paused submission regardless.
+
 ## How a form reaches the API
 
 1. A Client Component form posts to a Server Action in `src/app/(auth)/actions.ts`.

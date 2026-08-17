@@ -1,9 +1,16 @@
 "use client";
 
 import { useInView } from "@/hooks/use-in-view";
-import type { RatingFacet } from "@/data/educators";
+import type { RatingFacet } from "@/lib/educators/rating";
 
-/** Rating-facet breakdown; bars fill from zero once the card scrolls into view. */
+/**
+ * Rating-facet breakdown; bars fill from zero once the card scrolls into view.
+ *
+ * Presentational only — which bars these are (the four facets, or the star
+ * distribution when no facet was answered) is decided by `ratingBreakdown` in
+ * `lib/educators/rating`, and an educator with no published reviews yields no
+ * facets at all, so the page renders nothing here rather than an empty card.
+ */
 export function RatingBars({ facets }: { facets: RatingFacet[] }) {
   const { ref, inView } = useInView<HTMLDivElement>({ threshold: 0.3 });
 

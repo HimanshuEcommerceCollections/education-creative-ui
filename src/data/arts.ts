@@ -50,9 +50,20 @@ export const ARTS_OFFERS: OfferItem[] = [
   },
 ];
 
-/** Subject stats strip. */
+/**
+ * Subject stats strip.
+ *
+ * Every tile is either read off an array this page renders or states a policy the
+ * product keeps. The disciplines count comes from the marquee; the other two are
+ * commitments — credentials are reviewed before an educator is listed, and an
+ * unconfirmed booking refunds itself. Per-educator ratings are published by the API,
+ * but there is no platform-wide average behind a stat tile and no session history, so
+ * nothing here may claim an average rating or tally projects taken home.
+ */
 export const ARTS_STATS: SubjectStat[] = [
-  { id: "projects", value: 130, suffix: "+", label: "Projects taken home" },
-  { id: "disciplines", value: 6, label: "Craft disciplines" },
-  { id: "rating", value: 4.8, decimals: 1, label: "Average rating" },
+  { id: "disciplines", value: ARTS_MARQUEE.length, label: "Craft disciplines" },
+  { id: "checked", value: 100, suffix: "%", label: "Background checked" },
+  // BOOKING_POLICY.confirmationSlaDays on the server, and the same promise the
+  // booking flow makes before anyone pays.
+  { id: "confirmation", value: 2, suffix: " days", label: "To confirm, or refund" },
 ];

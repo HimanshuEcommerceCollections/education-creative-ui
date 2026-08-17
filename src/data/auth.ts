@@ -13,14 +13,19 @@ export interface AuthPanel {
   imageAlt: string;
 }
 
+/*
+ * The panel copy promised messaging on both of these. There is no messaging —
+ * bookings are requested and paid for, then confirmed by a coordinator — so the
+ * ticks name that instead of a feature the account doesn't have.
+ */
 export const LOGIN_PANEL: AuthPanel = {
   eyebrow: "Welcome back",
   heading: "Welcome back to your",
   accent: "learning journey.",
   description:
-    "Sign in to your parent account to message educators, manage bookings, and pick up right where your family left off.",
+    "Sign in to your parent account to request sessions, follow where each booking stands, and pick up right where your family left off.",
   ticks: [
-    "Parent-managed booking & messaging",
+    "Parent-managed bookings, start to finish",
     "Every educator reviewed before listing",
     "In-home & online, across six subjects",
   ],
@@ -34,11 +39,11 @@ export const SIGNUP_PANEL: AuthPanel = {
   heading: "Start your family's",
   accent: "learning journey.",
   description:
-    "Create a parent account to browse vetted educators, message the ones who fit, and book sessions — in your home or online.",
+    "Create a parent account to browse vetted educators and request sessions — in your home or online, at a rate you see before you pay.",
   ticks: [
     "Free to browse — no subscription",
     "A parent stays in control of every booking",
-    "Six subjects, all vetted educators",
+    "Confirmed within two days, or refunded in full",
   ],
   footnote: "We never create a login for a child, and we never sell your data.",
   image: "/assets/home/images/step-booking-lesson.jpg",

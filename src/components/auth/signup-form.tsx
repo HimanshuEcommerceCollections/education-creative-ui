@@ -79,6 +79,35 @@ export function SignupForm() {
 
         <FormAlert message={alert} />
 
+        {/*
+          `email_in_use` is the one signup failure with somewhere to go: this person
+          already has an account and needs to sign in or reset, not to keep editing
+          this form. The API deliberately doesn't say which of those it is, and this
+          copy doesn't either.
+        */}
+        {state.status === "error" && state.code === "email_in_use" ? (
+          <div className="mb-5 rounded-[14px] border-[1.5px] border-[rgba(46,58,115,0.25)] bg-[rgba(var(--slate-rgb),0.05)] px-4 py-[14px]">
+            <p className="text-[13.5px] leading-[1.55] text-ink">
+              If that account is yours, sign in instead &mdash; or reset the password if
+              you can&rsquo;t remember it.
+            </p>
+            <div className="mt-3 flex flex-wrap gap-3">
+              <Link
+                href="/login"
+                className="inline-flex rounded-[40px] border-[1.5px] border-transparent bg-slate px-5 py-[10px] text-[13px] font-semibold text-white no-underline transition-colors hover:bg-slate-deep"
+              >
+                Sign in
+              </Link>
+              <Link
+                href="/forgot-password"
+                className="inline-flex rounded-[40px] border-[1.5px] border-line bg-white px-5 py-[10px] text-[13px] font-semibold text-ink no-underline transition-colors hover:border-slate hover:bg-[rgba(var(--slate-rgb),0.05)]"
+              >
+                Reset my password
+              </Link>
+            </div>
+          </div>
+        ) : null}
+
         <form action={formAction} noValidate>
           <TextField
             id="fullName"

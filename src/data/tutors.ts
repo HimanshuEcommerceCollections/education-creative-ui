@@ -1,12 +1,21 @@
 import type { Tutor } from "@/types/tutor";
 
+/**
+ * The featured educators in the homepage card stack.
+ *
+ * No rating field here, and none may be added. The gold `★ 4.9` badge is back on
+ * the cards, but it is joined on by `TutorsSection` from the API's published
+ * directory, keyed on the `id` below as the educator's slug — a rating written into
+ * this file would render identically and mean nothing. A tutor the API holds no
+ * rating for gets no badge at all. Experience and the intro are things an educator
+ * tells us; a rating is something parents give.
+ */
 export const TUTORS: Tutor[] = [
   {
     id: "elena",
     subject: "Academic Tutoring",
     name: "Elena M.",
     experience: "8 years experience",
-    rating: "4.9",
     intro:
       "Patient and structured, and wonderful with exam nerves — across core academic subjects.",
   },
@@ -15,7 +24,6 @@ export const TUTORS: Tutor[] = [
     subject: "Music",
     name: "Marcus T.",
     experience: "12 years experience",
-    rating: "5.0",
     intro:
       "Classically trained, but happiest teaching the songs you actually want to play.",
   },
@@ -24,7 +32,6 @@ export const TUTORS: Tutor[] = [
     subject: "College Admissions",
     name: "Priya S.",
     experience: "6 years experience",
-    rating: "4.8",
     intro:
       "A former admissions reader who quietly demystifies essays and applications.",
   },
@@ -33,7 +40,6 @@ export const TUTORS: Tutor[] = [
     subject: "Arts & Crafts",
     name: "Lena K.",
     experience: "9 years experience",
-    rating: "4.9",
     intro:
       "A working studio artist who brings hands-on making to every age and ability.",
   },
@@ -42,7 +48,6 @@ export const TUTORS: Tutor[] = [
     subject: "Languages",
     name: "Sofia R.",
     experience: "7 years experience",
-    rating: "5.0",
     intro:
       "Conversation-first Spanish and French, for children and adults alike.",
   },
@@ -51,7 +56,6 @@ export const TUTORS: Tutor[] = [
     subject: "Cooking",
     name: "James O.",
     experience: "10 years experience",
-    rating: "4.9",
     intro: "A professional chef teaching confident, everyday kitchen skills.",
   },
 ];

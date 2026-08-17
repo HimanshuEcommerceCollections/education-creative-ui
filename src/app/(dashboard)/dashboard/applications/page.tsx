@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
+import { ServiceUnavailable } from "@/components/auth/service-unavailable";
 import { ApplicationRow } from "@/components/dashboard/application-row";
 import {
   DashboardCard,
@@ -8,7 +9,7 @@ import {
   EmptyState,
 } from "@/components/dashboard/page-frame";
 import { loadApplicationQueue } from "@/lib/dashboard/applications";
-import { getSession } from "@/lib/auth/session";
+import { guardSession } from "@/lib/auth/session";
 
 export const metadata: Metadata = {
   title: "Educator Applications",
@@ -21,11 +22,13 @@ export const metadata: Metadata = {
  * same controls for a coordinator and an admin.
  */
 export default async function ApplicationsPage() {
-  const session = await getSession();
-  if (!session) redirect("/login");
-  if (!session.isStaff) redirect("/account");
+  const guard = await guardSession("/dashboard/applications");
+  if (!guard.ok) {
+    return <ServiceUnavailable message={guard.message} retryHref="/dashboard/applications" />;
+  }
+  if (!guard.session.isStaff) redirect("/account");
 
-  const { open, settled, error } = await loadApplicationQueue();
+  const { open, settled, truncated, error } = await loadApplicationQueue();
 
   return (
     <DashboardPage
@@ -39,6 +42,21 @@ export default async function ApplicationsPage() {
           className="mb-7 rounded-[14px] border-[1.5px] border-[rgba(194,72,60,0.35)] bg-[rgba(194,72,60,0.07)] px-4 py-3 text-[13.5px] text-[#a63a30]"
         >
           {error}
+        </p>
+      ) : null}
+
+      {/*
+        Truncation is stated rather than hidden. The list is filtered by status on
+        the server now, but a page ceiling still exists — and an unreviewed
+        application quietly falling off the end is the failure worth naming.
+      */}
+      {truncated ? (
+        <p
+          role="status"
+          className="mb-7 rounded-[14px] border-[1.5px] border-[rgba(210,162,65,0.5)] bg-[rgba(210,162,65,0.1)] px-4 py-3 text-[13.5px] leading-[1.55] text-ink"
+        >
+          There are more applications than fit on one page, so this list is
+          incomplete. Work the queue down and the rest will appear.
         </p>
       ) : null}
 

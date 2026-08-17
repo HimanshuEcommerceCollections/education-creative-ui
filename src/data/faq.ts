@@ -50,7 +50,7 @@ export const FAQ_ITEMS: FaqItem[] = [
     category: "pricing",
     question: "How is pricing decided?",
     answer: [
-      "Each educator sets their own hourly rate. The range you see on a profile reflects their experience, the subject, and the format — online or in-home. Rates are always shown up front, so you can compare before you message or book. ",
+      "Each educator sets their own hourly rate. What you see on a profile reflects their experience, the subject, and the format — online or in-home, where a travel charge may apply. Rates are always shown up front, and the full total is itemised before you pay. ",
       { kind: "link", text: "Browse educators", href: "/browse" },
       " to see what they currently charge.",
     ],
@@ -60,7 +60,7 @@ export const FAQ_ITEMS: FaqItem[] = [
     category: "pricing",
     question: "Is there a subscription or membership fee?",
     answer: [
-      "No. There's no subscription and no membership fee — you simply pay per session at the educator's listed rate. Browsing, messaging, and comparing educators is free from your parent account.",
+      "No. There's no subscription and no membership fee — you simply pay per session at the educator's listed rate. Browsing and comparing educators is free, and you only pay when you request a session.",
     ],
   },
   {
@@ -78,7 +78,7 @@ export const FAQ_ITEMS: FaqItem[] = [
     category: "booking",
     question: "How do I book a session?",
     answer: [
-      "Browse educators by subject, message the ones who look like a fit, then book directly through your parent account. You choose the date, time, and format, and confirm from there. Everything runs through the parent-managed account — there's no separate child login. ",
+      "Browse educators by subject, pick the one you'd like, and choose a date, time, and format. You pay at that point, which places the request — then a coordinator confirms the time with the educator and emails you, usually well inside two days. If it can't be confirmed, you're refunded in full automatically. Everything runs through the parent-managed account — there's no separate child login. ",
       { kind: "link", text: "See how it works", href: "/how-it-works" },
       " for a step-by-step walkthrough.",
     ],
@@ -86,11 +86,11 @@ export const FAQ_ITEMS: FaqItem[] = [
   {
     id: "reschedule-or-cancel",
     category: "booking",
-    question: "Can I reschedule or cancel a session?",
+    question: "Can I cancel a session?",
     answer: [
-      "Yes. You can reschedule or cancel from ",
+      "Yes. Cancel from ",
       { kind: "strong", text: "My Bookings" },
-      " in your account. Each educator sets their own reschedule and cancellation terms, and those terms are shown to you before you confirm a session — so there are no surprises.",
+      " in your account: at least 24 hours before the session, you're refunded in full. Inside 24 hours we can't refund it — the educator has already held the slot — so get in touch and we'll do what we can. Changing the time isn't self-service yet; cancel and request the new time, or contact support and we'll move it for you.",
     ],
   },
   {
@@ -98,7 +98,7 @@ export const FAQ_ITEMS: FaqItem[] = [
     category: "booking",
     question: "In-home or online — which can I choose?",
     answer: [
-      "Both. Many of the same educators offer in-home sessions across the Raleigh area and online sessions as well. You pick whichever format suits your family when you book, and you can switch formats for future sessions.",
+      "Both. Many of the same educators offer in-home sessions across the Raleigh area and online sessions as well. You pick whichever format suits your family when you request the session — in-home may carry a travel charge, itemised before you pay — and you can choose differently next time.",
     ],
   },
 
@@ -108,7 +108,7 @@ export const FAQ_ITEMS: FaqItem[] = [
     category: "safety",
     question: "Who books for a child under 18?",
     answer: [
-      "A parent or guardian, always. For anyone under 18, the parent or guardian creates the account, books the sessions, and supervises every session. There is no separate child login and children don't hold their own accounts — the account stays parent-managed throughout.",
+      "A parent or guardian, always. For anyone under 18, the parent or guardian creates the account, requests the sessions, and supervises every session. There is no separate child login and children don't hold their own accounts — the account stays parent-managed throughout.",
     ],
   },
   {
@@ -135,8 +135,14 @@ export const FAQ_ITEMS: FaqItem[] = [
     id: "information-privacy",
     category: "safety",
     question: "Is my information private?",
+    /*
+     * This answer has to describe real data handling, never a demo disclaimer: the
+     * platform takes payments and stores a child's first name, age band, and (for
+     * in-home sessions) a home address. "No real student records or personal data
+     * are stored" would be false in the worst possible direction.
+     */
     answer: [
-      "Accounts are parent-managed, and we design around keeping families' details protected. This site is a demo — no real student records or personal data are stored. For how a live version would handle data, see our ",
+      "Accounts are parent-managed, and we collect as little about a child as a session can run on: a first name and an age band, never a date of birth or a surname, and no login of their own. Home addresses for in-home sessions are encrypted at rest and released to an educator only once a booking is confirmed. For the full picture, see our ",
       { kind: "link", text: "Privacy Policy", href: "/privacy" },
       ".",
     ],

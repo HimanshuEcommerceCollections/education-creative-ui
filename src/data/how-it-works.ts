@@ -32,24 +32,32 @@ export const HERO_BADGES: string[] = [
   "In-home & online",
 ];
 
-/** The three journey steps, browse → connect → learn. */
+/**
+ * The three journey steps, browse → request → learn.
+ *
+ * These steps describe the pay-first model the booking flow implements, and nothing
+ * else: the parent pays at the point of request, a coordinator then confirms the slot
+ * and assigns the educator, and an unconfirmed booking is refunded in full. There is
+ * no messaging anywhere in the product, so nothing here may offer to contact an
+ * educator directly or to decide "when it feels right".
+ */
 export const JOURNEY_STEPS: JourneyStep[] = [
   {
     title: "Browse educators",
     caption: "Browse educators",
-    body: "Explore profiles across six subjects — tutoring, admissions guidance, music, languages, arts & crafts, and cooking. Compare experience, availability, and ratings from other families before you reach out.",
+    body: "Explore profiles across six subjects — tutoring, admissions guidance, music, languages, arts & crafts, and cooking. Compare experience, format, availability, and the hourly rate you'll pay before you request anything.",
     image: { src: "/assets/how-it-works/images/journey-browse.jpg", alt: "A student browsing on a laptop" },
   },
   {
-    title: "Connect & book",
-    caption: "Connect & book",
-    body: "Message an educator directly from your parent account to talk through goals, schedule, and format. When it feels right, confirm a booking — no pressure, no obligation.",
+    title: "Request & pay",
+    caption: "Request & pay",
+    body: "Choose your educator, a time, and a format, add your child's details, and pay securely. That places the request — a coordinator then confirms the slot with the educator and emails you within two days, or refunds you in full if it can't be filled.",
     image: { src: "/assets/how-it-works/images/journey-connect.jpg", alt: "Two people finalizing a booking agreement" },
   },
   {
     title: "Learn & grow",
     caption: "Learn & grow",
-    body: "Sessions run in your home or online, at times that work for your family. You’re looped in throughout, with an educator to message any time plans need to change.",
+    body: "Sessions run in your home or online, at the time your coordinator confirmed. A parent or guardian is present or reachable throughout, and every booking, price, and refund stays visible in My Bookings.",
     image: { src: "/assets/how-it-works/images/journey-learn.jpg", alt: "A parent helping their child with schoolwork" },
   },
 ];
@@ -62,19 +70,26 @@ export const TRUST_CARDS: TrustCard[] = [
     body: "Every independent educator submits credentials and professional references, reviewed before their profile is ever listed.",
   },
   {
+    /*
+     * Was "Verified Ratings — reviews come only from parents who've completed a
+     * session". Reviews do exist now and are anchored to a completed booking, but a
+     * three-tile strip explaining how booking works is not where that belongs. The
+     * coordinator confirmation step below is the one a parent most needs explained,
+     * because it is why paying does not instantly book a time.
+     */
     icon: "star",
-    title: "Verified Ratings",
-    body: "Reviews come only from parents who’ve completed a session, so what you read reflects real experience.",
+    title: "A Person Confirms Every Booking",
+    body: "Nothing is auto-assigned. A coordinator reaches the educator, confirms the time, and emails you — and if that can’t happen within two days, your payment is refunded in full automatically.",
   },
   {
     icon: "users",
-    title: "Parent-Managed Contact",
-    body: "Parents create the account, message educators, and manage every booking — there’s no separate child-facing login.",
+    title: "Parent-Managed Bookings",
+    body: "Parents create the account, request the sessions, and manage every booking — there’s no separate child-facing login.",
   },
   {
     icon: "document",
     title: "A Record You Can Revisit",
-    body: "Messaging and scheduling stay on the platform, so there’s always a record to look back on.",
+    body: "Every request, the price you paid, who was assigned, and any refund stays in My Bookings, so there’s always a record to look back on.",
   },
 ];
 

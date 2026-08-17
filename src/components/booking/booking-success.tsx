@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useCallback, useEffect, useRef } from "react";
 
 import { Confetti } from "@/components/auth/confetti";
-import { BOOKING_CONFIRMATION_SLA_DAYS } from "@/data/booking";
 import { cn } from "@/lib/utils";
 
 import { CheckIcon, ClockIcon } from "./booking-icons";
@@ -21,6 +20,13 @@ export interface BookingRecap {
 
 interface BookingSuccessProps {
   recap: BookingRecap | null;
+  /**
+   * The confirmation SLA in force, from site configuration by way of the flow.
+   * This number is a promise printed beside a pay button, so it has to be the
+   * live one — a build-time copy would keep promising two days after an admin
+   * moved it to three.
+   */
+  confirmationSlaDays: number;
   onClose: () => void;
   onBookAnother: () => void;
 }
@@ -44,7 +50,12 @@ const FOCUSABLE =
  * none of that, which leaves a keyboard user tabbing around the page behind an
  * overlay they can't see past.
  */
-export function BookingSuccess({ recap, onClose, onBookAnother }: BookingSuccessProps) {
+export function BookingSuccess({
+  recap,
+  confirmationSlaDays,
+  onClose,
+  onBookAnother,
+}: BookingSuccessProps) {
   const cardRef = useRef<HTMLDivElement>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const restoreTo = useRef<HTMLElement | null>(null);
@@ -98,7 +109,7 @@ export function BookingSuccess({ recap, onClose, onBookAnother }: BookingSuccess
     { label: "Payment received", detail: recap.totalLabel, done: true },
     {
       label: "Coordinator confirms & assigns",
-      detail: `Within ${BOOKING_CONFIRMATION_SLA_DAYS} days`,
+      detail: `Within ${confirmationSlaDays} days`,
       done: false,
     },
     { label: "Your educator is confirmed", detail: "We'll email you", done: false },
@@ -183,7 +194,7 @@ export function BookingSuccess({ recap, onClose, onBookAnother }: BookingSuccess
         </div>
 
         <p className="mb-5 rounded-[12px] bg-[var(--chip-a)] px-4 py-3 text-left text-[12.5px] leading-[1.55] text-slate">
-          If we can&rsquo;t confirm within {BOOKING_CONFIRMATION_SLA_DAYS} days, this
+          If we can&rsquo;t confirm within {confirmationSlaDays} days, this
           booking is refunded in full automatically — you don&rsquo;t need to chase us.
         </p>
 

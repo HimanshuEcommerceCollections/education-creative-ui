@@ -1,10 +1,6 @@
 import { BOOKING_TIMEZONE } from "@contracts/bookings.ts";
 
-import {
-  BOOKING_MIN_NOTICE_HOURS,
-  BOOKING_WINDOW_MONTHS,
-  type BookingEducator,
-} from "@/data/booking";
+import type { BookingEducator, BookingRules } from "@/data/booking";
 
 /**
  * Civil-date arithmetic for the booking calendar.
@@ -104,9 +100,19 @@ export function isSameDate(a: CivilDate | null, b: CivilDate | null): boolean {
   return a.year === b.year && a.month === b.month && a.day === b.day;
 }
 
-/** Latest month the calendar will page to, as `{ year, month }`. */
-export function lastOpenMonth(now: CivilNow): { year: number; month: number } {
-  const zeroBased = now.month - 1 + BOOKING_WINDOW_MONTHS;
+/**
+ * Latest month the calendar will page to, as `{ year, month }`.
+ *
+ * `rules` comes from site configuration by way of the booking page, so every
+ * function here that has an opinion about *when* takes it explicitly rather than
+ * reading a module constant — which is what lets one page render the live window
+ * and the tests render whatever they need.
+ */
+export function lastOpenMonth(
+  now: CivilNow,
+  rules: BookingRules,
+): { year: number; month: number } {
+  const zeroBased = now.month - 1 + rules.windowMonths;
   return { year: now.year + Math.floor(zeroBased / 12), month: (zeroBased % 12) + 1 };
 }
 
@@ -123,14 +129,15 @@ export function isDateOpen(
   date: CivilDate,
   educator: BookingEducator,
   now: CivilNow,
+  rules: BookingRules,
 ): boolean {
   const startOfToday = civilMinutes(now);
   if (civilMinutes(date) < startOfToday) return false;
 
-  const last = lastOpenMonth(now);
+  const last = lastOpenMonth(now, rules);
   if (date.year * 12 + date.month > last.year * 12 + last.month) return false;
 
-  return openSlots(date, educator, now).length > 0;
+  return openSlots(date, educator, now, rules).length > 0;
 }
 
 /**
@@ -146,12 +153,14 @@ export function openSlots(
   date: CivilDate,
   educator: BookingEducator,
   now: CivilNow,
+  rules: BookingRules,
 ): string[] {
   const weekday = weekdayOf(date);
   const window = educator.availability.find((entry) => entry.day === weekday);
   if (!window) return [];
 
-  const earliest = civilMinutes(now, now.hour, now.minute) + BOOKING_MIN_NOTICE_HOURS * 60;
+  const earliest =
+    civilMinutes(now, now.hour, now.minute) + rules.minNoticeHours * 60;
 
   return window.times.filter((time) => {
     const [hour, minute] = time.split(":").map(Number);
@@ -163,12 +172,13 @@ export function openSlots(
 export function firstOpenDate(
   educator: BookingEducator,
   now: CivilNow,
+  rules: BookingRules,
 ): CivilDate | null {
-  const last = lastOpenMonth(now);
+  const last = lastOpenMonth(now, rules);
   const cursor: CivilDate = { year: now.year, month: now.month, day: now.day };
 
   while (cursor.year * 12 + cursor.month <= last.year * 12 + last.month) {
-    if (isDateOpen(cursor, educator, now)) return { ...cursor };
+    if (isDateOpen(cursor, educator, now, rules)) return { ...cursor };
 
     cursor.day += 1;
     if (cursor.day > daysInMonth(cursor.year, cursor.month)) {

@@ -6,6 +6,7 @@ import { ChevronIcon } from "@/components/common/icons";
 import { Reveal } from "@/components/common/reveal";
 import { TutorCard } from "@/components/home/tutor-card";
 import { TUTORS } from "@/data/tutors";
+import type { EducatorRating } from "@/lib/educators/rating";
 import { cn } from "@/lib/utils";
 import type { StackDirection } from "@/types/tutor";
 
@@ -43,6 +44,12 @@ function StackButton({
 
 interface TutorStackProps {
   heading: ReactNode;
+  /**
+   * Published ratings by educator slug (a tutor's `id`), resolved on the server
+   * by the section above. Sparse on purpose: an id that isn't here has no
+   * published reviews, and its card carries no rating badge.
+   */
+  ratings?: Record<string, EducatorRating>;
 }
 
 /**
@@ -50,7 +57,7 @@ interface TutorStackProps {
  * "leaving" card so the controls (left column) and cards (right column) stay
  * in sync; the static heading is passed in from the server section.
  */
-export function TutorStack({ heading }: TutorStackProps) {
+export function TutorStack({ heading, ratings = {} }: TutorStackProps) {
   const count = TUTORS.length;
   const [order, setOrder] = useState<number[]>(() =>
     TUTORS.map((_, index) => index),
@@ -123,6 +130,7 @@ export function TutorStack({ heading }: TutorStackProps) {
             <TutorCard
               key={tutor.id}
               tutor={tutor}
+              rating={ratings[tutor.id]}
               position={order.indexOf(index)}
               isLeaving={leaving?.index === index}
               direction={leaving?.direction}

@@ -6,7 +6,13 @@ import { Highlight } from "@/components/common/highlight";
 import { Reveal } from "@/components/common/reveal";
 import { Button } from "@/components/ui/button";
 
-const CHIPS = ["★ 4.8 rating", "5 yrs experience", "$45/hr", "In-home & online"];
+/*
+ * Every chip is something an educator tells us about themselves. Published ratings
+ * exist now, but they live behind `GET /educators/directory` and this band does not
+ * read it — so a "★ 4.8 rating" chip here could only be a number written in this file
+ * and rendered as though a family had given it.
+ */
+const CHIPS = ["5 yrs experience", "$45/hr", "In-home & online"];
 
 /**
  * Editorial single-educator spotlight for the Arts & Crafts page: a dark,

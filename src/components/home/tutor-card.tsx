@@ -1,10 +1,17 @@
 import type { CSSProperties, KeyboardEvent } from "react";
 
+import type { EducatorRating } from "@/lib/educators/rating";
 import { cn } from "@/lib/utils";
 import type { StackDirection, Tutor } from "@/types/tutor";
 
 interface TutorCardProps {
   tutor: Tutor;
+  /**
+   * This educator's published rating from the API, or undefined when they have
+   * none. `data/tutors.ts` holds no rating field and must not grow one — the
+   * badge below is drawn from this prop or not at all.
+   */
+  rating?: EducatorRating;
   /** Position in the stack (0 = front). */
   position: number;
   isLeaving: boolean;
@@ -55,6 +62,7 @@ function cardStyle(
 
 export function TutorCard({
   tutor,
+  rating,
   position,
   isLeaving,
   direction,
@@ -95,9 +103,11 @@ export function TutorCard({
               {tutor.subject}
             </span>
           </div>
-          <span className="ml-auto whitespace-nowrap rounded-[20px] bg-gold px-[11px] py-[5px] text-[12.5px] font-bold tracking-[0.02em] text-white">
-            ★ {tutor.rating}
-          </span>
+          {rating ? (
+            <span className="ml-auto whitespace-nowrap rounded-[20px] bg-gold px-[11px] py-[5px] text-[12.5px] font-bold tracking-[0.02em] text-white">
+              ★ {rating.average.toFixed(1)}
+            </span>
+          ) : null}
         </div>
 
         <h3 className="mb-[3px] font-serif text-[29px] font-semibold tracking-[-0.02em]">

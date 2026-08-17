@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import type { EducatorRating } from "@/lib/educators/rating";
 import type { SubjectEducator } from "@/types/subject-page";
 
 const OVERLAY_HOVER =
@@ -11,7 +12,18 @@ const OVERLAY_HOVER =
  * Educator card: name by default, full detail revealed on hover/focus. A whole
  * card link (the source used a click handler), keyboard-accessible.
  */
-export function EducatorCard({ educator }: { educator: SubjectEducator }) {
+export function EducatorCard({
+  educator,
+  rating,
+}: {
+  educator: SubjectEducator;
+  /**
+   * The API's published rating for this educator, or undefined when they have
+   * none — in which case no pill is drawn. The subject data files hold no rating
+   * field and must not grow one.
+   */
+  rating?: EducatorRating;
+}) {
   return (
     <Link
       href={educator.href}
@@ -44,9 +56,11 @@ export function EducatorCard({ educator }: { educator: SubjectEducator }) {
         <div className="mb-[10px] text-[12px] tracking-[0.04em] text-white/80">
           {educator.meta}
         </div>
-        <span className="mb-3 inline-block rounded-[20px] bg-gold px-[11px] py-1 text-[12px] font-bold text-white">
-          ★ {educator.rating}
-        </span>
+        {rating ? (
+          <span className="mb-3 inline-block rounded-[20px] bg-gold px-[11px] py-1 text-[12px] font-bold text-white">
+            ★ {rating.average.toFixed(1)}
+          </span>
+        ) : null}
         <p className="mb-[14px] text-[13.5px] leading-[1.55] text-white/90">
           {educator.bio}
         </p>

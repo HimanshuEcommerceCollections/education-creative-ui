@@ -9,8 +9,13 @@ import type { LanguageEducator } from "@/data/languages";
 import type { RevealDelay } from "@/lib/reveal";
 
 /**
- * "Two voices, five languages" — the featured educators on a dark, photo-backed
- * band, each in a light card with rating, experience, price, and a bio.
+ * "Two voices, three languages" — the featured educators on a dark, photo-backed
+ * band, each in a light card with experience, price, and a bio.
+ *
+ * No card leads with a `★ 4.9` badge: this band takes no rating prop, so a number here
+ * could only come from the data file rather than from the API's published directory. The heading counts the
+ * languages this page actually offers — three (Spanish, French, Hindi) — and has to be
+ * corrected alongside the data whenever that set changes.
  *
  * Takes its educators as a prop rather than reading the module directly, so the
  * page can overlay admin-set rates before they render.
@@ -35,7 +40,7 @@ export function LanguagesEducators({ educators }: { educators: LanguageEducator[
         <Reveal className="mb-[50px] max-w-[680px]">
           <Eyebrow tone="light">Your educators</Eyebrow>
           <h2 className="font-serif text-[clamp(30px,4vw,54px)] font-semibold leading-[1.02] tracking-[-0.02em] text-[#F6F5F1]">
-            Two voices, <Highlight tone="gold">five languages.</Highlight>
+            Two voices, <Highlight tone="gold">three languages.</Highlight>
           </h2>
         </Reveal>
 
@@ -58,7 +63,6 @@ export function LanguagesEducators({ educators }: { educators: LanguageEducator[
                   </div>
                   <h3 className="font-serif text-[21px] font-bold text-ink">{educator.name}</h3>
                   <div className="flex gap-[14px] text-[13px] font-semibold text-slate">
-                    <span>{educator.rating}</span>
                     <span>{educator.experience}</span>
                     <span>{educator.price}</span>
                   </div>

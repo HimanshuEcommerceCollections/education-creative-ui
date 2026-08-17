@@ -3,8 +3,9 @@
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 
-import { inviteCoordinatorAction } from "@/app/(dashboard)/dashboard/actions";
-import { IDLE, fieldError, formMessage } from "@/lib/auth/form-state";
+import { inviteStaffAction } from "@/app/(dashboard)/dashboard/actions";
+import { SessionExpiredAlert } from "@/components/auth/session-expired-alert";
+import { IDLE, fieldError, formMessage, sessionExpired } from "@/lib/auth/form-state";
 import { cn } from "@/lib/utils";
 
 const INPUT =
@@ -52,16 +53,22 @@ function Field({
 }
 
 /**
- * The coordinator invite form. Deliberately has no password field — the invitee
- * sets their own through the emailed single-use link, so no credential ever
- * passes through an admin's hands.
+ * The staff invite form. Deliberately has no password field — the invitee sets
+ * their own through the emailed single-use link, so no credential ever passes
+ * through an admin's hands.
+ *
+ * The role selector is what keeps administrator recovery in an operator's hands: if
+ * inviting a second administrator means running `npm run seed:admin` on a server, an
+ * admin who loses access has no route back that doesn't involve an engineer.
  */
-export function InviteCoordinatorForm() {
-  const [state, action] = useActionState(inviteCoordinatorAction, IDLE);
+export function InviteStaffForm() {
+  const [state, action] = useActionState(inviteStaffAction, IDLE);
 
+  const expired = sessionExpired(state);
   const failed = state.status === "error";
-  const message =
-    formMessage(state) ?? (state.status === "success" ? state.message : undefined);
+  const message = expired
+    ? undefined
+    : formMessage(state) ?? (state.status === "success" ? state.message : undefined);
 
   return (
     <form action={action}>
@@ -96,7 +103,20 @@ export function InviteCoordinatorForm() {
             className={INPUT}
           />
         </Field>
+        <Field label="Role" name="role" error={fieldError(state, "role")}>
+          <select
+            name="role"
+            defaultValue="coordinator"
+            aria-invalid={Boolean(fieldError(state, "role"))}
+            className={INPUT}
+          >
+            <option value="coordinator">Coordinator</option>
+            <option value="admin">Administrator</option>
+          </select>
+        </Field>
       </div>
+
+      {expired ? <SessionExpiredAlert /> : null}
 
       {message ? (
         <p
@@ -115,6 +135,8 @@ export function InviteCoordinatorForm() {
       <div className="mt-5 flex items-center justify-between gap-4 border-t border-line pt-5">
         <p className="text-[12.5px] leading-[1.5] text-muted">
           They&apos;ll get a single-use link, good for 7 days, to set their own password.
+          An administrator can do everything a coordinator can, plus pricing, staff, and
+          role grants.
         </p>
         <SubmitButton />
       </div>

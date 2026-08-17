@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 
 import type { EducatorAssignment } from "@contracts/bookings.ts";
 
+import { ServiceUnavailable } from "@/components/auth/service-unavailable";
 import { AssignmentCard } from "@/components/dashboard/assignment-card";
 import {
   DashboardCard,
@@ -11,7 +12,7 @@ import {
 } from "@/components/dashboard/page-frame";
 import { ApiError, apiFetch } from "@/lib/api/server";
 import { readSessionToken } from "@/lib/auth/cookies";
-import { getSession } from "@/lib/auth/session";
+import { guardSession } from "@/lib/auth/session";
 
 export const metadata: Metadata = {
   title: "My Sessions",
@@ -28,10 +29,12 @@ export const metadata: Metadata = {
  * else's list.
  */
 export default async function EducatorSessionsPage() {
-  const session = await getSession();
-  if (!session) redirect("/login");
-  if (session.isStaff) redirect("/dashboard");
-  if (session.activeRole !== "educator") redirect("/account");
+  const guard = await guardSession("/educator/sessions");
+  if (!guard.ok) {
+    return <ServiceUnavailable message={guard.message} retryHref="/educator/sessions" />;
+  }
+  if (guard.session.isStaff) redirect("/dashboard");
+  if (guard.session.activeRole !== "educator") redirect("/account");
 
   let assignments: EducatorAssignment[] = [];
   let error: string | null = null;
@@ -56,7 +59,7 @@ export default async function EducatorSessionsPage() {
     <DashboardPage
       eyebrow="Teaching"
       title="My sessions"
-      description="Sessions a coordinator has confirmed and assigned to you. Learner details are here; for in-home sessions the address is one click away, and every look at it is recorded."
+      description="Sessions a coordinator has confirmed and assigned to you. Learner details are here; for in-home sessions the address is one click away, and every look at it is recorded. Mark a session delivered — or record a no-show — from its card once it's done."
     >
       {error ? (
         <p

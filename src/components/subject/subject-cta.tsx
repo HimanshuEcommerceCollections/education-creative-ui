@@ -14,7 +14,15 @@ interface SubjectCtaProps {
   bgImage: ImageAsset;
 }
 
-/** Closing call-to-action with a photo backdrop. */
+/**
+ * Closing call-to-action with a photo backdrop.
+ *
+ * The button goes where a booking actually starts. There is no intro call anywhere in
+ * the product and the contact form doesn't reach an educator, so this must not offer
+ * one: the real first step is to open a profile, pick a time, and pay — a coordinator
+ * then confirms it, or the booking refunds itself. Each page's `description` says what
+ * happens next rather than promising a call nobody schedules.
+ */
 export function SubjectCta({ title, description, bgImage }: SubjectCtaProps) {
   return (
     <section className="relative overflow-hidden bg-slate-deep py-[16vh] text-center text-ivory">
@@ -48,8 +56,8 @@ export function SubjectCta({ title, description, bgImage }: SubjectCtaProps) {
           </p>
         </Reveal>
         <Reveal delay={3}>
-          <Button href="/contact" variant="light">
-            Book a free intro call
+          <Button href="/browse" variant="light">
+            Browse educators
           </Button>
         </Reveal>
       </Container>

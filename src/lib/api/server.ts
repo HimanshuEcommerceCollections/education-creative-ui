@@ -18,6 +18,18 @@ if (!API_BASE_URL) {
   );
 }
 
+/**
+ * Proves to the API that a request came from this app rather than from anyone who
+ * knows the API's URL.
+ *
+ * The API treats the forwarded client IP as trustworthy — it keys credential rate
+ * limits on it and stamps it onto consent and audit rows — which only holds if the
+ * hop itself is authenticated. Optional on both sides so the two can be switched
+ * on in either order; until the API also has it, it accepts unauthenticated
+ * callers and says so at boot.
+ */
+const INTERNAL_API_SECRET = process.env.INTERNAL_API_SECRET;
+
 /** A failed API call, carrying the contract's code so callers can branch on it. */
 export class ApiError extends Error {
   constructor(
@@ -88,6 +100,7 @@ export async function apiFetch<T>(
 
   if (options.body !== undefined) headers["Content-Type"] = "application/json";
   if (options.token) headers.Authorization = `Bearer ${options.token}`;
+  if (INTERNAL_API_SECRET) headers["x-internal-secret"] = INTERNAL_API_SECRET;
   if (options.clientIp) headers["x-client-ip"] = options.clientIp;
   if (options.clientUserAgent) headers["x-client-user-agent"] = options.clientUserAgent;
 

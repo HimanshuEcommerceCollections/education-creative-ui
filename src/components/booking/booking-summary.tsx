@@ -3,10 +3,14 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import type { BookingFormat, SessionDuration } from "@contracts/bookings.ts";
+import type {
+  BookingFormat,
+  QuoteResponse,
+  SessionDuration,
+} from "@contracts/bookings.ts";
+import type { ErrorCode } from "@contracts/errors.ts";
 
 import {
-  BOOKING_CONFIRMATION_SLA_DAYS,
   FORMAT_LABELS,
   type BookingEducator,
 } from "@/data/booking";
@@ -14,22 +18,54 @@ import { formatMoney, type Estimate } from "@/lib/booking/pricing";
 import { formatDate, formatTime, type CivilDate } from "@/lib/booking/schedule";
 import { cn } from "@/lib/utils";
 
+import { BookingBlocked } from "./booking-blocked";
 import { ArrowRightIcon, LockIcon, ShieldIcon } from "./booking-icons";
 
 interface BookingSummaryProps {
   educator: BookingEducator;
   subject: string | null;
   format: BookingFormat;
+  /**
+   * The confirmation SLA in force, from site configuration by way of the flow.
+   * The refund promise sits beside the pay button, so this has to be the live
+   * figure — a build-time copy would keep promising two days after an admin moved
+   * it to three.
+   */
+  confirmationSlaDays: number;
   date: CivilDate | null;
   time: string | null;
   alternateTime: string | null;
   flexible: boolean;
   duration: SessionDuration;
+  /** The browser's own figure. Labelled as an estimate, because that is all it is. */
   estimate: Estimate;
+  /**
+   * The server's price for these choices, from `POST /bookings/quotes`, once it has
+   * one. This is the authoritative number and it replaces the estimate outright, so
+   * the parent's first sight of the real figure is here and not next to the card form
+   * with the booking already created.
+   */
+  quote?: QuoteResponse | null;
+  /** True while a re-quote is in flight, so the figure can say it's settling. */
+  quotePending?: boolean;
   /** Human-readable list of what's still needed. Empty means ready. */
   missing: readonly string[];
   pending: boolean;
   error?: string;
+  /**
+   * The failure's contract code, so the card can offer the way out rather than
+   * only naming the problem — a sign-in link for an expired session, a resend for
+   * an unconfirmed address. See `booking-blocked`.
+   */
+  errorCode?: ErrorCode;
+  /** The signed-in parent's address, for the resend-confirmation affordance. */
+  accountEmail?: string;
+  /**
+   * A reason the API has already given for refusing these choices — an educator it
+   * doesn't list, a subject it can't price. Blocks payment, because pressing the
+   * button would reproduce it after five more fields.
+   */
+  blocked?: string;
   paymentsLive: boolean;
   /**
    * True once a booking exists and Stripe's panel has taken over. The card then
@@ -84,14 +120,27 @@ export function BookingSummary({
   flexible,
   duration,
   estimate,
+  quote,
+  quotePending = false,
   missing,
   pending,
   error,
+  errorCode,
+  accountEmail,
+  blocked,
   paymentsLive,
+  confirmationSlaDays,
   readOnly = false,
   onSubmit,
 }: BookingSummaryProps) {
-  const ready = missing.length === 0;
+  const ready = missing.length === 0 && !blocked;
+
+  /*
+   * The server's breakdown wins whenever there is one. Both come in the same shape
+   * and the same units — integer cents, one line per adjustment — precisely so this
+   * swap is a choice of source and not a second rendering path.
+   */
+  const priced = quote ?? estimate;
 
   return (
     <aside className="sticky top-[100px]">
@@ -140,7 +189,7 @@ export function BookingSummary({
 
         <div className="relative border-t border-white/[0.16] pt-[18px]">
           <ul className="grid list-none gap-2">
-            {estimate.lineItems.map((line) => (
+            {priced.lineItems.map((line) => (
               <li
                 key={line.label}
                 className="flex items-baseline justify-between gap-3 text-[13px] text-white/[0.66]"
@@ -155,15 +204,23 @@ export function BookingSummary({
             aria-live="polite"
             className="mt-[14px] flex items-baseline justify-between gap-3"
           >
-            <span className="text-[13.5px] text-white/70">Estimated total</span>
-            <b className="font-serif text-[30px] font-bold text-white">
-              {formatMoney(estimate.totalCents)}
+            <span className="text-[13.5px] text-white/70">
+              {quote ? "Total" : "Estimated total"}
+            </span>
+            <b
+              className={cn(
+                "font-serif text-[30px] font-bold text-white transition-opacity duration-300",
+                quotePending && "opacity-60",
+              )}
+            >
+              {formatMoney(priced.totalCents)}
             </b>
           </div>
 
           <p className="mt-1 text-[11.5px] leading-[1.5] text-white/50">
-            An estimate. We confirm the exact amount on the payment step before you&rsquo;re
-            charged.
+            {quote
+              ? "Priced by us, not by your browser — this is exactly what you'll be charged."
+              : "An estimate. We confirm the exact amount on the payment step before you're charged."}
           </p>
         </div>
 
@@ -179,7 +236,7 @@ export function BookingSummary({
               onClick={onSubmit}
               disabled={!ready || pending}
               aria-busy={pending}
-              aria-describedby={ready ? undefined : "booking-missing"}
+              aria-describedby={missing.length > 0 ? "booking-missing" : undefined}
               className={cn(
                 "inline-flex w-full cursor-pointer items-center justify-center gap-[9px] rounded-[40px] bg-white px-7 py-4 font-sans text-[15px] font-bold text-slate-deep",
                 "transition-[transform,box-shadow,opacity] duration-300 ease-brand motion-reduce:transition-none",
@@ -216,15 +273,26 @@ export function BookingSummary({
           )}
 
           {error ? (
+            <div
+              role="alert"
+              className="mt-3 rounded-[12px] bg-[rgba(255,255,255,0.12)] px-4 py-3 text-[13px] leading-[1.5] text-white"
+            >
+              <p>{error}</p>
+              {/* The way out, next to the thing that went wrong. */}
+              <BookingBlocked code={errorCode} accountEmail={accountEmail} />
+            </div>
+          ) : null}
+
+          {blocked ? (
             <p
               role="alert"
               className="mt-3 rounded-[12px] bg-[rgba(255,255,255,0.12)] px-4 py-3 text-[13px] leading-[1.5] text-white"
             >
-              {error}
+              {blocked}
             </p>
           ) : null}
 
-          {!ready ? (
+          {missing.length > 0 ? (
             <div
               id="booking-missing"
               role="status"
@@ -246,7 +314,7 @@ export function BookingSummary({
           <p className="flex items-start gap-2 text-[11.5px] leading-[1.55] text-white/60">
             <ShieldIcon className="mt-px h-[15px] w-[15px] flex-none text-gold" />
             You pay now and a coordinator confirms. If we can&rsquo;t confirm your session
-            within {BOOKING_CONFIRMATION_SLA_DAYS} days, you&rsquo;re refunded in full,
+            within {confirmationSlaDays} days, you&rsquo;re refunded in full,
             automatically.
           </p>
           <p className="flex items-start gap-2 text-[11.5px] leading-[1.55] text-white/60">

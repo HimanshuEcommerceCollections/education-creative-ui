@@ -14,7 +14,14 @@ import {
   updateFormatPolicyAction,
   updateRateBandAction,
 } from "@/app/(dashboard)/dashboard/pricing/actions";
-import { IDLE, fieldError, formMessage, type AuthFormState } from "@/lib/auth/form-state";
+import { SessionExpiredAlert } from "@/components/auth/session-expired-alert";
+import {
+  IDLE,
+  fieldError,
+  formMessage,
+  sessionExpired,
+  type AuthFormState,
+} from "@/lib/auth/form-state";
 import { cn } from "@/lib/utils";
 
 /**
@@ -46,6 +53,10 @@ function SaveButton({ label = "Save" }: { label?: string }) {
 }
 
 function Feedback({ state }: { state: AuthFormState }) {
+  // An admin session idling out isn't a problem with this row's numbers, so it
+  // doesn't render as a red box under them.
+  if (sessionExpired(state)) return <SessionExpiredAlert className="mt-3" />;
+
   const failed = state.status === "error";
   const message =
     formMessage(state) ?? (state.status === "success" ? state.message : undefined);
@@ -191,6 +202,17 @@ export function EducatorRateRow({ rate }: { rate: EducatorRateView }) {
 // Format differential
 // ---------------------------------------------------------------------------
 
+/*
+ * The contract's ceilings, spelled out on the form.
+ *
+ * `updateFormatPolicySchema` caps `inHomeMultiplierBps` at 30000 (×3, so 200% on
+ * top of the base) and `travelFlatCents` at 20000. Left unstated, they reach the admin
+ * only as a rejection keyed to a field this form doesn't have: entering 250 in the
+ * surcharge box fails with nothing highlighted and no hint that a ceiling exists.
+ */
+const MAX_SURCHARGE_PERCENT = 200;
+const MAX_TRAVEL_DOLLARS = 200;
+
 export function FormatPolicyForm({ policy }: { policy: FormatPolicyView }) {
   const [state, action] = useActionState(updateFormatPolicyAction, IDLE);
   const surchargePercent = (policy.inHomeMultiplierBps - 10_000) / 100;
@@ -212,10 +234,15 @@ export function FormatPolicyForm({ policy }: { policy: FormatPolicyView }) {
                   : surchargePercent.toFixed(2)
               }
               inputMode="decimal"
+              max={MAX_SURCHARGE_PERCENT}
+              aria-describedby="in-home-surcharge-limit"
               aria-invalid={Boolean(fieldError(state, "inHomeSurchargePercent"))}
               className={MONEY_INPUT}
             />
             <span className="text-[12px]">%</span>
+          </span>
+          <span id="in-home-surcharge-limit" className="text-[11.5px] text-muted">
+            0&ndash;{MAX_SURCHARGE_PERCENT}%
           </span>
           {fieldError(state, "inHomeSurchargePercent") ? (
             <span className="text-[12px] text-[#a63a30]">
@@ -234,9 +261,13 @@ export function FormatPolicyForm({ policy }: { policy: FormatPolicyView }) {
               name="travelFlatCents"
               defaultValue={dollars(policy.travelFlatCents)}
               inputMode="decimal"
+              aria-describedby="travel-flat-limit"
               aria-invalid={Boolean(fieldError(state, "travelFlatCents"))}
               className={MONEY_INPUT}
             />
+          </span>
+          <span id="travel-flat-limit" className="text-[11.5px] text-muted">
+            $0&ndash;${MAX_TRAVEL_DOLLARS}
           </span>
           {fieldError(state, "travelFlatCents") ? (
             <span className="text-[12px] text-[#a63a30]">

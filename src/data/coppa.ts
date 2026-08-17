@@ -7,9 +7,9 @@ export interface CoppaPoint {
 /**
  * The canonical parent-supervision points shown in the COPPA band on
  * How It Works, About, Browse, Contact, and educator pages. Single source of
- * truth — previously triplicated (with drifting wording) across
- * how-it-works.ts, about.ts, and browse.ts. The bodies match the band's own
- * headline ("…books and supervises every session — always").
+ * truth: every page that renders the band reads it from here, because a second copy
+ * is a second wording, and this one is a child-safety claim. The bodies match the
+ * band's own headline ("…books and supervises every session — always").
  */
 export const COPPA_POINTS: CoppaPoint[] = [
   {
@@ -18,7 +18,7 @@ export const COPPA_POINTS: CoppaPoint[] = [
   },
   {
     title: "Parent handles booking",
-    body: "Scheduling, payment, and messaging with educators run through the parent.",
+    body: "Scheduling, payment, and all contact with educators run through the parent.",
   },
   {
     title: "Parent stays involved",

@@ -21,8 +21,8 @@ interface TextFieldProps {
   placeholder?: string;
   autoComplete?: string;
   /**
-   * Message to show, or undefined when valid. This was a boolean while the form
-   * was a demo — the server now returns per-field copy worth rendering.
+   * Message to show, or undefined when valid. A string rather than a boolean, because
+   * the server returns per-field copy and rendering it beats inventing a local one.
    */
   error?: string;
   /** Defaults to `id`. Set when the API's field name differs from the input's. */

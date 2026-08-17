@@ -2,28 +2,29 @@ import "server-only";
 
 import { cookies, headers } from "next/headers";
 
-const COOKIE_NAME = process.env.SESSION_COOKIE_NAME ?? "ylj_session";
-const IS_PRODUCTION = process.env.NODE_ENV === "production";
+import { SESSION_COOKIE_NAME, SESSION_COOKIE_SECURE } from "./cookie-config";
 
 /**
  * Session cookie handling. The token never reaches client JavaScript, so an XSS
  * cannot exfiltrate a credential — the main reason the BFF is worth the extra hop.
+ *
+ * The name and the `secure` flag come from `cookie-config.ts`, which `proxy.ts`
+ * imports too: the proxy decides whether to redirect purely on this cookie's
+ * presence, so the two must never be able to disagree about what it's called.
  *
  * `set` and `delete` only work inside a Server Action or Route Handler; a Server
  * Component cannot modify cookies (headers are already streaming by then).
  */
 export async function readSessionToken(): Promise<string | null> {
   const store = await cookies();
-  return store.get(COOKIE_NAME)?.value ?? null;
+  return store.get(SESSION_COOKIE_NAME)?.value ?? null;
 }
 
 export async function writeSessionCookie(token: string, expiresAt: Date): Promise<void> {
   const store = await cookies();
-  store.set(COOKIE_NAME, token, {
+  store.set(SESSION_COOKIE_NAME, token, {
     httpOnly: true,
-    // Required by the `__Host-` prefix in production. Left off in development so
-    // the cookie survives plain http:// over a LAN address.
-    secure: IS_PRODUCTION,
+    secure: SESSION_COOKIE_SECURE,
     sameSite: "lax",
     path: "/",
     expires: expiresAt,
@@ -32,7 +33,7 @@ export async function writeSessionCookie(token: string, expiresAt: Date): Promis
 
 export async function clearSessionCookie(): Promise<void> {
   const store = await cookies();
-  store.delete(COOKIE_NAME);
+  store.delete(SESSION_COOKIE_NAME);
 }
 
 /**
@@ -53,4 +54,4 @@ export async function clientRequestMeta(): Promise<{
   };
 }
 
-export { COOKIE_NAME as SESSION_COOKIE_NAME };
+export { SESSION_COOKIE_NAME };

@@ -1,22 +1,29 @@
 import "server-only";
 
-import type { AssignableEducator, CoordinatorBooking } from "@contracts/bookings.ts";
+import {
+  BOOKING_STATUSES,
+  type AssignableEducator,
+  type BookingStatus,
+  type CoordinatorBooking,
+} from "@contracts/bookings.ts";
 
 import { ApiError, apiFetch } from "@/lib/api/server";
 import { readSessionToken } from "@/lib/auth/cookies";
 
+/** How many bookings sit in each status, across the whole table — not this page. */
+export type BookingStatusCounts = Record<BookingStatus, number>;
+
 export interface BookingQueue {
-  /** Paid, waiting on a coordinator. The work. */
-  awaiting: CoordinatorBooking[];
+  /** Every booking the read returned, newest deadline first. Tabs filter this. */
+  items: CoordinatorBooking[];
   /**
-   * Past the confirm decision: confirmed, plus partially refunded.
-   *
-   * A goodwill refund flips the booking's status, so fetching only `confirmed`
-   * would make a booking disappear from the queue the moment it was partly
-   * refunded — exactly when someone might need to refund the rest of it.
+   * Per-status totals from the API, counted over all bookings rather than the
+   * page. A tab labelled from `items` would read "of the most recent 200", and a
+   * tab showing zero because the page ran out is indistinguishable from a status
+   * that is genuinely empty.
    */
-  decided: CoordinatorBooking[];
-  /** Approved educators, the only ones a confirm may name. */
+  counts: BookingStatusCounts | null;
+  /** Approved educators, the only ones a confirm or reassign may name. */
   educators: AssignableEducator[];
   /**
    * When the queue was read, as epoch ms.
@@ -29,49 +36,145 @@ export interface BookingQueue {
   error: string | null;
 }
 
+type QueueResponse = {
+  items: CoordinatorBooking[];
+  educators: AssignableEducator[];
+  counts?: BookingStatusCounts;
+};
+
 /**
- * Loads the confirmation queue. Two calls rather than one unfiltered fetch,
- * because the API's default is deliberately "what needs a decision" and asking
- * for the confirmed list is a separate intent — the overview only ever wants the
- * first.
+ * Loads the whole queue in one call.
  *
- * Failures come back as data so the page renders with an inline notice instead of
- * an error boundary; a coordinator seeing an empty queue with an explanation can
- * still work, one seeing a crash page cannot.
+ * One read rather than one per status. The previous shape asked six times and
+ * reported the refusals, because the API's filter did not accept `disputed`,
+ * `expired` or `pending_payment` at all — so the three statuses nobody could see
+ * were reported as "we couldn't read them just now" on every single render. The
+ * filter now accepts every status and omitting it returns all of them, which
+ * makes the tabs a client-side split of one answer instead of six requests that
+ * can half-fail.
  */
 export async function loadBookingQueue(): Promise<BookingQueue> {
   const token = await readSessionToken();
-
-  type QueueResponse = { items: CoordinatorBooking[]; educators: AssignableEducator[] };
+  const readAt = Date.now();
 
   try {
-    const [awaiting, confirmed, partlyRefunded] = await Promise.all([
-      apiFetch<QueueResponse>("/bookings/queue?status=paid_unconfirmed", { token }),
-      apiFetch<QueueResponse>("/bookings/queue?status=confirmed&limit=25", { token }),
-      apiFetch<QueueResponse>("/bookings/queue?status=partially_refunded&limit=25", {
-        token,
-      }),
-    ]);
+    const response = await apiFetch<QueueResponse>("/bookings/queue", { token });
 
     return {
-      awaiting: awaiting.items,
-      decided: [...confirmed.items, ...partlyRefunded.items].sort((a, b) =>
-        a.preferredDate.localeCompare(b.preferredDate),
-      ),
-      educators: awaiting.educators,
-      readAt: Date.now(),
+      items: response.items,
+      counts: response.counts ?? null,
+      educators: response.educators ?? [],
+      readAt,
       error: null,
     };
-  } catch (error) {
+  } catch (caught) {
     return {
-      awaiting: [],
-      decided: [],
+      items: [],
+      counts: null,
       educators: [],
-      readAt: Date.now(),
+      readAt,
       error:
-        error instanceof ApiError
-          ? error.message
+        caught instanceof ApiError
+          ? caught.message
           : "We couldn't load the booking queue just now.",
     };
   }
 }
+
+/**
+ * The tabs, in the order a coordinator works them.
+ *
+ * `awaiting` leads because it is the only status with a deadline that refunds
+ * itself. `disputed` is next despite usually being empty: an open chargeback is
+ * money leaving on somebody else's timetable, and it had no surface in the
+ * product at all until the queue could request it.
+ */
+export const BOOKING_TABS = [
+  {
+    id: "awaiting",
+    label: "To confirm",
+    statuses: ["paid_unconfirmed"],
+    empty: "Nothing is waiting on a decision.",
+  },
+  {
+    id: "disputed",
+    label: "Disputed",
+    statuses: ["disputed"],
+    empty: "No open chargebacks.",
+  },
+  {
+    id: "decided",
+    label: "Confirmed",
+    /*
+     * A goodwill refund flips the status, so a booking partly refunded would
+     * vanish from this tab — exactly when someone might need to refund the rest.
+     */
+    statuses: ["confirmed", "partially_refunded"],
+    empty: "Nothing confirmed and still to happen.",
+  },
+  {
+    id: "delivered",
+    label: "Delivered",
+    statuses: ["completed", "no_show"],
+    empty: "No sessions recorded as delivered yet.",
+  },
+  {
+    id: "stale",
+    label: "Unfinished",
+    /** Requests that never became sessions: nobody confirmed, or checkout was abandoned. */
+    statuses: ["expired", "pending_payment"],
+    empty: "No abandoned or expired requests.",
+  },
+  {
+    id: "refunded",
+    label: "Refunded",
+    statuses: ["refunded"],
+    empty: "Nothing has been refunded in full.",
+  },
+] as const satisfies readonly {
+  id: string;
+  label: string;
+  statuses: readonly BookingStatus[];
+  empty: string;
+}[];
+
+export type BookingTab = (typeof BOOKING_TABS)[number];
+export type BookingTabId = BookingTab["id"];
+
+const TAB_IDS = new Set<string>(BOOKING_TABS.map((tab) => tab.id));
+
+/** The tab from `?tab=`, falling back to the work everyone opens this page for. */
+export function parseTab(value: string | undefined): BookingTabId {
+  return value && TAB_IDS.has(value) ? (value as BookingTabId) : "awaiting";
+}
+
+/** The bookings belonging to a tab, filtered from the single read. */
+export function bookingsForTab(
+  items: readonly CoordinatorBooking[],
+  tab: BookingTab,
+): CoordinatorBooking[] {
+  const wanted = new Set<string>(tab.statuses);
+  return items.filter((booking) => wanted.has(booking.status));
+}
+
+/**
+ * What a tab shows next to its label.
+ *
+ * `null` when the API didn't send counts, so the UI can leave the number off
+ * rather than print a zero it can't stand behind.
+ */
+export function tabCount(
+  counts: BookingStatusCounts | null,
+  tab: BookingTab,
+): number | null {
+  if (!counts) return null;
+  return tab.statuses.reduce((total, status) => total + (counts[status] ?? 0), 0);
+}
+
+/**
+ * Statuses no tab claims, so a new one added to the contract can't quietly
+ * disappear from the dashboard.
+ */
+export const UNTABBED_STATUSES: readonly BookingStatus[] = BOOKING_STATUSES.filter(
+  (status) => !BOOKING_TABS.some((tab) => (tab.statuses as readonly string[]).includes(status)),
+);

@@ -5,6 +5,7 @@ import { Container } from "@/components/common/container";
 import { Eyebrow } from "@/components/common/eyebrow";
 import { Reveal, type RevealDelay } from "@/components/common/reveal";
 import { EducatorCard } from "@/components/subject/educator-card";
+import type { EducatorRating } from "@/lib/educators/rating";
 import type { ImageAsset } from "@/types/media";
 import type { SubjectEducator } from "@/types/subject-page";
 
@@ -13,6 +14,11 @@ interface EducatorsSectionProps {
   title: ReactNode;
   bgImage: ImageAsset;
   educators: SubjectEducator[];
+  /**
+   * Published ratings by educator slug (a card's `id`), loaded by the page from
+   * the API directory. Sparse: a card whose id is absent shows no rating pill.
+   */
+  ratings?: Record<string, EducatorRating>;
   /** Optional supervision/COPPA line rendered, centered, below the cards. */
   note?: string;
 }
@@ -22,6 +28,7 @@ export function EducatorsSection({
   title,
   bgImage,
   educators,
+  ratings = {},
   note,
 }: EducatorsSectionProps) {
   return (
@@ -57,7 +64,7 @@ export function EducatorsSection({
           <div className="grid grid-cols-2 gap-[22px] max-[640px]:grid-cols-1">
             {educators.map((educator, index) => (
               <Reveal key={educator.id} delay={(index + 1) as RevealDelay}>
-                <EducatorCard educator={educator} />
+                <EducatorCard educator={educator} rating={ratings[educator.id]} />
               </Reveal>
             ))}
           </div>

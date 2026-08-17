@@ -223,8 +223,63 @@ export const BOOKING_EDUCATORS: readonly BookingEducator[] = EDUCATORS.map(
   },
 );
 
-export function getBookingEducator(slug: string): BookingEducator | undefined {
-  return BOOKING_EDUCATORS.find((educator) => educator.slug === slug);
+export function getBookingEducator(
+  slug: string,
+  roster: readonly BookingEducator[] = BOOKING_EDUCATORS,
+): BookingEducator | undefined {
+  return roster.find((educator) => educator.slug === slug);
+}
+
+/**
+ * Narrows the in-repo roster to what the server will actually accept.
+ *
+ * The list above is a stand-in, and the API is the authority: it 404s an educator
+ * slug it has never heard of, refuses a subject with no rate band, and matches
+ * `subjectTopic` against `educator_profiles.subjects` by exact string. Offering a
+ * card the API will refuse means the parent finds out at the *final* submit —
+ * after the child's name, the address and both consents.
+ *
+ * The pricing snapshot is the only public read that names server-side truth, so
+ * that is what this filters on:
+ *
+ * - **Topics** are kept only when their priced category has a band in force. A
+ *   topic whose category is missing cannot be quoted at all.
+ * - **Educators** are kept only when the snapshot holds at least one rate for
+ *   them, which is the one signal we have that the slug exists server-side.
+ *
+ * Both inputs empty means the snapshot fetch failed, and then the local list is
+ * returned whole — a booking page must degrade to yesterday's roster, never to an
+ * empty one. Same if the filter would leave nothing: a half-seeded pricing table
+ * is a reason to show the local list, not to tell a parent nobody teaches here.
+ *
+ * What this cannot check is the topic *labels*, which live on
+ * `educator_profiles.subjects` and have no public endpoint. The quote probe in the
+ * booking flow covers that: it runs the API's own `assertTeachesTopic` at step 2,
+ * so a label drift surfaces there instead of at the end.
+ */
+export function bookableEducators({
+  pricedSubjects,
+  ratedEducatorSlugs,
+  roster = BOOKING_EDUCATORS,
+}: {
+  pricedSubjects: readonly string[];
+  ratedEducatorSlugs: readonly string[];
+  roster?: readonly BookingEducator[];
+}): readonly BookingEducator[] {
+  if (pricedSubjects.length === 0 || ratedEducatorSlugs.length === 0) return roster;
+
+  const priced = new Set(pricedSubjects);
+  const rated = new Set(ratedEducatorSlugs);
+
+  const narrowed = roster
+    .filter((educator) => rated.has(educator.slug))
+    .map((educator) => ({
+      ...educator,
+      subjects: educator.subjects.filter((topic) => priced.has(topic.category)),
+    }))
+    .filter((educator) => educator.subjects.length > 0);
+
+  return narrowed.length > 0 ? narrowed : roster;
 }
 
 /** Session length choices, in the contract's allowed set. */
@@ -268,25 +323,43 @@ export const BOOKING_PRICING = {
 } as const;
 
 /**
- * How far ahead the calendar opens. Two months matches the source design and is
- * about as far out as a suggested time stays meaningful.
+ * The booking rules the flow greys out slots and prints promises against.
+ *
+ * **These are not constants any more.** They live in site configuration
+ * (`booking.*`), and the booking page reads them from the public snapshot and
+ * passes them down as `rules`. The API enforces the same figures on every
+ * request, so a Server Action can't be talked past a rule the calendar shows.
+ *
+ * The values below are the fallback used when the API can't be reached — the
+ * same numbers the server's registry ships as its defaults, so an unreachable
+ * API leaves the flow behaving exactly as it did before the store existed.
  */
-export const BOOKING_WINDOW_MONTHS = 2;
+export interface BookingRules {
+  /**
+   * How far ahead the calendar opens, in whole months. Two matches the source
+   * design and is about as far out as a suggested time stays meaningful.
+   */
+  windowMonths: number;
+  /**
+   * Minimum notice on a requested slot. A coordinator has to read the request,
+   * check the educator is free, and confirm — a session starting in three hours
+   * can't survive that, so it isn't offered.
+   */
+  minNoticeHours: number;
+  /**
+   * The confirmation SLA the refund promise is built on: if no coordinator has
+   * confirmed within this many days, the booking auto-refunds in full
+   * (ARCHITECTURE.md §8). The parent is told this number *before* paying, which
+   * is why it has to be the live one and not a build-time copy.
+   */
+  confirmationSlaDays: number;
+}
 
-/**
- * Minimum notice on a requested slot. A coordinator has to read the request,
- * check the educator is free, and confirm — a session starting in three hours
- * can't survive that, so it isn't offered.
- */
-export const BOOKING_MIN_NOTICE_HOURS = 24;
-
-/**
- * The confirmation SLA the refund promise is built on: if no coordinator has
- * confirmed within this many days, the booking auto-refunds in full
- * (`booking.sla_days`, ARCHITECTURE.md §8). The parent is told this number
- * *before* paying, which is the whole point of surfacing it here.
- */
-export const BOOKING_CONFIRMATION_SLA_DAYS = 2;
+export const DEFAULT_BOOKING_RULES: BookingRules = {
+  windowMonths: 2,
+  minNoticeHours: 24,
+  confirmationSlaDays: 2,
+};
 
 /**
  * Whether card payment is available is **not** a constant.

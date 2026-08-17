@@ -21,13 +21,20 @@ export interface OfferItem {
   image: ImageAsset;
 }
 
-/** An educator profile card (hover reveals the detail). */
+/**
+ * An educator profile card (hover reveals the detail).
+ *
+ * No `rating`, and none may be added. The gold "★ 4.9" pill is drawn again, but the
+ * number is passed to `EducatorCard` separately, joined by the page from the API's
+ * published directory on the `id` below (the educator's slug). A rating field here
+ * would let a subject data file publish a score no parent gave; an educator the API
+ * has no rating for simply gets no pill.
+ */
 export interface SubjectEducator {
   id: string;
   name: string;
   role: string;
   meta: string;
-  rating: string;
   bio: string;
   price: string;
   href: string;

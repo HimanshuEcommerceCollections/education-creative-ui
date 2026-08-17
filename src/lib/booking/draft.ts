@@ -11,6 +11,7 @@ import {
   BOOKING_EDUCATORS,
   getBookingEducator,
   type BookingEducator,
+  type BookingRules,
   type BookingTopic,
 } from "@/data/booking";
 
@@ -102,6 +103,14 @@ export interface InitialSelection {
   time: string | null;
   alternateTime: string | null;
   flexible: boolean;
+  /**
+   * The educator that was asked for and can't be booked, or null.
+   *
+   * Substituting silently is worse than saying nothing: a parent who followed
+   * "Book with Marcus" from his profile would land on Elena's card with no
+   * indication anything had changed. Step 1 renders this.
+   */
+  unavailableEducatorSlug: string | null;
 }
 
 /**
@@ -121,15 +130,34 @@ export function resolveInitialSelection({
   draft,
   educatorSlug,
   now,
+  rules,
+  roster = BOOKING_EDUCATORS,
 }: {
   draft: BookingDraft | null;
   educatorSlug: string | undefined;
   now: CivilNow;
+  /**
+   * The live booking rules. A draft is re-checked against the window in force
+   * *now*, not the one that applied when it was written — an admin who shortens
+   * the notice window mid-session must not have yesterday's cookie restore a slot
+   * the API would refuse.
+   */
+  rules: BookingRules;
+  /**
+   * Who the server will actually accept, from the page. Restoring a draft that
+   * names an educator the API has since stopped listing would otherwise put a
+   * parent in front of a pay button for a 404.
+   */
+  roster?: readonly BookingEducator[];
 }): InitialSelection {
   // An explicit `?educator=` is a fresh intent and outranks the draft.
-  const requested = educatorSlug ? getBookingEducator(educatorSlug) : undefined;
-  const fromDraft = draft ? getBookingEducator(draft.educatorSlug) : undefined;
-  const educator = requested ?? fromDraft ?? BOOKING_EDUCATORS[0];
+  const requested = educatorSlug ? getBookingEducator(educatorSlug, roster) : undefined;
+  const fromDraft = draft ? getBookingEducator(draft.educatorSlug, roster) : undefined;
+  const educator = requested ?? fromDraft ?? roster[0];
+
+  /* Only an explicit request is worth naming — a stale cookie is our problem. */
+  const unavailableEducatorSlug =
+    educatorSlug && !requested ? educatorSlug : null;
 
   const base: InitialSelection = {
     educator,
@@ -140,6 +168,7 @@ export function resolveInitialSelection({
     time: null,
     alternateTime: null,
     flexible: false,
+    unavailableEducatorSlug,
   };
 
   if (!draft) return base;
@@ -160,9 +189,9 @@ export function resolveInitialSelection({
 
   if (draft.dateKey) {
     const stored = parseDateKey(draft.dateKey);
-    if (isDateOpen(stored, educator, now)) {
+    if (isDateOpen(stored, educator, now, rules)) {
       date = stored;
-      const open = openSlots(stored, educator, now);
+      const open = openSlots(stored, educator, now, rules);
       if (draft.time && open.includes(draft.time)) time = draft.time;
       if (draft.alternateTime && open.includes(draft.alternateTime)) {
         alternateTime = draft.alternateTime;
@@ -177,8 +206,10 @@ export function resolveInitialSelection({
     durationMinutes: draft.durationMinutes,
     date,
     time,
-    // A second choice without a first choice is meaningless.
-    alternateTime: time ? alternateTime : null,
+    // A second choice without a first choice is meaningless, and one equal to the
+    // first is what the contract rejects at `alternateTime`.
+    alternateTime: time && alternateTime !== time ? alternateTime : null,
     flexible: draft.flexible,
+    unavailableEducatorSlug,
   };
 }

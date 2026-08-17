@@ -40,7 +40,7 @@ export function ShieldIcon({ className }: IconProps) {
   );
 }
 
-/** Star — verified ratings. */
+/** Star — "A Person Confirms Every Booking". */
 export function StarIcon({ className }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" strokeWidth={1.8} className={className} {...STROKE}>

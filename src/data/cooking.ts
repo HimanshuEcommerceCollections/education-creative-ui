@@ -89,7 +89,6 @@ export const COOKING_EDUCATORS: SubjectEducator[] = [
     name: "James O.",
     role: "Cooking Educator",
     meta: "8 yrs experience · Online · In-home",
-    rating: "4.9",
     bio: "A former line cook who swears the best food is unfussy — sharp knife work, big flavour, no stress.",
     price: "$58/hr",
     href: "/browse",
@@ -100,7 +99,6 @@ export const COOKING_EDUCATORS: SubjectEducator[] = [
     name: "Rosa N.",
     role: "Cooking Educator",
     meta: "6 yrs experience · Online · In-home",
-    rating: "4.8",
     bio: "Baker and bread-head — dough, pastry, and the quiet satisfaction of something rising in the oven.",
     price: "$54/hr",
     href: "/browse",
@@ -108,9 +106,20 @@ export const COOKING_EDUCATORS: SubjectEducator[] = [
   },
 ];
 
-/** Count-up figures for the stats strip. */
+/**
+ * Count-up figures for the stats strip.
+ *
+ * The educator count is read off the array above, and the other two tiles are
+ * promises the product keeps: credentials reviewed before listing, and a booking
+ * that refunds itself if a coordinator can't confirm it. Ratings are published per
+ * educator, not as a platform average, and there is no session history to count — so a
+ * figure that could only be written in this file and nowhere else (an average rating, a
+ * tally of meals cooked together) does not belong here.
+ */
 export const COOKING_STATS: SubjectStat[] = [
-  { id: "meals", value: 140, suffix: "+", label: "Meals cooked together" },
-  { id: "educators", value: 2, label: "Kitchen educators" },
-  { id: "rating", value: 4.9, decimals: 1, label: "Average rating" },
+  { id: "educators", value: COOKING_EDUCATORS.length, label: "Kitchen educators" },
+  { id: "checked", value: 100, suffix: "%", label: "Background checked" },
+  // BOOKING_POLICY.confirmationSlaDays on the server, and the same promise the
+  // booking flow makes before anyone pays.
+  { id: "confirmation", value: 2, suffix: " days", label: "To confirm, or refund" },
 ];

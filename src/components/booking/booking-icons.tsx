@@ -83,11 +83,16 @@ export function ArrowRightIcon({ className }: IconProps) {
   );
 }
 
-/** Star — the educator rating. Solid, so it reads at 14px. */
+/**
+ * Filled star — the rating beside an educator's rate on their picker card.
+ *
+ * Drawn only next to a rating the API published; a card for someone with no
+ * reviews shows the rate on its own.
+ */
 export function StarIcon({ className }: IconProps) {
   return (
-    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" className={className}>
-      <path d="M12 2.6l2.9 6.1 6.6.9-4.8 4.6 1.2 6.6L12 17.6l-5.9 3.2 1.2-6.6L2.5 9.6l6.6-.9L12 2.6z" />
+    <svg viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true" className={className}>
+      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14l-5-4.87 6.91-1.01L12 2z" />
     </svg>
   );
 }

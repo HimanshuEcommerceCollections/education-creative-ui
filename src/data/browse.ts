@@ -20,20 +20,30 @@ export interface Educator {
   subject: string;
   /** Hourly rate in USD. */
   price: number;
-  rating: number;
   description: string;
   image: ImageAsset;
+  /**
+   * This educator's own profile page, or `null` when one hasn't been authored.
+   *
+   * Not derived, and never shared between cards. One `PROFILE_HREF` reused across
+   * the grid means a parent clicking **Marcus T. (Music)** reads an
+   * academic-tutoring profile whose CTA then pre-fills `?educator=elena` — the
+   * booking flow silently swaps who they are paying. A card without a profile
+   * links to the booking flow for *itself* instead; nothing here may ever point
+   * at a different person's page.
+   */
+  profileHref: string | null;
 }
 
 /**
- * "View profile" destination. The demo ships a single fully-built profile
- * (Elena's), so — as in the source, where every card opened one shared
- * profile page — all cards link here until more profiles are authored.
+ * Sort options for the grid.
+ *
+ * `rating` sorts on the API's published averages, which are joined onto these
+ * rows by slug at render — no rating is stored in this file and none may be. The
+ * grid only offers the option when the API actually returned a rating for
+ * somebody; otherwise it would be an order with nothing behind it.
  */
-export const PROFILE_HREF = "/educators/elena";
-
-/** Sort options for the grid. */
-export type BrowseSort = "rating" | "priceLow" | "priceHigh";
+export type BrowseSort = "rating" | "name" | "priceLow" | "priceHigh";
 
 export const BROWSE_FILTERS: BrowseFilter[] = [
   { label: "All", value: "all" },
@@ -51,80 +61,80 @@ export const EDUCATORS: Educator[] = [
     name: "Elena M.",
     subject: "Academic Tutoring",
     price: 55,
-    rating: 4.9,
     description: "Patient K–12 math and science support built around each student.",
     image: { src: "/assets/browse/images/educator-elena.jpg", alt: "Elena M." },
+    profileHref: "/educators/elena",
   },
   {
     slug: "daniel",
     name: "Daniel A.",
     subject: "Academic Tutoring",
     price: 50,
-    rating: 4.7,
     description: "Reading, writing, and study skills for elementary and middle grades.",
     image: { src: "/assets/browse/images/educator-daniel.jpg", alt: "Daniel A." },
+    profileHref: null,
   },
   {
     slug: "priya",
     name: "Priya S.",
     subject: "College Admissions",
     price: 65,
-    rating: 4.9,
     description: "Application guidance, essay feedback, and interview practice.",
     image: { src: "/assets/browse/images/educator-priya.jpg", alt: "Priya S." },
+    profileHref: null,
   },
   {
     slug: "marcus",
     name: "Marcus T.",
     subject: "Music",
     price: 60,
-    rating: 5.0,
     description: "Piano and guitar for beginners through intermediate players.",
     image: { src: "/assets/browse/images/educator-marcus.jpg", alt: "Marcus T." },
+    profileHref: null,
   },
   {
     slug: "rosa",
     name: "Rosa N.",
     subject: "Cooking & Music",
     price: 54,
-    rating: 4.8,
     description: "Home cooking fundamentals and beginner vocals, at your pace.",
     image: { src: "/assets/browse/images/educator-rosa.jpg", alt: "Rosa N." },
+    profileHref: null,
   },
   {
     slug: "james",
     name: "James O.",
     subject: "Cooking",
     price: 58,
-    rating: 4.9,
     description: "Knife skills, baking, and family-friendly recipes.",
     image: { src: "/assets/browse/images/educator-james.jpg", alt: "James O." },
+    profileHref: null,
   },
   {
     slug: "lena",
     name: "Lena K.",
     subject: "Languages (Spanish & French)",
     price: 52,
-    rating: 4.9,
     description: "Conversational Spanish and French for all ages.",
     image: { src: "/assets/browse/images/educator-lena.jpg", alt: "Lena K." },
+    profileHref: null,
   },
   {
     slug: "sofia",
     name: "Sofia R.",
     subject: "Languages (Hindi & English)",
     price: 48,
-    rating: 4.8,
     description: "Hindi and English practice, reading, and pronunciation.",
     image: { src: "/assets/browse/images/educator-sofia.jpg", alt: "Sofia R." },
+    profileHref: null,
   },
   {
     slug: "theo",
     name: "Theo W.",
     subject: "Arts & Crafts",
     price: 45,
-    rating: 4.8,
     description: "Drawing, painting, and hands-on craft projects.",
     image: { src: "/assets/browse/images/educator-theo.jpg", alt: "Theo W." },
+    profileHref: null,
   },
 ];

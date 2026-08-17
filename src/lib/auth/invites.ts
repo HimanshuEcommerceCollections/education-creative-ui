@@ -1,15 +1,18 @@
 import "server-only";
 
-import type { UserRole } from "@contracts/roles.ts";
+import type { z } from "zod";
+
+import { inviteDetailsResponseSchema } from "@contracts/auth.ts";
 
 import { ApiError, apiFetch } from "@/lib/api/server";
 
-export interface InviteDetails {
-  email: string;
-  fullName: string;
-  role: UserRole;
-  expiresAt: string;
-}
+/**
+ * `GET /auth/invite` as the contract defines it.
+ *
+ * Was a hand-written interface, i.e. a second copy of a schema the API already
+ * owns and free to drift from it without anything failing.
+ */
+export type InviteDetails = z.infer<typeof inviteDetailsResponseSchema>;
 
 /**
  * Reads an invite without consuming it, so the set-password page can greet the

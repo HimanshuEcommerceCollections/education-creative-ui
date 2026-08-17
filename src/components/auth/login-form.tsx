@@ -6,11 +6,13 @@ import { useActionState, useEffect, useRef, useState } from "react";
 
 import { loginAction } from "@/app/(auth)/actions";
 import { IDLE, fieldError, formMessage } from "@/lib/auth/form-state";
+import { safeNextPath } from "@/lib/auth/next-path";
 
 import { SOCIAL_ICONS } from "./auth-icons";
 import { AuthSuccess } from "./auth-success";
 import { Confetti } from "./confetti";
 import { FormAlert } from "./form-alert";
+import { LoginRecovery } from "./login-recovery";
 import { PasswordField } from "./password-field";
 import { StudyBuddy, type BuddyState } from "./study-buddy";
 import { SubmitButton } from "./submit-button";
@@ -20,9 +22,19 @@ import { TextField } from "./text-field";
 const SUCCESS_DWELL_MS = 1400;
 
 /** Sign-in form panel — one entry point for parents, educators, and staff. */
-export function LoginForm() {
+export function LoginForm({
+  /**
+   * The deep link the proxy turned away, already vetted on the server. Re-vetted
+   * here anyway: this is a Client Component and the prop is only as trustworthy
+   * as the URL it came from.
+   */
+  nextPath,
+}: {
+  nextPath?: string | null;
+}) {
   const router = useRouter();
   const [state, formAction] = useActionState(loginAction, IDLE);
+  const destination = safeNextPath(nextPath);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -37,16 +49,22 @@ export function LoginForm() {
   const succeeded = state.status === "success";
 
   /**
-   * Celebrate, then go where the **server** said to. `redirectTo` is derived from
-   * the session's role — customers to the homepage, educators and staff to their
-   * dashboards. Nothing here inspects a role to make that choice.
+   * Celebrate, then go where they were headed — or, failing that, where the
+   * **server** said to. `redirectTo` is derived from the session's role (customers
+   * to the homepage, educators and staff to their dashboards) and nothing here
+   * inspects a role to make that choice.
+   *
+   * A vetted `?next=` wins over the role default because it is the more specific
+   * intent: someone who clicked "my bookings" in an email wants their bookings,
+   * not their role's front door. It can only ever be a same-origin path.
    */
   useEffect(() => {
     if (state.status !== "success") return;
 
-    const timer = setTimeout(() => router.replace(state.redirectTo), SUCCESS_DWELL_MS);
+    const target = destination ?? state.redirectTo;
+    const timer = setTimeout(() => router.replace(target), SUCCESS_DWELL_MS);
     return () => clearTimeout(timer);
-  }, [state, router]);
+  }, [state, router, destination]);
 
   /** Put the cursor on whichever field the server complained about. */
   useEffect(() => {
@@ -73,6 +91,12 @@ export function LoginForm() {
         </p>
 
         <FormAlert message={alert} />
+
+        {/*
+          Rendered outside the sign-in form below it, because the recovery panels
+          contain their own form (resend verification) and forms can't nest.
+        */}
+        <LoginRecovery state={state} email={email} />
 
         <form action={formAction} noValidate>
           <TextField

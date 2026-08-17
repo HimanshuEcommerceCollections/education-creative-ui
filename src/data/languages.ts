@@ -25,12 +25,17 @@ export interface FloatingGreeting {
   delay: string;
 }
 
-/** A featured language educator on the dark spotlight band. */
+/**
+ * A featured language educator on the dark spotlight band.
+ *
+ * No `rating`, and no field may carry one: nothing in the product collects a review,
+ * so a number stored here — especially one pre-decorated as `"★ 4.9"` — reaches the
+ * page looking like a parent's verdict with nothing behind it.
+ */
 export interface LanguageEducator {
   id: string;
   name: string;
   role: string;
-  rating: string;
   experience: string;
   price: string;
   bio: string;
@@ -93,7 +98,6 @@ export const LANGUAGE_EDUCATORS: LanguageEducator[] = [
     id: "lena",
     name: "Lena K.",
     role: "Spanish & French",
-    rating: "★ 4.9",
     experience: "7 yrs experience",
     price: "$52/hr",
     bio: "Warm, patient, and relentlessly conversational — Lena's students often forget they're in a lesson at all.",
@@ -104,7 +108,6 @@ export const LANGUAGE_EDUCATORS: LanguageEducator[] = [
     id: "sofia",
     name: "Sofia R.",
     role: "Hindi & English",
-    rating: "★ 4.8",
     experience: "6 yrs experience",
     price: "$48/hr",
     bio: "Script, songs, and stories — Sofia teaches Hindi the way families speak it, with culture in every lesson.",
@@ -113,9 +116,18 @@ export const LANGUAGE_EDUCATORS: LanguageEducator[] = [
   },
 ];
 
-/** Count-up figures for the stats strip. */
+/**
+ * Count-up figures for the stats strip.
+ *
+ * Both counts below are read off the arrays this page renders, and the confirmation
+ * window is the policy the booking flow is built on. Ratings are published per educator,
+ * not as a platform average, and there is no session history to count, so nothing here
+ * may state an average rating or a monthly lesson tally.
+ */
 export const LANGUAGES_STATS: SubjectStat[] = [
-  { id: "lessons", value: 160, suffix: "+", label: "Language lessons monthly" },
-  { id: "educators", value: 2, label: "Vetted educators" },
-  { id: "rating", value: 4.9, decimals: 1, label: "Average rating" },
+  { id: "languages", value: ARCH_OFFERS.length, label: "Languages offered" },
+  { id: "educators", value: LANGUAGE_EDUCATORS.length, label: "Vetted educators" },
+  // BOOKING_POLICY.confirmationSlaDays on the server, and the same promise the
+  // booking flow makes before anyone pays.
+  { id: "confirmation", value: 2, suffix: " days", label: "To confirm, or refund" },
 ];

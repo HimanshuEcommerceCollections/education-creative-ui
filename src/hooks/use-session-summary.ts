@@ -42,12 +42,26 @@ export function useSessionSummary(): SessionSummary | undefined {
   return summary;
 }
 
+/**
+ * Where each role lands from the nav.
+ *
+ * A `Record` over the contract's role union rather than an `if` chain, so adding a
+ * role to `USER_ROLES` is a type error here instead of a silent fall-through to
+ * `/account` — which for a staff role would be a redirect bounce, and for anything
+ * else a page they have no business on.
+ *
+ * Not `ROLE_HOME` from the contract: that maps `customer` to `/` because it answers
+ * "where does login send them", and this answers "where does *their account* live".
+ */
+const ACCOUNT_HREF: Record<UserRole, string> = {
+  admin: "/dashboard",
+  coordinator: "/dashboard",
+  educator: "/educator",
+  customer: "/account",
+};
+
 /** Where this session's owner should land when they click through the nav. */
 export function accountHref(summary: SessionSummary): string {
   if (!summary.signedIn) return "/login";
-  if (summary.activeRole === "admin" || summary.activeRole === "coordinator") {
-    return "/dashboard";
-  }
-  if (summary.activeRole === "educator") return "/educator";
-  return "/account";
+  return ACCOUNT_HREF[summary.activeRole];
 }

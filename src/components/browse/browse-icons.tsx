@@ -20,7 +20,7 @@ export function SearchIcon({ className }: IconProps) {
   );
 }
 
-/** Filled star — card rating. */
+/** Filled star — card rating. Only drawn beside a rating the API supplied. */
 export function StarIcon({ className }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true" className={className}>
@@ -29,7 +29,7 @@ export function StarIcon({ className }: IconProps) {
   );
 }
 
-/** Right arrow — "View profile". */
+/** Right arrow — card links. */
 export function ArrowRightIcon({ className }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" strokeWidth={2} className={className} {...STROKE}>

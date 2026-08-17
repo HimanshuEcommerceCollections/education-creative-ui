@@ -3,9 +3,12 @@
 import { revalidatePath } from "next/cache";
 
 import {
+  type BookingChildDetails,
   cannotConfirmBookingSchema,
   confirmBookingSchema,
+  reassignBookingSchema,
   refundBookingSchema,
+  rescheduleBookingSchema,
 } from "@contracts/bookings.ts";
 
 import {
@@ -16,6 +19,7 @@ import {
   toErrorState,
 } from "@/lib/auth/action-helpers";
 import type { AuthFormState } from "@/lib/auth/form-state";
+import { recordBookingOutcome } from "@/lib/dashboard/booking-outcome";
 
 /**
  * Coordinator decisions on a paid booking.
@@ -82,6 +86,73 @@ export async function cannotConfirmBookingAction(
   }
 }
 
+/**
+ * The session moves to a new day or time.
+ *
+ * The date and time posted here are **civil values in `BOOKING_TIMEZONE`**, taken
+ * straight off `<input type="date">` and `<input type="time">` — `YYYY-MM-DD` and
+ * `HH:MM`, exactly what the contract wants. Nothing is converted to an instant on
+ * the way through, because converting through the coordinator's own timezone is
+ * precisely how a 4:00 PM session becomes a 9:00 PM one.
+ *
+ * The field names match the contract keys, so a `validation_failed` from either
+ * side lands on the input the value was typed into without any remapping.
+ */
+export async function rescheduleBookingAction(
+  _previous: AuthFormState,
+  formData: FormData,
+): Promise<AuthFormState> {
+  const id = text(formData, "id");
+  const parsed = parseForm(rescheduleBookingSchema, {
+    preferredDate: text(formData, "preferredDate"),
+    preferredTime: text(formData, "preferredTime"),
+    reason: text(formData, "reason"),
+  });
+  if (!parsed.ok) return parsed.state;
+
+  try {
+    const result = await callApiAuthed<{ message: string }>(
+      `/bookings/${encodeURIComponent(id)}/reschedule`,
+      { method: "POST", body: parsed.data },
+    );
+    revalidateQueue();
+    return { status: "success", redirectTo: "", message: result.message };
+  } catch (error) {
+    return toErrorState(error);
+  }
+}
+
+/**
+ * A different educator takes an already-confirmed session.
+ *
+ * Separate from `confirm` because the two answer different questions: `confirm`
+ * decides who gets the session in the first place, this one takes it off somebody
+ * who was already told it was theirs. The API refuses a no-op with `conflict`, so
+ * the picker leaves the current holder out rather than relying on that.
+ */
+export async function reassignBookingAction(
+  _previous: AuthFormState,
+  formData: FormData,
+): Promise<AuthFormState> {
+  const id = text(formData, "id");
+  const parsed = parseForm(reassignBookingSchema, {
+    educatorSlug: text(formData, "educatorSlug"),
+    reason: text(formData, "reason"),
+  });
+  if (!parsed.ok) return parsed.state;
+
+  try {
+    const result = await callApiAuthed<{ message: string }>(
+      `/bookings/${encodeURIComponent(id)}/reassign`,
+      { method: "POST", body: parsed.data },
+    );
+    revalidateQueue();
+    return { status: "success", redirectTo: "", message: result.message };
+  } catch (error) {
+    return toErrorState(error);
+  }
+}
+
 /** "12.50" / "$12.50" / "12" → integer cents; null for anything that isn't money. */
 function parseDollars(raw: string): number | null {
   const value = raw.trim().replace(/^\$/, "");
@@ -117,7 +188,7 @@ export async function refundBookingAction(
     amountCents,
     reason: text(formData, "reason"),
   });
-  if (!parsed.ok) return parsed.state;
+  if (!parsed.ok) return withAmountFieldName(parsed.state);
 
   try {
     const result = await callApiAuthed<{ message: string }>(
@@ -126,6 +197,48 @@ export async function refundBookingAction(
     );
     revalidateQueue();
     return { status: "success", redirectTo: "", message: result.message };
+  } catch (error) {
+    return withAmountFieldName(toErrorState(error));
+  }
+}
+
+/**
+ * Re-keys `amountCents` onto `amount`, the name the input actually has.
+ *
+ * The form asks for dollars in an input named `amount`; both this action and the
+ * contract key their errors `amountCents`. So "Enter how much to refund" or an
+ * over-the-cap refusal reached the form alert but never attached to the field, and
+ * "Please check the highlighted fields" highlighted nothing. Same remapping the
+ * educator-application action does for `subjectsOfInterest` → `subject`.
+ */
+function withAmountFieldName(state: AuthFormState): AuthFormState {
+  if (state.status !== "error" || !state.fieldErrors?.amountCents) return state;
+
+  const { amountCents, ...rest } = state.fieldErrors;
+  return { ...state, fieldErrors: { ...rest, amount: amountCents } };
+}
+
+/**
+ * Marks a confirmed booking delivered, or records a no-show.
+ *
+ * Staff can always do this — a coordinator taking the phone call is how a no-show
+ * usually gets reported — and the educator's own surface posts to the same endpoint.
+ * See `lib/dashboard/booking-outcome.ts` for the path that needs confirming.
+ */
+export async function recordBookingOutcomeAction(
+  _previous: AuthFormState,
+  formData: FormData,
+): Promise<AuthFormState> {
+  const id = text(formData, "id");
+
+  try {
+    const state = await recordBookingOutcome(
+      id,
+      text(formData, "outcome"),
+      optionalText(formData, "note"),
+    );
+    if (state.status === "success") revalidateQueue();
+    return state;
   } catch (error) {
     return toErrorState(error);
   }
@@ -145,18 +258,11 @@ export async function revealChildDetailsAction(
   const id = text(formData, "id");
 
   try {
-    const details = await callApiAuthed<{
-      learnerFirstName: string;
-      learnerAgeBand: string;
-      learnerFocus: string | null;
-      address: {
-        line1: string;
-        line2?: string | null;
-        city: string;
-        state: string;
-        postalCode: string;
-      } | null;
-    }>(`/bookings/${encodeURIComponent(id)}/child-details`);
+    // The contract's own type. The inline copy this replaces had widened
+    // `learnerAgeBand` from the contract enum to bare `string`.
+    const details = await callApiAuthed<BookingChildDetails>(
+      `/bookings/${encodeURIComponent(id)}/child-details`,
+    );
 
     const lines = [
       `Learner: ${details.learnerFirstName} (${details.learnerAgeBand})`,

@@ -76,7 +76,7 @@ export const ABOUT_VALUES: AboutValue[] = [
   {
     icon: "record",
     title: "A record you can revisit",
-    body: "Messaging and scheduling stay on-platform, so there’s always a record to look back on.",
+    body: "Every booking, payment, and refund is recorded in your account, so there’s always a record to look back on.",
     num: "05",
   },
 ];
@@ -112,9 +112,15 @@ export const ABOUT_TRUST_CARDS: AboutTrustCard[] = [
     body: "We check an educator’s background and credentials before their profile goes live.",
   },
   {
+    /*
+     * The star card carries the refund promise, not a ratings claim: nothing in the
+     * product collects a review, so a "verified ratings" card would describe a
+     * verification system that does not exist. How It Works and For Parents carry the
+     * same promise in the same slot, and the three have to stay in step.
+     */
     icon: "star",
-    title: "Verified Ratings",
-    body: "Reviews come from families who booked through the platform — no anonymous ratings.",
+    title: "Confirmed, or Refunded",
+    body: "You pay when you request a session and a coordinator confirms it with the educator — if that can’t happen within two days, you’re refunded in full, automatically.",
   },
   {
     icon: "chat",
@@ -124,6 +130,6 @@ export const ABOUT_TRUST_CARDS: AboutTrustCard[] = [
   {
     icon: "record",
     title: "A Record You Can Revisit",
-    body: "Messaging and scheduling stay on-platform, giving you a history you can return to anytime.",
+    body: "Bookings, payments, and refunds are all recorded in your account, giving you a history you can return to anytime.",
   },
 ];

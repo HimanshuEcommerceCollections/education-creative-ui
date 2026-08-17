@@ -5,7 +5,12 @@ import { Eyebrow } from "@/components/common/eyebrow";
 import { Reveal } from "@/components/common/reveal";
 import { Button } from "@/components/ui/button";
 
-const META = ["College Admissions Counselor", "★ 4.9", "$65/hr"];
+/*
+ * The row carries the role and the rate, both of which an educator supplies. Published
+ * ratings are read from the API on the card surfaces that show them; this band reads
+ * none, so a gold "★ 4.9" between them could only be a number invented in this file.
+ */
+const META = ["College Admissions Counselor", "$65/hr"];
 
 /**
  * Featured counselor band: a dark, photo-backed section with a portrait and
@@ -49,16 +54,13 @@ export function CounselorSpotlight() {
               </h2>
               <div className="mb-4 flex flex-wrap gap-[18px] text-[14px] font-semibold text-[rgba(246,245,241,0.78)]">
                 {META.map((meta) => (
-                  <span key={meta} className={meta.startsWith("★") ? "text-gold" : undefined}>
-                    {meta}
-                  </span>
+                  <span key={meta}>{meta}</span>
                 ))}
               </div>
               <p className="mb-6 max-w-[520px] text-[16px] leading-[1.75] text-[rgba(246,245,241,0.72)]">
                 Former university admissions reader turned one-on-one counselor.
-                Priya has guided dozens of Triangle-area families through the
-                process — calmly, honestly, and without ever writing a word for
-                the student.
+                Priya walks Triangle-area families through the process — calmly,
+                honestly, and without ever writing a word for the student.
               </p>
               <Button href="/browse" variant="primary">
                 View profile
